@@ -1,0 +1,18 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="lv1" cx="50%" cy="40%" r="60%">
+      <stop offset="0" stop-color="#fcf6e2"/>
+      <stop offset="0.6" stop-color="#d8cba8"/>
+      <stop offset="1" stop-color="#9a8a64"/>
+    </radialGradient>
+  </defs>
+  <g transform="translate(60 60) rotate(22)">
+    <path d="M -28,-12 Q -34,4 -22,22 Q -2,30 18,24 Q 32,12 28,-8 Q 18,-22 0,-22 Q -22,-22 -28,-12 Z" fill="url(#lv1)"/>
+    <path d="M -22,-6 Q -26,8 -16,18 Q 0,22 14,18 Q 24,8 22,-4 Q 14,-16 0,-16 Q -16,-16 -22,-6 Z" fill="#e8dcc0" opacity="0.5"/>
+    <path d="M -16,2 Q -18,12 -10,18 Q 4,20 12,14 Q 16,4 12,-4 Q 2,-10 -8,-8 Q -14,-4 -16,2 Z" fill="#faf2dc" opacity="0.55"/>
+    <path d="M -20,-12 Q -25,-14 -22,-6" fill="none" stroke="#b8a880" stroke-width="0.7" opacity="0.65"/>
+    <path d="M 20,-6 Q 25,-8 22,2" fill="none" stroke="#b8a880" stroke-width="0.7" opacity="0.65"/>
+    <path d="M -10,12 Q 2,16 12,12" fill="none" stroke="#9a8a60" stroke-width="0.5" opacity="0.45"/>
+    <ellipse cx="-14" cy="-6" rx="3" ry="1.8" fill="#faf2dc" opacity="0.55" transform="rotate(-20 -14 -6)"/>
+  </g>
+</svg>

@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Where We Are — Antitesi Magazine</title>
+    <script src="../js/articles-and-utils.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&family=Noto+Naskh+Arabic&family=Noto+Serif+JP&family=Noto+Serif+SC&family=Noto+Serif+TC&family=Noto+Serif+KR&family=Noto+Serif+Hebrew&family=Noto+Serif+Devanagari&family=Noto+Serif+Bengali&family=Noto+Serif+Thai&family=Noto+Serif+Tamil&family=Noto+Serif+Georgian&family=Noto+Serif+Armenian&family=Noto+Serif+Khmer&family=Noto+Serif+Lao&family=Noto+Serif+Myanmar&family=Noto+Serif+Tibetan&family=Noto+Serif+Sinhala&family=Noto+Serif+Ethiopic&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/index_style.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        :root {
+            --map-bg: #f9f8f5;
+            --map-stroke: rgba(0, 0, 0, 0.18);
+            --map-stroke-hover: rgba(0, 0, 0, 0.55);
+            --map-fill-author: var(--dynamic-color);
+            --map-fill-reader: #1a1a1a;
+            --pulse-color: var(--dynamic-color);
+        }
+
+        body.dark-mode {
+            --map-bg: #0c0c0c;
+            --map-stroke: rgba(255, 255, 255, 0.7);
+            --map-stroke-hover: rgba(255, 255, 255, 1);
+            --map-fill-reader: #e8e6df;
+        }
+
+        #map-wrap {
+            flex: 1;
+            position: relative;
+            transition: background 0.5s;
+            padding: 5.5rem 0rem 0rem;
+            /* top | left+right | bottom */
+            overflow: visible;
+        }
+
+        #map-svg {
+            width: 100%;
+            height: 130%;
+            display: block;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -40%);
+        }
+
+        .country {
+            fill: transparent;
+            stroke: var(--map-stroke);
+            stroke-width: 0.7px;
+            stroke-linejoin: round;
+            transition: fill 0.4s ease, stroke 0.25s ease, d 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: default;
+            vector-effect: non-scaling-stroke;
+            pointer-events: all;
+        }
+
+        .country.has-author {
+            fill: color-mix(in srgb, var(--map-fill-author) 20%, transparent);
+            stroke: color-mix(in srgb, var(--map-fill-author) 60%, var(--map-stroke));
+            stroke-width: 0.9px;
+            cursor: pointer;
+        }
+
+        .country.hovered {
+            fill: color-mix(in srgb, var(--dynamic-color) 22%, transparent) !important;
+            stroke: var(--map-stroke-hover) !important;
+        }
+
+        #picker {
+            position: fixed;
+            inset: 0;
+            z-index: 300;
+            pointer-events: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #picker-inner {
+            background: var(--white);
+            border: 1px solid var(--dynamic-color);
+            padding: 1.2rem 1.5rem;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1rem;
+            line-height: 1.8;
+            min-width: 220px;
+            max-width: 340px;
+            opacity: 0;
+            transform: translateY(6px);
+            transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.4s;
+        }
+
+        body.dark-mode #picker-inner {
+            background: #111;
+            color: var(--gray);
+        }
+
+        #picker.visible #picker-inner {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
+        #picker-inner .pk-country {
+            display: block;
+            font-weight: 600;
+            font-size: 0.72rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+            opacity: 0.45;
+            margin-bottom: 0.6rem;
+        }
+
+        #picker-inner a {
+            display: block;
+            color: inherit;
+            text-decoration: none;
+            padding: 0.1rem 0;
+            transition: opacity 0.15s;
+        }
+
+        #picker-inner a:hover {
+            opacity: 0.55;
+        }
+
+        .pulse-dot {
+            position: absolute;
+            pointer-events: none;
+            transform: translate(-50%, -50%);
+        }
+
+        .pulse-dot-core {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--pulse-color);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .pulse-dot-ring {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            border: 1px solid var(--pulse-color);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation: pulse-expand 2.2s ease-out infinite;
+        }
+
+        @keyframes pulse-expand {
+            0% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 0.8;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(4.5);
+                opacity: 0;
+            }
+        }
+
+        #country-label {
+            position: fixed;
+            z-index: 250;
+            pointer-events: none;
+            font-family: 'Crimson Pro', 'Noto Naskh Arabic', 'Noto Serif Hebrew', 'Noto Serif JP', 'Noto Serif SC', 'Noto Serif TC', 'Noto Serif KR', 'Noto Serif Devanagari', 'Noto Serif Bengali', 'Noto Serif Thai', 'Noto Serif Tamil', 'Noto Serif Georgian', 'Noto Serif Armenian', 'Noto Serif Khmer', 'Noto Serif Lao', 'Noto Serif Myanmar', 'Noto Serif Tibetan', 'Noto Serif Sinhala', 'Noto Serif Ethiopic', serif;
+            font-style: italic;
+            font-weight: 400;
+            font-size: 0.85rem;
+            letter-spacing: 0.02em;
+            color: var(--black, #1a1a1a);
+            opacity: 0;
+            transform: translate(-50%, -180%);
+            transition: opacity 0.18s ease;
+            white-space: nowrap;
+            text-shadow: 0 0 5px var(--map-bg), 0 0 10px var(--map-bg), 0 0 14px var(--map-bg);
+        }
+
+        body.dark-mode #country-label {
+            color: #e8e6df;
+        }
+
+        #country-label.visible {
+            opacity: 0.92;
+        }
+
+        #map-title {
+            position: fixed;
+            top: 1.8rem;
+            left: 2rem;
+            z-index: 150;
+            pointer-events: none;
+        }
+
+        #map-title h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(1.6rem, 3vw, 2.6rem);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.02em;
+            opacity: 0.9;
+        }
+
+        #map-title p {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            opacity: 0.35;
+            margin-top: 0.4rem;
+        }
+
+        #loading {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 400;
+            background: var(--map-bg);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            opacity: 0.3;
+            transition: opacity 0.4s;
+        }
+
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        @media (max-width: 767px) {
+            #map-title {
+                top: 1.2rem;
+                left: 1.2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true')
+            document.body.classList.add('dark-mode');
+    </script>
+
+    <script>
+        if (new URLSearchParams(location.search).has('embed')) {
+            document.addEventListener('DOMContentLoaded', () => {
+                ['.shortcuts-hint', '#map-title', '.nav-cluster'].forEach(sel => {
+                    const el = document.querySelector(sel);
+                    if (el) el.style.display = 'none';
+                });
+            });
+        }
+    </script>
+
+    <nav class="nav-cluster">
+        <a href="../index.html">Home</a>
+        <a href="../explore.html">Explore</a>
+        <a href="../about.html">About</a>
+        <a href="../archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <div id="map-wrap">
+        <div id="loading">Rendering map&hellip;</div>
+
+        <div id="map-title">
+            <h1>Where are we (writing from)</h1>
+            <p>Ovvero our desk, approximately</p>
+        </div>
+
+        <svg id="map-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+
+    <div id="picker" aria-hidden="true">
+        <div id="picker-inner"></div>
+    </div>
+
+    <div id="country-label" aria-hidden="true"></div>
+
+    <div class="shortcuts-hint"></div>
+
+    <script>
+        // ── Native-language country names ─────────────────────────────────────
+        // Endonyms — the name of a country as used by its own people.
+        // English/identical names are omitted (fallback uses the GeoJSON name).
+        const NATIVE_NAMES = {
+            'Albania': 'Shqipëria',
+            'Algeria': 'الجزائر',
+            'Andorra': 'Andorra',
+            'Argentina': 'Argentina',
+            'Armenia': 'Հայաստան',
+            'Austria': 'Österreich',
+            'Azerbaijan': 'Azərbaycan',
+            'Bahrain': 'البحرين',
+            'Bangladesh': 'বাংলাদেশ',
+            'Belarus': 'Беларусь',
+            'Belgium': 'België / Belgique',
+            'Bhutan': 'འབྲུག་ཡུལ',
+            'Bolivia': 'Bolivia',
+            'Bosnia and Herzegovina': 'Bosna i Hercegovina',
+            'Brazil': 'Brasil',
+            'Bulgaria': 'България',
+            'Burkina Faso': 'Burkina Faso',
+            'Burundi': 'Uburundi',
+            'Cambodia': 'កម្ពុជា',
+            'Cape Verde': 'Cabo Verde',
+            'Chad': 'Tchad / تشاد',
+            'Chile': 'Chile',
+            'China': '中国',
+            'Colombia': 'Colombia',
+            'Comoros': 'Komori / القمر',
+            'Costa Rica': 'Costa Rica',
+            'Croatia': 'Hrvatska',
+            'Cuba': 'Cuba',
+            'Cyprus': 'Κύπρος',
+            'Czech Republic': 'Česko',
+            'Democratic Republic of the Congo': 'République démocratique du Congo',
+            'Denmark': 'Danmark',
+            'Djibouti': 'Djibouti / جيبوتي',
+            'Dominican Republic': 'República Dominicana',
+            'East Timor': 'Timor-Leste',
+            'Ecuador': 'Ecuador',
+            'Egypt': 'مصر',
+            'El Salvador': 'El Salvador',
+            'Equatorial Guinea': 'Guinea Ecuatorial',
+            'Eritrea': 'ኤርትራ',
+            'Estonia': 'Eesti',
+            'Ethiopia': 'ኢትዮጵያ',
+            'Faroe Islands': 'Føroyar',
+            'Finland': 'Suomi',
+            'France': 'France',
+            'Georgia': 'საქართველო',
+            'Germany': 'Deutschland',
+            'Greece': 'Ελλάδα',
+            'Greenland': 'Kalaallit Nunaat',
+            'Guatemala': 'Guatemala',
+            'Guinea': 'Guinée',
+            'Guinea Bissau': 'Guiné-Bissau',
+            'Haiti': 'Ayiti',
+            'Honduras': 'Honduras',
+            'Hong Kong': '香港',
+            'Hungary': 'Magyarország',
+            'Iceland': 'Ísland',
+            'India': 'भारत',
+            'Indonesia': 'Indonesia',
+            'Iran': 'ایران',
+            'Iraq': 'العراق',
+            'Israel': 'ישראל',
+            'Italy': 'Italia',
+            'Ivory Coast': 'Côte d’Ivoire',
+            'Japan': '日本',
+            'Jordan': 'الأردن',
+            'Kazakhstan': 'Қазақстан',
+            'Kosovo': 'Kosova',
+            'Kuwait': 'الكويت',
+            'Kyrgyzstan': 'Кыргызстан',
+            'Laos': 'ລາວ',
+            'Latvia': 'Latvija',
+            'Lebanon': 'لبنان',
+            'Liechtenstein': 'Liechtenstein',
+            'Lithuania': 'Lietuva',
+            'Luxembourg': 'Lëtzebuerg',
+            'Macau': '澳門',
+            'Macedonia': 'Северна Македонија',
+            'Madagascar': 'Madagasikara',
+            'Malaysia': 'Malaysia',
+            'Maldives': 'ދިވެހިރާއްޖެ',
+            'Mali': 'Mali',
+            'Malta': 'Malta',
+            'Marshall Islands': 'Aolepān Aorōkin Ṃajeḷ',
+            'Mauritania': 'موريتانيا',
+            'Mauritius': 'Maurice',
+            'Mexico': 'México',
+            'Moldova': 'Moldova',
+            'Monaco': 'Monaco',
+            'Mongolia': 'Монгол улс',
+            'Montenegro': 'Crna Gora',
+            'Morocco': 'المغرب',
+            'Mozambique': 'Moçambique',
+            'Myanmar': 'မြန်မာ',
+            'Nepal': 'नेपाल',
+            'Netherlands': 'Nederland',
+            'Nicaragua': 'Nicaragua',
+            'Niger': 'Niger',
+            'North Korea': '조선',
+            'Northern Cyprus': 'Kuzey Kıbrıs',
+            'Norway': 'Norge',
+            'Oman': 'عُمان',
+            'Pakistan': 'پاکستان',
+            'Palestine': 'فلسطين',
+            'Panama': 'Panamá',
+            'Paraguay': 'Paraguay',
+            'Peru': 'Perú',
+            'Philippines': 'Pilipinas',
+            'Poland': 'Polska',
+            'Portugal': 'Portugal',
+            'Qatar': 'قطر',
+            'Republic of the Congo': 'République du Congo',
+            'Romania': 'România',
+            'Russia': 'Россия',
+            'Rwanda': 'Rwanda',
+            'San Marino': 'San Marino',
+            'Samoa': 'Sāmoa',
+            'Sao Tome and Principe': 'São Tomé e Príncipe',
+            'Saudi Arabia': 'السعودية',
+            'Serbia': 'Србија',
+            'Slovakia': 'Slovensko',
+            'Slovenia': 'Slovenija',
+            'Singapore': 'Singapura / 新加坡',
+            'Solomon Islands': 'Solomon Islands',
+            'Somalia': 'Soomaaliya',
+            'Somaliland': 'Somaliland',
+            'South Korea': '대한민국',
+            'Spain': 'España',
+            'Sri Lanka': 'ශ්‍රී ලංකාව',
+            'Sudan': 'السودان',
+            'South Sudan': 'South Sudan',
+            'Suriname': 'Suriname',
+            'Swaziland': 'eSwatini',
+            'Sweden': 'Sverige',
+            'Switzerland': 'Schweiz / Suisse',
+            'Syria': 'سوريا',
+            'Taiwan': '臺灣',
+            'Tajikistan': 'Тоҷикистон',
+            'Thailand': 'ประเทศไทย',
+            'Tunisia': 'تونس',
+            'Turkey': 'Türkiye',
+            'Turkmenistan': 'Türkmenistan',
+            'USA': 'United States',
+            'Ukraine': 'Україна',
+            'United Arab Emirates': 'الإمارات',
+            'Uruguay': 'Uruguay',
+            'Uzbekistan': 'Oʻzbekiston',
+            'Vatican City': 'Città del Vaticano',
+            'Venezuela': 'Venezuela',
+            'Vietnam': 'Việt Nam',
+            'Western Sahara': 'الصحراء الغربية',
+            'Yemen': 'اليمن',
+        };
+        const nativeName = en => NATIVE_NAMES[en] || en;
+
+        // ── // ── Articles → countries map ──────────────────────────────────────────
+        const AUTHOR_COUNTRIES = {};
+        articles.forEach(a => {
+            if (!a.writing_from) return;
+            if (!AUTHOR_COUNTRIES[a.writing_from]) AUTHOR_COUNTRIES[a.writing_from] = [];
+            AUTHOR_COUNTRIES[a.writing_from].push({ title: a.title, author: a.author, file: a.filename, folder: a.folder });
+        });
+
+        // ── Color system ──────────────────────────────────────────────────────
+        const _colors = ['#ff3366', '#3366ff', '#33ff66', '#ff9933', '#9933ff', '#33ffff'];
+        let _colorIndex = 0;
+        function changeColor() {
+            _colorIndex = (_colorIndex + 1) % _colors.length;
+            document.documentElement.style.setProperty('--dynamic-color', _colors[_colorIndex]);
+        }
+
+        // ── SVG setup ─────────────────────────────────────────────────────────
+        const SVG = document.getElementById('map-svg');
+        const VW = 1000, VH = 500;
+        SVG.setAttribute('viewBox', `0 0 ${VW} ${VH}`);
+        SVG.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+        // ── Projection ────────────────────────────────────────────────────────
+        const CENTERS = [
+            { name: 'Milan', lon: 9.19, lat: 45.46 },
+            { name: 'Buenos Aires', lon: -58.38, lat: -34.60 },
+            { name: 'Tokyo', lon: 139.69, lat: 35.69 },
+            { name: 'Nairobi', lon: 36.82, lat: -1.29 },
+            { name: 'Mexico City', lon: -99.13, lat: 19.43 },
+            { name: 'Istanbul', lon: 28.98, lat: 41.01 },
+            { name: 'Mumbai', lon: 72.87, lat: 19.07 },
+            { name: 'São Paulo', lon: -46.63, lat: -23.55 },
+            { name: 'Cairo', lon: 31.23, lat: 30.06 },
+            { name: 'Seoul', lon: 126.98, lat: 37.57 },
+        ];
+        let CENTER = CENTERS[Math.floor(Math.random() * CENTERS.length)];
+
+        // Raw GeoJSON stored after first fetch so we can re-project in place
+        let _geojson = null;
+
+        // ── Centroid ──────────────────────────────────────────────────────────
+        function computeCentroid(feature) {
+            const geo = feature.geometry;
+            if (!geo) return null;
+
+            // Collect all coordinate pairs across all rings/polygons
+            let sumLon = 0, sumLat = 0, count = 0;
+            const addRings = rings => rings.forEach(ring =>
+                ring.forEach(([lon, lat]) => { sumLon += lon; sumLat += lat; count++; })
+            );
+
+            if (geo.type === 'Polygon') addRings(geo.coordinates);
+            else if (geo.type === 'MultiPolygon') geo.coordinates.forEach(poly => addRings(poly));
+
+            if (!count) return null;
+            return { lon: sumLon / count, lat: sumLat / count };
+        }
+
+        // ── Recenter: update CENTER and re-project all paths in place ─────────
+        function recenterOn(feature) {
+            const centroid = computeCentroid(feature);
+            if (!centroid) return;
+
+            CENTER = { lon: centroid.lon, lat: Math.max(-85, Math.min(85, centroid.lat)) };
+
+            if (!_geojson) return;
+            _geojson.features.forEach(f => {
+                const path = f._path;
+                if (!path) return;
+                const d = featureToPath(f.geometry);
+                if (d) {
+                    path.setAttribute('d', d);
+                    path.style.display = '';
+                } else {
+                    path.style.display = 'none';
+                }
+            });
+        }
+
+        function project([lon, lat]) {
+            const cx = CENTER.lon * Math.PI / 180, cy = CENTER.lat * Math.PI / 180;
+            const l = lon * Math.PI / 180, p = lat * Math.PI / 180;
+            const c = Math.acos(Math.max(-1, Math.min(1,
+                Math.sin(cy) * Math.sin(p) + Math.cos(cy) * Math.cos(p) * Math.cos(l - cx)
+            )));
+            const k = c === 0 ? 0 : c / Math.sin(c);
+            const x = k * Math.cos(p) * Math.sin(l - cx);
+            const y = k * (Math.cos(cy) * Math.sin(p) - Math.sin(cy) * Math.cos(p) * Math.cos(l - cx));
+            return [VW / 2 + x * VW / 6.5, VH / 2 - y * VW / 6.5];
+        }
+
+        // Returns the great-circle angle (radians) between a lon/lat point and CENTER
+        function angularDist(lon, lat) {
+            const cx = CENTER.lon * Math.PI / 180, cy = CENTER.lat * Math.PI / 180;
+            const l = lon * Math.PI / 180, p = lat * Math.PI / 180;
+            return Math.acos(Math.max(-1, Math.min(1,
+                Math.sin(cy) * Math.sin(p) + Math.cos(cy) * Math.cos(p) * Math.cos(l - cx)
+            )));
+        }
+
+        // A ring is visible if at least one point is within 90° of CENTER
+        function isRingVisible(ring) {
+            return ring.some(([lon, lat]) => angularDist(lon, lat) < Math.PI / 2 + Math.PI / 4);
+        }
+
+        function coordsToPath(rings) {
+            return rings
+                .filter(isRingVisible)
+                .map(ring =>
+                    ring.map(([lon, lat], i) => {
+                        const [x, y] = project([lon, lat]);
+                        return (i === 0 ? 'M' : 'L') + x.toFixed(2) + ',' + y.toFixed(2);
+                    }).join(' ') + 'Z'
+                ).join(' ');
+        }
+
+        function featureToPath(geometry) {
+            if (!geometry) return '';
+            if (geometry.type === 'Polygon') return coordsToPath(geometry.coordinates);
+            if (geometry.type === 'MultiPolygon')
+                return geometry.coordinates.map(poly => coordsToPath(poly)).join(' ');
+            return '';
+        }
+
+        document.addEventListener('click', changeColor);
+
+        // ── Country label (hover) ─────────────────────────────────────────────
+        const countryLabel = document.getElementById('country-label');
+        function showCountryLabel(name, x, y) {
+            countryLabel.textContent = name;
+            countryLabel.style.left = x + 'px';
+            countryLabel.style.top = y + 'px';
+            countryLabel.classList.add('visible');
+        }
+        function hideCountryLabel() {
+            countryLabel.classList.remove('visible');
+        }
+
+        // ── Picker ────────────────────────────────────────────────────────────
+        const picker = document.getElementById('picker');
+        const pickerInner = document.getElementById('picker-inner');
+        let activePath = null;
+
+        function openPicker(countryName, arts) {
+            const links = arts.map(a =>
+                `<a href="../articles/${a.folder}/${a.file}">${a.title}<span style="opacity:0.45;font-size:0.85em;"> — ${a.author}</span></a>`
+            ).join('');
+            pickerInner.innerHTML = `<span class="pk-country">${nativeName(countryName)}</span>${links}`;
+            picker.classList.add('visible');
+        }
+
+        function closePicker() {
+            picker.classList.remove('visible');
+            if (activePath) {
+                activePath.classList.remove('hovered');
+                activePath = null;
+            }
+        }
+
+        // Close when clicking outside picker-inner (map, empty space, other countries)
+        document.addEventListener('click', e => {
+            if (picker.classList.contains('visible') && !pickerInner.contains(e.target)) {
+                closePicker();
+            }
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closePicker();
+        });
+
+        // ── Render ────────────────────────────────────────────────────────────
+        function render(geojson) {
+            const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+            g.id = 'countries-group';
+
+            geojson.features.forEach(feature => {
+                const name = feature.properties.name;
+                const d = featureToPath(feature.geometry);
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', d || '');
+                path.setAttribute('class', 'country');
+                path.dataset.name = name;
+                if (!d) path.style.display = 'none';
+
+                // Store path reference directly on feature — no index juggling
+                feature._path = path;
+
+                const authorArts = AUTHOR_COUNTRIES[name];
+                if (authorArts) path.classList.add('has-author');
+
+                path.addEventListener('mouseenter', (e) => {
+                    path.classList.add('hovered');
+                    showCountryLabel(nativeName(name), e.clientX, e.clientY);
+                });
+                path.addEventListener('mousemove', (e) => {
+                    showCountryLabel(nativeName(name), e.clientX, e.clientY);
+                });
+                path.addEventListener('mouseleave', () => {
+                    if (path !== activePath) path.classList.remove('hovered');
+                    hideCountryLabel();
+                });
+
+                path.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    changeColor();
+                    closePicker();
+
+                    recenterOn(feature);
+
+                    if (!authorArts) return;
+
+                    if (authorArts.length === 1) {
+                        // Brief pause so the recentering is visible before navigating
+                        setTimeout(() => {
+                            window.location.href = `../articles/${authorArts[0].folder}/${authorArts[0].file}`;
+                        }, 420);
+                        return;
+                    }
+
+                    if (activePath && activePath !== path) activePath.classList.remove('hovered');
+                    activePath = path;
+                    openPicker(name, authorArts);
+                });
+
+                g.appendChild(path);
+            });
+
+            SVG.appendChild(g);
+            document.getElementById('loading').classList.add('hidden');
+        }
+
+        fetch('../multimedia/models/world.geojson?v=5')
+            .then(r => r.json())
+            .then(data => { _geojson = data; render(data); })
+            .catch(err => {
+                document.getElementById('loading').textContent = 'Could not load map data.';
+                console.error(err);
+            });
+
+        initKeyboardShortcuts({
+            extraKeys: {
+                'Escape': returnToHome,
+                'h': returnToHome,
+                'H': returnToHome,
+            }
+        });
+    </script>
+</body>
+
+</html>

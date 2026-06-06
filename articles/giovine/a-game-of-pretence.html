@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Title format is "Article Title - Author Name | Antitesi Magazine" -->
+    <title>A Game of Pretense - Lorenzo Giovine | Antitesi Magazine</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <!-- Shared stylesheets (paths relative to articles/ subdirectory) -->
+    <link rel="stylesheet" href="./widget.css">
+    <link rel="stylesheet" href="../../css/index_style.css">
+    <link rel="stylesheet" href="../../css/article_style.css">
+    <link rel="stylesheet" href="../../css/mobile.css">
+
+    <!-- Flying magazine: desktop only -->
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="../../css/spark_styles.css">');
+            document.write('<script>window.magazineSparkMode = true;<\/script>');
+            document.write('<script src="../../js/flying-magazine.js"><\/script>');
+        }
+    </script>
+
+    <script src="../../js/articles-and-utils.js"></script>
+
+    <!-- ═══════════════════════════════════════════════════════
+         OPTIONAL LIBRARIES — delete what you don't need
+         ═══════════════════════════════════════════════════════ -->
+
+    <!-- Leaflet (interactive maps) -->
+    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /> -->
+    <!-- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> -->
+
+    <!-- MathJax (mathematical expressions) -->
+    <!-- <script>window.MathJax = { tex: { inlineMath: [['$','$']] } };</script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script> -->
+</head>
+
+<body>
+    <!-- run dark mode first otherwise the page flashes -->
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    <div class="progress-bar"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-cluster">
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+        <a href="../../archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <!-- Article -->
+    <article class="article-view">
+
+        <header class="article-header">
+            <!-- EDIT: fallback values shown here, overridden at runtime by the IIFE below -->
+            <h1 class="article-title">A Game of Pretense</h1>
+            </h1>
+            <div class="article-meta" id="article-meta">
+                <span>Article</span>
+                <span>~12 min read</span>
+                <span>May 2026</span>
+            </div>
+            <div class="article-author" id="article-author">by Lorenzo Giovine</div>
+        </header>
+
+        <!-- Metadata IIFE: populates header from articles-and-utils.js at runtime.
+             Do not touch this — it just works as long as the filename in articles[] matches. -->
+        <script>
+            (function () {
+                const filename = window.location.pathname.split('/').pop();
+                const data = (typeof articles !== 'undefined') && articles.find(a => a.filename === filename);
+                if (!data) return;
+                const meta = document.getElementById('article-meta');
+                const author = document.getElementById('article-author');
+                if (meta) meta.innerHTML = `<span>Article</span><span>~${data.readTime} read</span><span>${data.publishDate}</span>`;
+                if (author) author.textContent = 'by ' + data.author;
+            })();
+        </script>
+
+        <!-- ═══════════════════════════════════════════════════════
+             EDIT: article body goes here.
+             Use <div class="article-content"> for prose.
+             Add section dividers, part numbers, interactive
+             elements, references — whatever the piece needs.
+             ═══════════════════════════════════════════════════════ -->
+
+        <div class="article-content">
+
+            <p>Dynamical systems ought to be the most exciting and dull objects in mathematics. A
+                thousand and one models for everything, from lines of cars at a toll booth modelled around
+                Poissonian distributions to the evolution of the Earth's tectonic plates under the effects of
+                mantle convection.
+
+                Perhaps no dynamical system has seen more mathematics written about it than The
+                Economy (assume a lightning bolt flashing across with roaring thunder as you read this
+                term).
+
+                And while the numbers chicanery going on at the financial level is no surprise to anyone who
+                knows anything about the last century of market woes, I'd argue that finance is working
+                within the guardrails set by the axioms of most modern free market economics.
+                To make my point clear: it's the very axioms of our models that simplify and plastify our
+                system to a degree where the guardrails can do nothing but guide us serenely to collapse.
+                Over and over, that is.
+
+            </p>
+
+            <figure class="giovine-figure lam-wrap">
+
+    <canvas id="lam-canvas"></canvas>
+
+    <div class="lam-readout">
+        broken bonds <span id="lam-broken-count">0</span>
+    </div>
+
+    <div class="lam-controls">
+
+        <input type="range"
+            id="lam-slider"
+            min="0"
+            max="1"
+            step="0.001"
+            value="0">
+
+        <div class="lam-labels">
+            <span id="lam-label-elastic">Elastic</span>
+            <span id="lam-label-plastified">Plastified</span>
+            <span id="lam-label-laminated">Laminated</span>
+        </div>
+
+        <button id="lam-sound-btn" type="button">
+            <i class="ti ti-volume-off"></i>
+            <span id="sound-label">sound off</span>
+        </button>
+
+        <button id="lam-reset" type="button">
+            <i class="ti ti-refresh"></i>
+            reset
+        </button>
+
+    </div>
+
+</figure>
+
+            <!-- <div class="section-divider"></div> -->
+
+            <p>There is a growing empirical weight to the claim made by the lower echelons of society: that
+                though the stock market may be booming, and though private investment may enjoy more
+                highs than lows, the economic life of the “traditional" First World doesn't feel tethered to the
+                evolution of finance. This disconnect is not a glitch; it is a symptom of a dimensional
+                mismatch.
+
+                The structural rot in today's economy is tied to a violent reduction in dimensionality. We are
+                attempting to resolve the n-dimensional problems of supply, demand, and material entropy
+                through the narrow opening of sole-and-universal fungibility. By forcing every disparate
+                material reality to be expressed through the single 1D scalar of currency, we have effectively
+                laminated the world.
+
+                If we treat the economy as a manifold and its actors as nodes, it’s easy to construe why
+                lamination is a fatal flaw of this system: it does not allow for elasticity.
+                Let me go back to my material science metaphor.
+
+                The economy is an open system, and thus giving elasticity to the manifold that represents it
+                is a fundamental part of the system’s tolerance. Elasticity is the ability to return to stability
+                after stress is applied; it allows for shocks to be absorbed and makes tearing—systemic
+                rupture—unlikely.
+
+                But at times, currency acts not just as a bottleneck, but as an outright source of needless
+                excess. By its very design, it introduces specific ways of defrauding and profiting at the
+                expense of single nodes, which signifies a change in the curvature of the manifold proper.
+
+            </p>
+            <div class="section-divider"></div>
+
+<p>In essence, I see currency as the very nature of the connection between nodes; yet, an
+   inadequate currency cannot account for the needs of the entire manifold, simply because of
+   dimensionality.</p>
+ 
+<figure class="giovine-figure btl-figure">
+    <div class="btl-canvas-wrap">
+        <canvas id="btl-canvas"></canvas>
+ 
+        <button id="btl-toggle" type="button">
+            <span>free</span> <span class="btl-arr">/</span> <span style="opacity:0.5">monetized</span>
+        </button>
+ 
+        <div class="btl-readout">
+            avg path length <span class="btl-num" id="btl-path">—</span>
+        </div>
+    </div>
+ 
+    <figcaption class="giovine-caption">
+        Needs and availability of
+        <span style="color:#f4a261">food</span>,
+        <span style="color:#e63946">care</span>,
+        <span style="color:#2a9d8f">knowledge</span>,
+        <span style="color:#4361ee">time</span> —
+        flowing freely, or routed through a single scalar.
+    </figcaption>
+</figure>
+ 
+<p>To make matters worse, the monodimensional nature of currency makes it incredibly
+   unwieldy to counteract the introduction of rigidity. Because the connection is universal,
+   changing its mechanics by rule of law influences the structure of the entire manifold
+   simultaneously, and not changing its mechanics… does nothing! This makes selecting singular
+   areas of rigidity for correction a mathematical nightmare — you cannot soften one part of
+   the cloth without compromising the tension of the whole.
+ 
+   If we assume that a higher collective efficiency of this system is a more desirable state at
+   any point in time, then currency and its exchange become an enormous problem. It creates
+   a bottleneck of paths where inefficient routes will be picked, despite the label of
+   market-evolved efficiency, for the simple reason that the currency connection isn't functional
+   enough to map the reality it serves. It introduces curvature, and the lack of direct paths in the
+   exchange of goods makes finding the path of least resistance incredibly difficult. We are left
+   wandering the long way around, while the "juice" of the exchange is harvested by the
+   geometry of the path itself.
+ 
+   One of the greatest strengths of mathematics is the ability for multiple models to be
+   simultaneously useful; no model is ever 'correct', but many models tell us something about
+   the system they are used to analyse. At present, I find myself trying to give more rigorous
+   structure to the very economics I want to criticise. But the specific structure that may suit
+   economics is a topic for another article.</p>
+ 
+            <div class="section-divider"></div>
+
+            <p>
+                p.s. I’d beg the reader to take the word “plastify,” straight
+                out of materials science, in the quite literal sense:
+                “to manipulate and render rigid.”
+                This is not a flowery descriptor for bureaucracy;
+                it is a structural feature of an evolving system.
+                Understanding this transition from the elastic to the rigid
+                will enormously ease comprehension of the mechanical analogy
+                I use down the line.
+            </p>
+
+        </div>
+
+        <!-- References section (delete if not needed) -->
+        <div class="article-references">
+            <h3>References</h3>
+            <a href="#" target="_blank">&rarr; Author &mdash; Title</a>
+        </div>
+
+    </article>
+
+    <!-- Keyboard shortcut hint -->
+    <div class="shortcuts-hint"></div>
+
+
+    <script>
+        // ── Accent color cycling ───────────────────────────────
+        const colors = ['#ff3366', '#3366ff', '#33ff66', '#ff9933', '#9933ff', '#33ffff'];
+        let colorIndex = 0;
+        function changeColor() {
+            colorIndex = (colorIndex + 1) % colors.length;
+            document.documentElement.style.setProperty('--dynamic-color', colors[colorIndex]);
+        }
+        document.addEventListener('click', changeColor);
+
+        // ── Keyboard shortcuts ─────────────────────────────────
+        // Uses the shared helper from articles-and-utils.js.
+        // Add any article-specific keys inside extraKeys.
+        initKeyboardShortcuts({
+            extraKeys: {
+                'a': openNextArticle,
+                'A': openNextArticle,
+                'Escape': returnToHome,
+                'h': returnToHome,
+                'H': returnToHome,
+            }
+        });
+    </script>
+
+    <script src="./lamination-canvas.js"></script>
+    <script src="./bottleneck.js"></script>
+
+</body>
+
+</html>

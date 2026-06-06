@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - Antitesi Magazine</title>
+    <script src="js/articles-and-utils.js"></script>
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="css/spark_styles.css">');
+            document.write('<script>window.magazineSparkMode = true;<\/script>');
+            document.write('<script src="js/flying-magazine.js"><\/script>');
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/index_style.css">
+    <link rel="stylesheet" href="css/mobile.css">
+
+    <style>
+        .manifesto-container {
+            position: relative;
+            margin: 4rem 0;
+            perspective: 1000px;
+        }
+
+        .manifesto-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gray);
+            border-left: 3px solid var(--dynamic-color);
+            padding: 1.5rem;
+            transform-origin: left bottom;
+            transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1), border-color 0.6s var(--ease);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        body.dark-mode .manifesto-background {
+            background: #0a0a0a;
+        }
+
+        .manifesto-background.rotated {
+            transform: rotate(-8deg);
+        }
+
+        .hidden-text {
+            font-style: italic;
+            color: var(--dynamic-color);
+            text-align: center;
+            font-size: 1rem;
+            line-height: 1.5;
+            opacity: 0;
+            transition: opacity 0.6s ease, color 0.6s var(--ease);
+        }
+
+        .manifesto-background.rotated .hidden-text {
+            opacity: 1;
+        }
+
+        .manifesto-box {
+
+            align-items: center;
+            position: relative;
+            background: var(--gray);
+            padding: 1.2rem;
+            padding-top: 1.6rem;
+            padding-bottom: 0.1rem;
+            font-style: italic;
+            font-size: 1.2rem;
+            border-left: 3px solid var(--dynamic-color);
+            cursor: pointer;
+            transform-origin: left bottom;
+            transition: transform 0.8s cubic-bezier(0.4, 0.0, 0.2, 1), border-color 0.6s var(--ease);
+            z-index: 2;
+            margin: 0;
+        }
+
+
+        @media (max-width: 767px) {
+            .manifesto-container {
+                margin: 2.5rem 0;
+            }
+
+            .about-section {
+                margin: 3rem 0;
+            }
+
+            .manifesto-box {
+                font-size: 1.1rem;
+                cursor: default;
+                pointer-events: none;
+            }
+        }
+
+        body.dark-mode .manifesto-box {
+            background: #0a0a0a;
+        }
+
+        .manifesto-box.rotated {
+            transform: rotate(10deg);
+        }
+
+        .about-section {
+            margin: 4rem 0;
+        }
+
+
+        .about-section-title {
+            font-family: var(--grotesk);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.4;
+            margin-bottom: 2rem;
+        }
+
+        .submission-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin: 0rem 0;
+        }
+
+        @media (max-width: 767px) {
+            .submission-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .submission-item {
+            border-left: 2px solid var(--dynamic-color);
+            padding-left: 1rem;
+            font-size: 1rem;
+            line-height: 1.6;
+            transition: border-color 0.6s var(--ease);
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true')
+            document.body.classList.add('dark-mode');
+    </script>
+    <div class="progress-bar"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-cluster">
+        <a href="index.html">Home</a>
+        <a href="explore.html">Explore</a>
+        <a href="archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <!-- About Page -->
+    <section class="standard-page">
+
+        <header class="standard-header">
+            <h1 class="standard-title">About</h1>
+            <div class="standard-subtitle">Manifesto & Call for Articles</div>
+        </header>
+
+        <div class="standard-content">
+
+            <div class="manifesto-container">
+                <div class="manifesto-background" id="manifestoBackground">
+                    <div class="hidden-text">Truth is more interesting than polish.</div>
+                </div>
+                <div class="manifesto-box" id="manifestoBox">
+                    <p>Writing clarifies thinking. Sharing honestly builds understanding. When you articulate what
+                        drives your work, you discover what you truly care about — and so do your readers.</p>
+                </div>
+            </div>
+
+            <p><strong>Antitesi</strong> is looking for short, personal pieces that pull back the curtain on work behind
+                a thesis, a research project, or a university obsession. Not a diary. Not an abstract in disguise.</p>
+
+            <p>Think of it as backstage notes: the detours, discoveries, people, ideas, moments that made you care about
+                something absurdly specific. The part that never makes it into the final dissertation.</p>
+
+            <p>Your voice can be sharp, dry, playful, serious — or all of them at once. The only real condition is
+                sincerity: candor is more compelling than anything.</p>
+
+            <p><strong>Show us the heart of your thesis.</strong> You have 1,000 words — what should your readers
+                know?</p>
+
+            <p>Share your niche in a fresh way: a metaphor, a sketch, a mini-game, a diagram. Something that lets
+                readers follow the logic without needing to be specialists.</p>
+
+            <p style="opacity: 0.7; font-size: 1.125rem; margin-top: 2rem;">Check out a few sample pieces on our website
+                for the tone we love: clear, personal, and rooted in the work itself.</p>
+
+            <div class="about-section">
+                <h2 class="about-section-title">Submission Guidelines</h2>
+
+                <div class="submission-grid">
+                    <div class="submission-item">
+                        <strong>Step 1:</strong> Write a brief pitch detailing your idea.
+                    </div>
+                    <div class="submission-item">
+                        <strong>Step 2:</strong> If accepted, draft an article under 1,000 words.
+                    </div>
+                    <div class="submission-item">
+                        <strong>Multimedia:</strong> Images, playlists, film references, clips, sketches — anything that
+                        accompanied your work.
+                    </div>
+                    <div class="submission-item">
+                        <strong>Tone:</strong> Personal, clear, intellectually alive.
+                    </div>
+                </div>
+            </div>
+
+            <div class="contact-box" id="contactBox">
+                <a href="mailto:antitesimagazine@gmail.com">antitesimagazine@gmail.com</a>
+            </div>
+
+            <p style="text-align: center; font-style: italic; opacity: 0.6; margin-top: 2rem;">Send your pitch or
+                questions and we'll get back to you.</p>
+        </div>
+    </section>
+
+    <!-- Keyboard Shortcuts Hint -->
+    <div class="shortcuts-hint"></div>
+
+
+    <script>
+        initProgressBar();
+        if (isDesktop) {
+            initKeyboardShortcuts({
+                extraKeys: {
+                    'a': openNextArticle,
+                    'A': openNextArticle,
+                    'Escape': returnToHome,
+                    'h': returnToHome,
+                    'H': returnToHome,
+                }
+            });
+        }
+
+        // Manifesto easter egg
+        let manifestoClicks = 0;
+        document.getElementById('manifestoBox').addEventListener('click', () => {
+            manifestoClicks++;
+            if (manifestoClicks === 3) {
+                const easterEggElement = document.getElementById('easterEggAbout');
+                if (easterEggElement) easterEggElement.classList.add('revealed');
+                document.getElementById('manifestoBox').classList.add('rotated');
+                document.getElementById('manifestoBackground').classList.add('rotated');
+
+                setTimeout(() => {
+                    manifestoClicks = 0;
+                    document.getElementById('manifestoBox').classList.remove('rotated');
+                    document.getElementById('manifestoBackground').classList.remove('rotated');
+                    if (easterEggElement) easterEggElement.classList.remove('revealed');
+                }, 4000);
+            }
+        });
+
+        // Contact box
+        document.getElementById('contactBox').addEventListener('click', () => {
+            changeColor();
+        });
+    </script>
+</body>
+
+</html>

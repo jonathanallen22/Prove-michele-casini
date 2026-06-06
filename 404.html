@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 – Antitesi Magazine</title>
+
+    <!-- Three.js always loaded — perry is always shown on this page -->
+    <script type="importmap">
+    {"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/examples/jsm/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/index_style.css">
+    <link rel="stylesheet" href="css/mobile.css">
+
+    <style>
+        /* Perry always visible, overrides perry-lee.js media query */
+        /* Reset the fixed bottom-right positioning from index_style.css */
+        #viewer {
+            display: inline-block !important;
+            position: relative !important;
+            bottom: auto !important;
+            right: auto !important;
+            top: auto !important;
+            left: auto !important;
+            transform: none !important;
+        }
+
+        .page-404 {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* return home — nav-cluster style */
+        .return-home {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--grotesk);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--black);
+            text-decoration: none;
+            opacity: 0.3;
+            transition: opacity 0.3s var(--ease);
+            z-index: 100;
+            white-space: nowrap;
+        }
+
+        .return-home:hover {
+            opacity: 1;
+        }
+
+        body.dark-mode .return-home {
+            color: var(--gray);
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        (function () {
+            const dm = localStorage.getItem('darkMode');
+            if (dm === 'true') {
+                document.body.classList.add('dark-mode', 'no-transition');
+                requestAnimationFrame(() => document.body.classList.remove('no-transition'));
+            }
+        })();
+
+        // Signal to js/perry-lee.js that this is the 404 page,
+        // regardless of what URL the browser shows
+        window.is404Page = true;
+    </script>
+
+    <div class="page-404">
+        <div id="viewer"></div>
+    </div>
+
+    <a href="index.html" class="return-home">← return home</a>
+
+    <script src="js/perry-lee.js"></script>
+</body>
+
+</html>

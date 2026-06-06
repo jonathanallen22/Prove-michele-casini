@@ -1,0 +1,20 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="mt1" x1="0" y1="-1" x2="0" y2="1">
+      <stop offset="0" stop-color="#b8cba0"/>
+      <stop offset="0.5" stop-color="#8aa170"/>
+      <stop offset="1" stop-color="#5a724a"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(60 60) rotate(28)">
+    <path d="M 0,-38 C 16,-32 26,-12 22,12 C 18,28 -18,28 -22,12 C -26,-12 -16,-32 0,-38 Z" fill="url(#mt1)"/>
+    <path d="M -2,-34 C 12,-28 20,-10 16,8 C 12,22 -14,22 -18,8 C -22,-10 -14,-30 -2,-34 Z" fill="#b6cb9c" opacity="0.45"/>
+    <path d="M 0,-38 Q -2,0 0,30" fill="none" stroke="#3e5230" stroke-width="1.2" opacity="0.75"/>
+    <path d="M 0,-20 Q -10,-12 -16,-4" fill="none" stroke="#3e5230" stroke-width="0.5" opacity="0.55"/>
+    <path d="M 0,-20 Q 10,-12 16,-4" fill="none" stroke="#3e5230" stroke-width="0.5" opacity="0.55"/>
+    <path d="M 0,2 Q -12,8 -18,14" fill="none" stroke="#3e5230" stroke-width="0.5" opacity="0.55"/>
+    <path d="M 0,2 Q 12,8 18,14" fill="none" stroke="#3e5230" stroke-width="0.5" opacity="0.55"/>
+    <ellipse cx="-8" cy="-18" rx="3" ry="1.6" fill="#c8d8ae" opacity="0.45" transform="rotate(-20 -8 -18)"/>
+    <ellipse cx="10" cy="8" rx="3" ry="1.5" fill="#c8d8ae" opacity="0.35" transform="rotate(20 10 8)"/>
+  </g>
+</svg>

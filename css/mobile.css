@@ -1,0 +1,244 @@
+/* ════════════════════════════════════════════════════════════════
+   ANTITESI MAGAZINE — MOBILE STYLESHEET
+   All @media rules for the mobile breakpoint live here.
+   Never add per-page inline mobile overrides.
+   ════════════════════════════════════════════════════════════════ */
+
+/* Hide mobile-only nav items on desktop */
+.mobile-only {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .mobile-only {
+        display: flex;
+    }
+}
+
+.desktop-only {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    .desktop-only {
+        display: flex;
+    }
+}
+
+@media (max-width: 767px) {
+    .thesis-statement {
+        font-size: min(16vw, 18vh) !important;
+        line-height: 0.92;
+        letter-spacing: -0.04em;
+        text-align: left;
+        padding: 0 1.5rem;
+        max-width: none;
+    }
+}
+
+@media (max-width: 767px) {
+    .standard-page {
+        padding: 2.2rem 2rem;
+    }
+
+    .standard-title {
+        font-family: var(--display);
+        font-size: clamp(2.5rem, 6vw, 4rem);
+        line-height: 1.1;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+    }
+
+    .standard-content {
+        font-size: 1.25rem;
+        line-height: 1.5;
+    }
+
+    .shortcuts-hint {
+        display: none;
+    }
+
+}
+
+@media (max-width: 767px) {
+
+    .article-view {
+        padding: 1.8rem 1.8rem 1rem;
+    }
+
+    .article-meta span:first-child {
+        display: none;
+    }
+
+    .article-author {
+        margin-top: 0rem;
+    }
+
+    .article-content {
+        font-size: 1.1rem;
+        line-height: 1.5;
+    }
+
+    .article-content p {
+        margin-bottom: 1rem;
+    }
+
+    .part-number {
+        margin: 1.5rem 0 0.75rem;
+    }
+
+    .section-divider {
+        margin: 1.5rem auto;
+    }
+
+}
+
+
+@media (max-width: 767px) {
+
+    /* ── Bottom Tab Bar ──────────────────────────────────────────
+       .nav-cluster transforms from a top-right cluster into a
+       full-width frosted bottom tab bar.
+       ─────────────────────────────────────────────────────────── */
+ 
+
+    .nav-cluster {
+        /* Reset desktop positioning */
+        top: auto;
+        right: auto;
+        left: 0;
+        bottom: 0;
+ 
+        /* BAR */
+        width: 100%;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 0;
+ 
+ 
+        /* Height: fixed + safe area for notched phones */
+        height: calc(56px + env(safe-area-inset-bottom));
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+ 
+        /* Frosted glass */
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(16px) saturate(1.4);
+        -webkit-backdrop-filter: blur(16px) saturate(1.4);
+ 
+        /* Hairline top border */
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+ 
+        /* Stack above content, below modals */
+        z-index: 500;
+ 
+        /* Typography */
+        font-size: 0.6rem;
+        letter-spacing: 0.14em;
+    }
+ 
+ 
+    /* Dark mode */
+    body.dark-mode .nav-cluster {
+        background: rgba(0, 0, 0, 0.72);
+        border-top-color: rgba(255, 255, 255, 0.08);
+    }
+ 
+    /* Tab items */
+    .nav-cluster a {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+ 
+        /* Full tap area */
+        height: 56px;
+        padding: 0 0.25rem;
+ 
+        /* Reset desktop styles */
+        opacity: 1;
+        color: var(--black);
+        text-decoration: none;
+ 
+        /* Pill transition */
+        position: relative;
+        transition: color 0.2s var(--ease);
+    }
+ 
+    body.dark-mode .nav-cluster a {
+        color: var(--gray);
+    }
+ 
+    /* Inactive: muted */
+    .nav-cluster a:not(.active) {
+        opacity: 0.35;
+    }
+ 
+    /* Active pill */
+    .nav-cluster a.active {
+        opacity: 1;
+        color: var(--white);
+        background: var(--dynamic-color);
+        border-radius: 100px;
+ 
+        /* Pill is narrower than the full flex cell */
+        margin: 0 0.35rem;
+        padding: 0.35rem 0.85rem;
+        height: auto;
+ 
+        transition: background-color 0.3s var(--ease), color 0.2s var(--ease);
+    }
+ 
+    /* Hover/tap feedback for inactive tabs */
+    .nav-cluster a:not(.active):active {
+        opacity: 0.7;
+    }
+ 
+
+    /* ── Body padding so content isn't hidden behind the tab bar ─ */
+    body {
+        padding-bottom: calc(56px + env(safe-area-inset-bottom));
+    }
+
+    /* Pages that are full-screen (colophon, landing) shouldn't
+       have the extra padding shifting content */
+    body.no-bottom-pad {
+        padding-bottom: 0;
+    }
+
+
+    /* ── Index: landing stays full viewport ────────────────────── */
+    .landing {
+        height: 100svh;
+        /* small viewport height — accounts for browser chrome */
+    }
+
+    .thesis-statement {
+        text-align: center;
+        font-size: clamp(2rem, 10vw, 4rem);
+        max-width: 90vw;
+    }
+
+        /* ── Konami / Secret page: logo grid ───────────────────────── */
+    .secret-page {
+        padding: 4rem;
+        align-items: center;
+    }
+ 
+ 
+    .logo-link img {
+        width: 70px !important;
+        height: 70px !important;
+        opacity: 0.9 !important;
+    }
+
+ 
+    .logo-link:active img {
+        opacity: 1 !important;
+        transform: scale(1.15);
+    }
+
+}

@@ -1,0 +1,238 @@
+/* ════════════════════════════════════════════════════════════════
+   ANTITESI MAGAZINE — SHARED ARTICLE STYLESHEET
+   Shared by all articles. Per-article quirks stay inline.
+   ════════════════════════════════════════════════════════════════ */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --black: #000;
+    --white: #fff;
+    --gray: #f3f3f3;
+    --serif: 'Crimson Pro', serif;
+    --grotesk: 'Neue Haas Grotesk', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --display: 'Fraunces', serif;
+    --border-width: 1.5px;
+    --border-color: #666;
+    --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+    /* --accent and --dynamic-color are set per-article */
+}
+
+body {
+    font-family: var(--grotesk);
+    background: var(--white);
+    color: var(--black);
+    overflow-x: hidden;
+    line-height: 1.6;
+    font-size: 1.2rem;
+}
+
+body.dark-mode {
+    background: var(--black);
+    color: var(--gray);
+}
+
+/* ── Progress Bar ─────────────────────────────────────────────── */
+.progress-bar {
+    position: fixed;
+    left: 0;
+    border-top: var(--border-width) solid var(--border-color);
+    width: 1px;
+    height: 0%;
+    background: var(--black);
+    border-top-color: #444;
+    z-index: 1000;
+    transition: height 0.1s linear;
+}
+
+    border-top: var(--border-width) solid var(--border-color);
+    background: var(--gray);
+}
+
+/* ── Article Layout ───────────────────────────────────────────── */
+    border-top-color: #444;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 6rem 2rem 4rem;
+}
+    height: var(--border-width);
+    background: var(--black);
+    margin-bottom: 3rem;
+}
+
+.article-title {
+    font-family: var(--display);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+}
+
+body.dark-mode .article-title {
+    color: var(--white);
+}
+
+.article-subtitle {
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    color: #555;
+    font-style: italic;
+    margin-bottom: 1.5rem;
+    opacity: 0.8;
+}
+
+body.dark-mode .article-subtitle {
+    color: var(--gray);
+}
+
+.article-meta {
+    display: flex;
+    gap: 1.5rem;
+    font-family: var(--grotesk);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.4;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--black);
+}
+
+body.dark-mode .article-meta {
+    border-top-color: #333;
+}
+
+.article-author {
+    font-family: var(--grotesk);
+    font-size: 1.125rem;
+    opacity: 0.7;
+    margin-top: 1rem;
+}
+
+body.dark-mode .article-author {
+    color: var(--gray);
+}
+
+/* ── Article Content ──────────────────────────────────────────── */
+.article-content {
+    font-size: 1.25rem;
+    line-height: 1.8;
+}
+
+.article-content p {
+    margin-bottom: 1.5rem;
+}
+
+body.dark-mode .article-content p {
+    color: var(--gray);
+}
+
+.article-content em {
+    font-style: italic;
+}
+
+.article-content strong {
+    font-weight: 600;
+}
+
+.article-content p.citation {
+    font-style: italic;
+    color: #999;
+    border-left: 3px solid var(--accent);
+    padding-left: 2rem;
+    margin: 2rem 0;
+    font-size: 1.1rem;
+    text-align: left;
+}
+
+.article-content p a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: all 0.3s var(--ease);
+}
+
+.article-content p a:hover {
+    color: var(--black);
+    border-bottom: 1px solid var(--accent);
+}
+
+body.dark-mode .article-content p a:hover {
+    color: var(--white);
+}
+
+.article-content p a:visited {
+    opacity: 0.7;
+}
+
+/* ── Section Utilities ────────────────────────────────────────── */
+.section-divider {
+    width: 60%;
+    height: 1px;
+    background: var(--black);
+    opacity: 0.2;
+    margin: 3rem auto;
+}
+
+body.dark-mode .section-divider {
+    background: #333;
+}
+
+.part-number {
+    font-family: var(--grotesk);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.4;
+    margin: 3rem 0 1.5rem;
+}
+
+/* ── References ───────────────────────────────────────────────── */
+.article-references {
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--black);
+    opacity: 0.7;
+}
+
+body.dark-mode .article-references {
+    border-top-color: #333;
+}
+
+.article-references h3 {
+    font-family: var(--grotesk);
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+}
+
+.article-references a {
+    display: block;
+    margin: 0.75rem 0;
+    color: inherit;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s var(--ease);
+    padding-left: 1rem;
+    border-left: 2px solid transparent;
+}
+
+.article-references a:hover {
+    border-left-color: var(--dynamic-color);
+    padding-left: 1.5rem;
+}
+
+/* ── Keyboard Shortcuts Hint ──────────────────────────────────── */
+.shortcuts-hint {
+    position: fixed;
+    bottom: 2rem;
+    left: 2rem;
+    font-family: var(--grotesk);
+    font-size: 0.75rem;
+    opacity: 0.2;
+    z-index: 100;
+}

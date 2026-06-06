@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A lil mouse moving around the page | Antitesi Magazine</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <script src="../../js/articles-and-utils.js"></script>
+
+    <!-- Three.js import map -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <style>
+        /* ── Reset & variables ───────────────────────────────── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #000;
+            --white: #fff;
+            --gray: #f3f3f3;
+            --serif: 'Crimson Pro', serif;
+            --grotesk: 'Inter', sans-serif;
+            --display: 'Fraunces', serif;
+            --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+            --dynamic-color: #ff9933;
+        }
+
+        body {
+            font-family: var(--serif);
+            background: var(--white);
+            color: var(--black);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body.dark-mode {
+            background: var(--black);
+            color: var(--gray);
+        }
+
+        /* ── Progress bar ────────────────────────────────────── */
+        .progress-bar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 0%;
+            background: var(--dynamic-color);
+            opacity: 0.4;
+            z-index: 1000;
+            transition: height 0.1s linear;
+            pointer-events: none;
+        }
+
+        /* ── Nav ─────────────────────────────────────────────── */
+        .nav-cluster {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 100;
+            display: flex;
+            gap: 1.5rem;
+            font-family: var(--grotesk);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .nav-cluster a {
+            color: var(--black);
+            text-decoration: none;
+            opacity: 0.3;
+            transition: opacity 0.3s var(--ease);
+        }
+
+        body.dark-mode .nav-cluster a {
+            color: var(--gray);
+        }
+
+        .nav-cluster a:hover {
+            opacity: 1;
+        }
+
+        /* ── Article layout ──────────────────────────────────── */
+        .article-view {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 6rem 2rem 8rem;
+        }
+
+        .article-header {
+            margin-bottom: 3rem;
+        }
+
+        .article-title {
+            font-family: var(--display);
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .article-meta {
+            font-family: var(--grotesk);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            opacity: 0.35;
+            display: flex;
+            gap: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .article-author {
+            font-family: var(--grotesk);
+            font-size: 0.8rem;
+            opacity: 0.5;
+            letter-spacing: 0.06em;
+        }
+
+        .article-content {
+            font-size: 1.2rem;
+            line-height: 1.85;
+        }
+
+        .article-content p {
+            margin-bottom: 1.6rem;
+        }
+
+        .article-content em {
+            font-style: italic;
+        }
+
+        .article-content strong {
+            font-weight: 600;
+        }
+
+        .article-next {
+            display: inline-block;
+            margin-top: 1rem;
+            color: inherit;
+            text-decoration: none;
+            font-family: var(--grotesk);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.5;
+            transition: opacity 0.2s var(--ease);
+        }
+
+        .article-next:hover {
+            opacity: 1;
+        }
+
+        /* ── Callout box ─────────────────────────────────────── */
+        .callout {
+            border-left: 3px solid var(--dynamic-color);
+            padding: 1rem 1.2rem;
+            margin: 2.5rem 0;
+            font-size: 1.05rem;
+            opacity: 0.75;
+            font-style: italic;
+            transition: border-color 0.4s var(--ease);
+        }
+
+        /* ── What we'll build block ──────────────────────────── */
+        .build-plan {
+            background: var(--gray);
+            padding: 1.8rem 2rem;
+            margin: 2.5rem 0;
+            font-size: 1rem;
+            line-height: 1.7;
+            font-family: var(--grotesk);
+        }
+
+        body.dark-mode .build-plan {
+            background: #0d0d0d;
+        }
+
+        .build-plan h3 {
+            font-family: var(--grotesk);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            opacity: 0.35;
+            margin-bottom: 1rem;
+        }
+
+        .build-plan ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .build-plan ul li {
+            padding: 0.3rem 0;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+
+        .build-plan ul li::before {
+            content: '→ ';
+            color: var(--dynamic-color);
+            font-weight: 600;
+        }
+
+        /* ── Shortcuts hint ──────────────────────────────────── */
+        .shortcuts-hint {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            font-family: var(--grotesk);
+            font-size: 0.75rem;
+            opacity: 0.2;
+            z-index: 100;
+        }
+
+        /* ── Pretext canvas ──────────────────────────────────── */
+        #pretext-container {
+            position: relative;
+            width: 100%;
+        }
+
+        #textCanvas {
+            display: block;
+            width: 100%;
+        }
+
+        /* ── 3D mouse canvas (full page) ─────────────────────── */
+        #mouseCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true')
+            document.body.classList.add('dark-mode');
+    </script>
+
+    <div class="progress-bar"></div>
+
+    <nav class="nav-cluster">
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+    </nav>
+
+    <article class="article-view">
+        <div id="pretext-container">
+            <canvas id="textCanvas"></canvas>
+        </div>
+        <a href="template_confini" class="article-next">NEXT →</a>
+    </article>
+
+    <!-- 3D mouse overlay — full page -->
+    <canvas id="mouseCanvas"></canvas>
+
+    <div class="shortcuts-hint">ESC → home · A → read article</div>
+
+    <script>
+        // ── Color cycling ──────────────────────────────────────
+        const colors = ['#ff9933', '#ff3366', '#3366ff', '#33ff66', '#9933ff', '#33ffff'];
+        let colorIndex = 0;
+        function changeColor() {
+            colorIndex = (colorIndex + 1) % colors.length;
+            document.documentElement.style.setProperty('--dynamic-color', colors[colorIndex]);
+        }
+        document.addEventListener('click', changeColor);
+
+        initKeyboardShortcuts({
+            extraKeys: {
+                'a': openNextArticle, 'A': openNextArticle,
+                'Escape': returnToHome, 'h': returnToHome, 'H': returnToHome,
+            }
+        });
+
+        initProgressBar();
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════
+         Text layout (canvas) + 3D mouse (Three.js)
+         ═══════════════════════════════════════════════════ -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+        import { clone as skeletonClone } from 'three/addons/utils/SkeletonUtils.js';
+
+        /* ── Config ─────────────────────────────────────── */
+        const LINE_HEIGHT = 36;
+        const MODEL_HEIGHT = 140;
+        const SPEED = 150;
+        const DISPLACE_R = 40;
+        const DISPLACE_STR = 12;
+        const EDGE_PAD = 30;
+        const MARGIN_X = 40;
+
+        const SHRINK_FACTOR = 0.85;
+        const MIN_SCALE = 0.25;
+
+        /* ── Text blocks (all article copy renders on canvas) ── */
+        const textBlocks = [
+            {
+                text: "A lil mouse moving around the page",
+                font: '700 48px "Fraunces", serif',
+                fontSize: 48, lineHeight: 56, gap: 18,
+            },
+            {
+                text: "DEMO    ~2 MIN READ    APRIL 2026",
+                font: '500 11px "Inter", sans-serif',
+                fontSize: 11, lineHeight: 16, gap: 54,
+                opacity: 0.35,
+            },
+            {
+                text: "Amsterdam, Schiphol Airport. Un topolino passa inosservato tra i sedili della sala d'attesa dell'aeroporto, tra gli sguardi assonnati e ipnotizzati sugli schermi delle persone in attesa della chiamata del loro aereo. Sembro l'unico ad essermene accorto.",
+                font: '400 20px "Crimson Pro", serif',
+                fontSize: 20, lineHeight: 36, gap: 26,
+            },
+            {
+                text: "Mi chiedo con quale criterio scelga di passare sotto ai sedili, scorrendo lungo il battiscopa del gate, piuttosto che infilarsi nel tunnel verso l'esterno. Mi chiedo se le sue scelte siano dettate da un processo analitico o da un impulso istintivo.",
+                font: '400 20px "Crimson Pro", serif',
+                fontSize: 20, lineHeight: 36, gap: 48,
+            },
+            {
+                text: "This page is a prototype. There is a small mouse — it wanders. When it finds text in its path, it stops and reads. It doesn't know you're watching.",
+                font: 'italic 400 17px "Crimson Pro", serif',
+                fontSize: 17, lineHeight: 30, gap: 10,
+                opacity: 0.75,
+            },
+            {
+                text: "→ L. found this mouse we could use",
+                font: 'italic 400 15px "Crimson Pro", serif',
+                fontSize: 15, lineHeight: 26, gap: 56,
+                opacity: 0.5,
+            },
+        ];
+
+        /* ── DOM ─────────────────────────────────────────── */
+        const container = document.getElementById('pretext-container');
+        const textCanvas = document.getElementById('textCanvas');
+        const mouseCanvas = document.getElementById('mouseCanvas');
+        const textCtx = textCanvas.getContext('2d');
+        const dpr = window.devicePixelRatio || 1;
+        const isDark = () => document.body.classList.contains('dark-mode');
+
+        /* ── Text layout ─────────────────────────────────── */
+        let wordData = [];
+        let textHeight = 0;
+
+        function wordWrap(text, maxW) {
+            // textCtx.font must already be set to the caller's font
+            const words = text.split(' ');
+            const lines = [];
+            let cur = '';
+            for (const w of words) {
+                const test = cur ? cur + ' ' + w : w;
+                if (textCtx.measureText(test).width > maxW && cur) {
+                    lines.push(cur);
+                    cur = w;
+                } else cur = test;
+            }
+            if (cur) lines.push(cur);
+            return lines;
+        }
+
+        function layoutText() {
+            const W = container.clientWidth;
+            wordData = [];
+            let y = 0;
+
+            for (const block of textBlocks) {
+                textCtx.font = block.font;
+                const lh = block.lineHeight;
+                const lines = wordWrap(block.text, W);
+
+                for (const line of lines) {
+                    y += lh;
+                    let x = 0;
+                    for (const tok of line.split(/( +)/)) {
+                        if (!tok) continue;
+                        const tw = textCtx.measureText(tok).width;
+                        wordData.push({
+                            text: tok,
+                            baseX: x,
+                            baseY: y,
+                            width: tw,
+                            font: block.font,
+                            fontSize: block.fontSize,
+                            opacity: block.opacity ?? 1,
+                        });
+                        x += tw;
+                    }
+                }
+                y += block.gap;
+            }
+
+            textHeight = y + 40;
+            textCanvas.width = W * dpr;
+            textCanvas.height = textHeight * dpr;
+            textCanvas.style.width = W + 'px';
+            textCanvas.style.height = textHeight + 'px';
+            textCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        }
+
+        function renderText() {
+            const W = textCanvas.width / dpr;
+            const H = textCanvas.height / dpr;
+            textCtx.save();
+            textCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            textCtx.clearRect(0, 0, W, H);
+            textCtx.textBaseline = 'alphabetic';
+            const fg = isDark() ? '#f3f3f3' : '#000';
+            textCtx.fillStyle = fg;
+
+            const rect = textCanvas.getBoundingClientRect();
+            const localMice = mice.map(m => ({
+                x: m.mx - rect.left - window.scrollX,
+                y: m.my - rect.top - window.scrollY,
+                r: DISPLACE_R * m.scaleFactor,
+                str: DISPLACE_STR * m.scaleFactor,
+            }));
+
+            let curFont = '';
+            let curAlpha = 1;
+            for (const w of wordData) {
+                const cx = w.baseX + w.width * 0.5;
+                const cy = w.baseY - w.fontSize * 0.35;
+                let offX = 0, offY = 0;
+                for (const lm of localMice) {
+                    const dx = cx - lm.x, dy = cy - lm.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < lm.r && dist > 1) {
+                        const f = (1 - dist / lm.r) ** 2 * lm.str;
+                        offX += (dx / dist) * f;
+                        offY += (dy / dist) * f;
+                    }
+                }
+                if (w.font !== curFont) { textCtx.font = w.font; curFont = w.font; }
+                if (w.opacity !== curAlpha) { textCtx.globalAlpha = w.opacity; curAlpha = w.opacity; }
+                textCtx.fillText(w.text, w.baseX + offX, w.baseY - offY);
+            }
+            textCtx.globalAlpha = 1;
+            textCtx.restore();
+        }
+
+        /* ── Three.js setup ──────────────────────────────── */
+        const renderer = new THREE.WebGLRenderer({ canvas: mouseCanvas, alpha: true, antialias: true });
+        renderer.setPixelRatio(dpr);
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.OrthographicCamera(0, 1, 1, 0, 0.1, 2000);
+        camera.position.set(0, 0, 500);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 1.8));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2.0);
+        dirLight.position.set(300, 200, 400);
+        scene.add(dirLight);
+        const backLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        backLight.position.set(-200, -100, -200);
+        scene.add(backLight);
+
+        function syncCanvas() {
+            const w = document.documentElement.scrollWidth;
+            const h = document.documentElement.scrollHeight;
+            mouseCanvas.style.position = 'absolute';
+            mouseCanvas.style.top = '0';
+            mouseCanvas.style.left = '0';
+            mouseCanvas.style.width = w + 'px';
+            mouseCanvas.style.height = h + 'px';
+            mouseCanvas.style.pointerEvents = 'none';
+            mouseCanvas.style.zIndex = '9999';
+            renderer.setSize(w, h);
+            camera.left = 0;
+            camera.right = w;
+            camera.top = h;
+            camera.bottom = 0;
+            camera.updateProjectionMatrix();
+        }
+
+        const toThreeY = (py) => document.documentElement.scrollHeight - py;
+
+        /* ── Mice ────────────────────────────────────────── */
+        // Physics constants
+        const GRAVITY = 1200;
+        const JUMP_SPEED = 320;
+        const MAX_TILT = 0.25;
+
+        let gltfData = null;          // shared source GLTF (scene + animations)
+        const mice = [];              // every active mouse instance
+        let floors = [];
+
+        function makeMouse({ startMx, startMy, scaleFactor, floorIdx = 0 }) {
+            const inner = skeletonClone(gltfData.scene);
+            const box = new THREE.Box3().setFromObject(inner);
+            const size = box.getSize(new THREE.Vector3());
+            const center = box.getCenter(new THREE.Vector3());
+            const baseS = MODEL_HEIGHT / Math.max(size.x, size.y, size.z);
+            const s = baseS * scaleFactor;
+            inner.scale.set(s, s, s);
+            inner.position.set(-center.x * s, -center.y * s, -center.z * s);
+            inner.rotation.y = Math.PI * 0.5;
+
+            const pivot = new THREE.Group();
+            pivot.add(inner);
+            scene.add(pivot);
+
+            const mixer = new THREE.AnimationMixer(inner);
+            const actions = {};
+            for (const clip of gltfData.animations)
+                actions[clip.name] = mixer.clipAction(clip);
+
+            const m = {
+                pivot, inner, mixer, actions,
+                baseS, center,
+                scaleFactor,
+                mx: startMx, my: startMy,
+                state: 'resting',
+                targetX: 0, targetFloorIdx: 0, dir: 1,
+                restTimer: 0, restDuration: 3 + Math.random() * 5,
+                velY: 0, airborne: false,
+                floorIdx, landingIdx: floorIdx,
+                jumpTimer: 0, jumpCD: 1 + Math.random() * 1.5,
+            };
+            setIdle(m);
+            mice.push(m);
+            return m;
+        }
+
+        function applyScale(m, newScale) {
+            const s = m.baseS * newScale;
+            m.inner.scale.set(s, s, s);
+            m.inner.position.set(-m.center.x * s, -m.center.y * s, -m.center.z * s);
+            m.scaleFactor = newScale;
+        }
+
+        function buildFloors() {
+            const rect = textCanvas.getBoundingClientRect();
+            const pageTop = rect.top + window.scrollY;
+            const pageH = document.documentElement.scrollHeight;
+
+            // Text-baseline floors (so mice still walk on words)
+            const textFloors = new Set();
+            for (const w of wordData) textFloors.add(pageTop + w.baseY);
+
+            floors = [...textFloors];
+
+            // Synthetic floors fill the rest of the page, above and below the text
+            const FLOOR_GAP = LINE_HEIGHT;
+            const TOP_PAD = 100;
+            const BOTTOM_PAD = 80;
+            const MIN_SPACING = FLOOR_GAP * 0.55;
+
+            for (let y = TOP_PAD; y < pageH - BOTTOM_PAD; y += FLOOR_GAP) {
+                let tooClose = false;
+                for (const f of textFloors) {
+                    if (Math.abs(y - f) < MIN_SPACING) { tooClose = true; break; }
+                }
+                if (!tooClose) floors.push(y);
+            }
+
+            floors.sort((a, b) => a - b);
+        }
+
+        function nearestFloorIdx(pageY) {
+            let best = 0, bestD = Infinity;
+            for (let i = 0; i < floors.length; i++) {
+                const d = Math.abs(floors[i] - pageY);
+                if (d < bestD) { bestD = d; best = i; }
+            }
+            return best;
+        }
+
+        function pickNewDestination(m) {
+            const pageW = document.documentElement.clientWidth;
+            const MIN_RUN_DIST = Math.min(320, (pageW - EDGE_PAD * 2) * 0.55);
+
+            // Only pick a target floor within ±2 of the current one — avoids
+            // long up/down jump chains that look unnatural.
+            const MAX_FLOOR_DELTA = 2;
+            if (floors.length) {
+                const lo = Math.max(0, m.floorIdx - MAX_FLOOR_DELTA);
+                const hi = Math.min(floors.length - 1, m.floorIdx + MAX_FLOOR_DELTA);
+                m.targetFloorIdx = lo + Math.floor(Math.random() * (hi - lo + 1));
+            } else {
+                m.targetFloorIdx = 0;
+            }
+
+            // Prefer destinations that force a longer run
+            let tx = EDGE_PAD + Math.random() * (pageW - EDGE_PAD * 2);
+            for (let i = 0; i < 6 && Math.abs(tx - m.mx) < MIN_RUN_DIST; i++) {
+                tx = EDGE_PAD + Math.random() * (pageW - EDGE_PAD * 2);
+            }
+            m.targetX = tx;
+            m.dir = m.targetX > m.mx ? 1 : -1;
+            flipX(m, m.dir);
+        }
+
+        /* ── Load model ──────────────────────────────────── */
+        new GLTFLoader().load(
+            '../../multimedia/models/mouse/source/mouse.glb',
+            (gltf) => {
+                gltfData = gltf;
+                buildFloors();
+                const fIdx = floors.length ? Math.floor(floors.length / 2) : 0;
+                const startY = floors[fIdx] ?? 300;
+                makeMouse({ startMx: 50, startMy: startY, scaleFactor: 1.0, floorIdx: fIdx });
+                syncCanvas();
+            },
+            undefined,
+            (err) => console.error('Mouse load error:', err)
+        );
+
+        /* ── Animation helpers (per-mouse) ───────────────── */
+        function stopAll(m) { for (const k in m.actions) m.actions[k].stop(); }
+
+        function setRunning(m) {
+            stopAll(m);
+            m.actions['rig|run cycle']?.reset().play();
+            m.inner.rotation.y = Math.PI * 0.5;
+            m.inner.rotation.z = 0;
+        }
+
+        function setIdle(m) {
+            stopAll(m);
+            const idle = m.actions['rig|idol animtion'];
+            if (idle) {
+                idle.reset();
+                idle.time = 2.0;   // skip the first 2s of the idle clip
+                idle.play();
+            }
+            m.inner.rotation.y = 0;
+            m.inner.rotation.z = 0;
+        }
+
+        function playJumpAnim(m) {
+            const run = m.actions['rig|run cycle'], jmp = m.actions['rig|jump'];
+            if (!run || !jmp) return;
+            run.fadeOut(0.15);
+            jmp.reset().fadeIn(0.15).play();
+            jmp.setLoop(THREE.LoopOnce, 1);
+            jmp.clampWhenFinished = true;
+        }
+
+        function playRunAnim(m) {
+            const jmp = m.actions['rig|jump'], run = m.actions['rig|run cycle'];
+            if (jmp) jmp.fadeOut(0.15);
+            if (run) run.reset().fadeIn(0.15).play();
+        }
+
+        function flipX(m, d) {
+            m.pivot.scale.x = d === 1
+                ? Math.abs(m.pivot.scale.x)
+                : -Math.abs(m.pivot.scale.x);
+        }
+
+        /* ── Hit test: find which mouse (if any) contains this page-space point ── */
+        function findHitMouse(pageX, pageY) {
+            let best = null, bestD = Infinity;
+            for (const m of mice) {
+                const half = (MODEL_HEIGHT / 2) * m.scaleFactor;
+                const dx = pageX - m.mx;
+                const dy = pageY - m.my;
+                if (Math.abs(dx) <= half && Math.abs(dy) <= half) {
+                    const d = dx * dx + dy * dy;
+                    if (d < bestD) { bestD = d; best = m; }
+                }
+            }
+            return best;
+        }
+
+        /* ── Click: shrink the clicked mouse and spawn a duplicate ── */
+        document.addEventListener('click', (e) => {
+            if (!gltfData) return;
+            const hit = findHitMouse(e.pageX, e.pageY);
+            if (!hit) return;
+
+            // Both twins emerge at the same (smaller) size
+            const newScale = Math.max(hit.scaleFactor * SHRINK_FACTOR, MIN_SCALE);
+            applyScale(hit, newScale);
+
+            const twin = makeMouse({
+                startMx: hit.mx,
+                startMy: hit.my,
+                scaleFactor: newScale,
+                floorIdx: hit.floorIdx,
+            });
+
+            if (hit.airborne) land(hit);
+
+            // Horizontal split: one flees left, one flees right
+            const pageW = document.documentElement.clientWidth;
+            const leftTarget = Math.max(EDGE_PAD, EDGE_PAD + Math.random() * (hit.mx - EDGE_PAD));
+            const rightTarget = Math.min(pageW - EDGE_PAD, hit.mx + Math.random() * (pageW - EDGE_PAD - hit.mx));
+
+            // Randomize which twin jumps vs falls
+            const hitJumps = Math.random() < 0.5;
+            const jumper = hitJumps ? hit : twin;
+            const faller = hitJumps ? twin : hit;
+
+            configureSplitTwin(jumper, -1, leftTarget, 'jump');
+            configureSplitTwin(faller, 1, rightTarget, 'fall');
+        });
+
+        function configureSplitTwin(m, dir, targetX, mode) {
+            m.state = 'fleeing';
+            m.dir = dir;
+            flipX(m, dir);
+            m.targetX = targetX;
+            m.targetFloorIdx = m.floorIdx;  // resolve landing floor in the animation
+            m.jumpTimer = 0;
+            m.jumpCD = 1 + Math.random() * 1.5;
+
+            if (mode === 'jump') {
+                // Pop up — big upward velocity, land on same floor (or one above if possible)
+                m.velY = -JUMP_SPEED * 1.35;
+                m.landingIdx = m.floorIdx > 0 ? m.floorIdx - 1 : m.floorIdx;
+            } else {
+                // Fall — drop to the floor below if one exists, else a small upward hop
+                if (m.floorIdx < floors.length - 1) {
+                    m.velY = 60;
+                    m.landingIdx = m.floorIdx + 1;
+                } else {
+                    m.velY = -JUMP_SPEED * 0.55;
+                    m.landingIdx = m.floorIdx;
+                }
+            }
+            m.airborne = true;
+            setRunning(m);
+            playJumpAnim(m);
+        }
+
+        /* ── Land on a floor ─────────────────────────────── */
+        function land(m) {
+            m.airborne = false;
+            m.velY = 0;
+            m.floorIdx = m.landingIdx;
+            m.my = floors[m.floorIdx] ?? m.my;
+            m.inner.rotation.z = 0;
+        }
+
+        /* ── Start resting at current position ───────────── */
+        function startRest(m) {
+            m.state = 'resting';
+            m.restDuration = 4.0 + Math.random() * 4.0;
+            m.restTimer = 0;
+            setIdle(m);
+            flipX(m, Math.random() < 0.5 ? 1 : -1);
+        }
+
+        /* ── Per-mouse physics/state step ────────────────── */
+        function updateMouse(m, dt) {
+            if (m.state === 'resting') {
+                m.restTimer += dt;
+                if (m.restTimer >= m.restDuration) {
+                    m.state = 'wandering';
+                    pickNewDestination(m);
+                    setRunning(m);
+                    m.jumpTimer = 0;
+                    m.jumpCD = 1 + Math.random() * 1.5;
+                }
+            }
+
+            if (m.state === 'wandering' || m.state === 'fleeing') {
+                if (!m.airborne) {
+                    m.mx += SPEED * m.dir * dt;
+
+                    // Bounce off page edges: clamp and flip toward the interior
+                    const pageW = document.documentElement.clientWidth;
+                    if (m.mx < EDGE_PAD && m.dir < 0) {
+                        m.mx = EDGE_PAD;
+                        m.dir = 1;
+                        m.targetX = Math.max(m.targetX, m.mx + 200);
+                        flipX(m, 1);
+                    } else if (m.mx > pageW - EDGE_PAD && m.dir > 0) {
+                        m.mx = pageW - EDGE_PAD;
+                        m.dir = -1;
+                        m.targetX = Math.min(m.targetX, m.mx - 200);
+                        flipX(m, -1);
+                    }
+
+                    const arrivedX = (m.dir === 1 && m.mx >= m.targetX) || (m.dir === -1 && m.mx <= m.targetX);
+
+                    if (m.state === 'wandering' && !m.airborne) {
+                        m.jumpTimer += dt;
+                        if (m.jumpTimer > m.jumpCD) {
+                            m.jumpTimer = 0;
+                            m.jumpCD = 1 + Math.random() * 1.5;
+
+                            const canUp = m.floorIdx > 0;
+                            const canDown = m.floorIdx < floors.length - 1;
+                            if (canUp || canDown) {
+                                if (canUp && canDown) {
+                                    m.landingIdx = Math.random() < 0.5 ? m.floorIdx - 1 : m.floorIdx + 1;
+                                } else {
+                                    m.landingIdx = canUp ? m.floorIdx - 1 : m.floorIdx + 1;
+                                }
+                                m.velY = m.landingIdx < m.floorIdx ? -JUMP_SPEED : 0;
+                                m.airborne = true;
+                                playJumpAnim(m);
+                            }
+                        }
+                    }
+
+                    if (arrivedX) {
+                        m.mx = m.targetX;
+                        if (m.floorIdx === m.targetFloorIdx) {
+                            startRest(m);
+                        } else {
+                            if (m.targetFloorIdx < m.floorIdx && !m.airborne) {
+                                m.landingIdx = m.floorIdx - 1;
+                                m.velY = -JUMP_SPEED;
+                                m.airborne = true;
+                                playJumpAnim(m);
+                            } else if (m.targetFloorIdx > m.floorIdx && !m.airborne) {
+                                m.landingIdx = m.floorIdx + 1;
+                                m.velY = 0;
+                                m.airborne = true;
+                                playJumpAnim(m);
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (m.airborne) {
+                m.velY += GRAVITY * dt;
+                m.my += m.velY * dt;
+
+                const tilt = Math.max(-1, Math.min(1, m.velY / JUMP_SPEED));
+                m.inner.rotation.z = tilt * MAX_TILT * -m.dir;
+
+                const targetY = floors[m.landingIdx];
+                if (m.velY > 0 && m.my >= targetY) {
+                    land(m);
+                    if (m.state === 'wandering' || m.state === 'fleeing') playRunAnim(m);
+                    if (m.floorIdx === m.targetFloorIdx) {
+                        const arrivedX = Math.abs(m.mx - m.targetX) < 4;
+                        if (arrivedX) startRest(m);
+                    }
+                }
+            }
+
+            m.pivot.position.set(m.mx, toThreeY(m.my), 0);
+        }
+
+        /* ── Main loop ───────────────────────────────────── */
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = Math.min(clock.getDelta(), 0.1);
+
+            for (const m of mice) {
+                m.mixer.update(dt);
+                updateMouse(m, dt);
+            }
+
+            renderText();
+            renderer.render(scene, camera);
+        }
+
+        /* ── Init ────────────────────────────────────────── */
+        layoutText();
+        buildFloors();
+        syncCanvas();
+        animate();
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => { layoutText(); buildFloors(); syncCanvas(); }, 150);
+        });
+
+        new MutationObserver(() => renderText())
+            .observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+        new ResizeObserver(() => syncCanvas()).observe(document.documentElement);
+    </script>
+
+</body>
+
+</html>

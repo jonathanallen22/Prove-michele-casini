@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>On Wen — Three Fragments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Noto+Serif+SC:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+:root{
+  --bg:#0b0905;
+  --surface:#12100c;
+  --text:#ddd0b4;
+  --muted:#7a6d58;
+  --dim:#2c261c;
+  --red:#9c2016;
+  --red2:#c4311e;
+  --gold:#a07c1e;
+  --gold2:#cfa040;
+  --border:rgba(168,128,40,.18);
+}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Cormorant Garamond','Georgia',serif;
+  font-size:20px;
+  line-height:1.82;
+  overflow-x:hidden;
+}
+
+/* grain */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  pointer-events:none;z-index:9999;
+  opacity:.04;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:200px 200px;
+}
+
+/* ── HERO ── */
+.hero{
+  height:100vh;min-height:600px;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+  background:radial-gradient(ellipse 80% 60% at 50% 45%,#1c1508 0%,var(--bg) 70%);
+}
+
+.hero-ghost{
+  font-family:'Noto Serif SC',serif;
+  font-weight:300;
+  font-size:clamp(220px,45vw,500px);
+  color:transparent;
+  -webkit-text-stroke:1px rgba(168,128,40,.1);
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-52%);
+  pointer-events:none;user-select:none;
+  opacity:0;animation:ghostIn 5s ease-out .3s forwards;
+}
+@keyframes ghostIn{
+  0%{opacity:0;transform:translate(-50%,-48%)}
+  100%{opacity:1;transform:translate(-50%,-52%)}
+}
+
+.hero-body{
+  position:relative;z-index:1;text-align:center;
+  opacity:0;transform:translateY(22px);
+  animation:riseIn 2.4s ease-out .9s forwards;
+}
+@keyframes riseIn{to{opacity:1;transform:translateY(0)}}
+
+.hero-eyebrow{
+  font-size:.72rem;letter-spacing:.38em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:1.8rem;
+}
+.hero-title{
+  font-size:clamp(4rem,10vw,8rem);
+  font-weight:300;font-style:italic;
+  line-height:.95;color:var(--text);
+  margin-bottom:.4rem;
+}
+.hero-title b{font-style:normal;font-weight:300;color:var(--red2)}
+.hero-hanzi{
+  font-family:'Noto Serif SC',serif;font-weight:300;
+  font-size:1.4rem;letter-spacing:.9em;margin-left:.9em;
+  color:var(--gold);opacity:.55;margin-top:1.6rem;
+}
+
+.scroll-hint{
+  position:absolute;bottom:2.8rem;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:.6rem;
+  opacity:0;animation:fadePulse 2.5s ease-in-out 2.5s infinite;
+}
+@keyframes fadePulse{
+  0%,100%{opacity:.25;transform:translateX(-50%) translateY(0)}
+  50%{opacity:.7;transform:translateX(-50%) translateY(5px)}
+}
+.scroll-hint span{
+  font-size:.65rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);
+}
+.scroll-hint::after{
+  content:'';width:1px;height:48px;
+  background:linear-gradient(to bottom,var(--gold),transparent);
+}
+
+/* ── LAYOUT ── */
+.container{max-width:800px;margin:0 auto;padding:0 2.5rem}
+
+/* ── SECTION HEADER ── */
+.sec-head{
+  display:flex;align-items:baseline;gap:2rem;
+  padding-bottom:1.6rem;margin-bottom:4rem;
+  border-bottom:1px solid var(--border);
+}
+.sec-num{
+  font-size:5rem;font-weight:300;font-style:italic;
+  line-height:.85;color:var(--red);opacity:.7;
+  flex-shrink:0;
+}
+.sec-label{
+  font-size:.78rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--muted);padding-bottom:.3rem;
+}
+
+/* ── PROSE ── */
+.prose{margin:0 0 2rem}
+.prose p{margin-bottom:1.5em;font-size:1.1rem;line-height:1.88}
+.prose p:first-of-type::first-letter{
+  float:left;font-size:5rem;line-height:.72;
+  margin:.08em .08em 0 0;
+  color:var(--red2);font-weight:600;font-style:italic;
+}
+.prose em,.prose i{color:var(--gold2);font-style:italic}
+.prose .zh{font-family:'Noto Serif SC',serif;font-size:1.05em}
+
+.aside{
+  border-left:2px solid var(--gold);
+  padding:.8rem 1.4rem;margin:2rem 0;
+  color:var(--muted);font-size:.95rem;font-style:italic;
+}
+
+/* ── CATEGORIES ── */
+.cat-section{margin:3rem 0 4rem}
+.cat-meta{
+  font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:1.5rem;
+}
+.cat-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(230px,1fr));
+  border:1px solid var(--border);
+  margin-bottom:.2rem;
+}
+.cat-item{
+  display:flex;align-items:flex-start;gap:.7rem;
+  padding:.78rem 1rem;
+  transition:background .2s,border-color .2s;
+  border:1px solid transparent;
+  cursor:default;position:relative;
+}
+.cat-item:hover{background:rgba(156,32,22,.06);border-color:var(--border)}
+.cat-item.lit .cat-name{color:var(--gold2)}
+.cat-item.lit .cat-n{color:var(--red2)}
+.cat-item.notable::before{
+  content:'';
+  position:absolute;top:.9rem;right:.8rem;
+  width:4px;height:4px;border-radius:50%;
+  background:var(--gold);opacity:.5;
+}
+.cat-n{
+  font-size:.62rem;color:var(--dim);
+  min-width:1.6rem;padding-top:.3rem;
+  transition:color .2s;font-variant-numeric:tabular-nums;
+  letter-spacing:.04em;
+}
+.cat-name{
+  font-style:italic;font-size:.98rem;
+  color:var(--text);line-height:1.4;
+  transition:color .2s;
+}
+.cat-btn{
+  width:100%;padding:.9rem;margin-top:1rem;
+  background:transparent;border:1px solid var(--border);
+  color:var(--muted);font-family:inherit;
+  font-size:.72rem;letter-spacing:.22em;text-transform:uppercase;
+  cursor:pointer;transition:all .3s;
+}
+.cat-btn:hover{background:rgba(168,128,40,.07);color:var(--gold2);border-color:var(--gold)}
+.cat-btn.active{border-color:var(--red);color:var(--red2)}
+
+/* ── DIVIDER ── */
+.hr{
+  display:flex;align-items:center;gap:1.5rem;
+  max-width:800px;margin:0 auto;padding:0 2.5rem;
+  opacity:.25;
+}
+.hr::before,.hr::after{content:'';flex:1;height:1px;background:var(--gold)}
+.hr-zh{font-family:'Noto Serif SC',serif;color:var(--gold);font-size:1rem}
+
+/* ── ORACLE ── */
+.oracle-block{
+  margin:3.5rem 0;
+  display:flex;flex-direction:column;align-items:center;
+  gap:1.5rem;
+}
+.oracle-chars{
+  font-family:'Noto Serif SC',serif;
+  font-size:clamp(2.8rem,11vw,6.5rem);
+  font-weight:300;
+  color:var(--text);
+  writing-mode:vertical-rl;
+  text-orientation:upright;
+  letter-spacing:.1em;
+  padding:2rem 1.5rem;
+  border:1px solid var(--border);
+  background:linear-gradient(135deg,rgba(156,32,22,.04) 0%,transparent 60%);
+  line-height:1.3;
+  position:relative;
+}
+.oracle-chars::before{
+  content:'';
+  position:absolute;inset:6px;
+  border:1px solid rgba(168,128,40,.06);
+  pointer-events:none;
+}
+.oracle-gloss{
+  font-size:.88rem;font-style:italic;
+  color:var(--muted);text-align:center;line-height:1.7;
+  max-width:300px;
+}
+.oracle-gloss em{color:var(--text);font-style:normal}
+
+/* ── BU character ── */
+.bu-wrap{
+  text-align:center;margin:3rem 0;
+  display:flex;flex-direction:column;align-items:center;gap:.8rem;
+}
+.bu-char{
+  font-family:'Noto Serif SC',serif;
+  font-size:clamp(5rem,18vw,10rem);
+  font-weight:300;color:var(--gold);
+  cursor:default;
+  position:relative;display:inline-block;
+  transition:all .4s ease;
+  animation:buBreath 4s ease-in-out infinite;
+}
+.bu-char:hover{color:var(--red2);transform:scale(1.05)}
+@keyframes buBreath{
+  0%,100%{text-shadow:0 0 40px rgba(160,124,30,.1)}
+  50%{text-shadow:0 0 80px rgba(160,124,30,.25)}
+}
+.bu-label{
+  font-size:.65rem;letter-spacing:.35em;
+  text-transform:uppercase;color:var(--muted);
+}
+
+/* ── TRIPTYCH ── */
+.triptych{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--border);
+  margin:3rem 0;
+}
+.tri-panel{
+  background:var(--surface);
+  padding:2.5rem 1.4rem 2rem;
+  display:flex;flex-direction:column;
+  align-items:center;gap:1rem;text-align:center;
+  transition:background .35s;cursor:default;
+}
+.tri-panel:hover{background:rgba(156,32,22,.06)}
+.tri-zh{
+  font-family:'Noto Serif SC',serif;
+  font-size:3.2rem;font-weight:300;
+  color:var(--gold);opacity:.55;
+  transition:opacity .35s;line-height:1;
+}
+.tri-panel:hover .tri-zh{opacity:.9}
+.tri-name{
+  font-size:.95rem;font-style:italic;
+  color:var(--text);line-height:1.4;
+}
+.tri-action{
+  font-size:.65rem;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--red);
+}
+.tri-quote{
+  margin-top:auto;padding-top:1.2rem;
+  border-top:1px solid var(--dim);width:100%;
+  font-size:.88rem;color:var(--muted);
+  font-style:italic;line-height:1.55;
+}
+
+/* ── UTOPIA PANEL ── */
+.utopia{
+  text-align:center;padding:2.5rem 2rem;
+  border:1px solid var(--border);
+  background:rgba(156,32,22,.04);
+  margin:1px 0 0;
+}
+.utopia-zh{
+  font-family:'Noto Serif SC',serif;
+  font-size:3rem;color:var(--red2);
+  display:block;margin-bottom:.6rem;
+  opacity:.8;
+}
+.utopia p{
+  font-size:1.1rem;font-style:italic;
+  color:var(--text);max-width:500px;margin:0 auto;
+  line-height:1.7;
+}
+
+/* ── SECTIONS ── */
+.sec{padding:7rem 0 5rem}
+
+/* ── FOOTER ── */
+footer{
+  text-align:center;
+  padding:5rem 2rem 7rem;
+  color:var(--muted);
+  border-top:1px solid var(--border);
+}
+.footer-zh{
+  font-family:'Noto Serif SC',serif;
+  font-size:2.2rem;display:block;
+  margin-bottom:1rem;color:var(--dim);
+}
+.footer-gloss{
+  font-size:.72rem;letter-spacing:.22em;
+  text-transform:uppercase;opacity:.6;
+}
+
+/* ── SCROLL REVEAL ── */
+.r{opacity:0;transform:translateY(28px);transition:opacity .9s ease,transform .9s ease}
+.r.in{opacity:1;transform:none}
+.r.d1{transition-delay:.1s}.r.d2{transition-delay:.2s}.r.d3{transition-delay:.35s}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  .triptych{grid-template-columns:1fr}
+  .cat-grid{grid-template-columns:1fr 1fr}
+  .container{padding:0 1.5rem}
+  .sec{padding:5rem 0 3rem}
+  .sec-num{font-size:3.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══ HERO ═══ -->
+<header class="hero" role="banner">
+  <div class="hero-ghost" aria-hidden="true">文</div>
+  <div class="hero-body">
+    <p class="hero-eyebrow">Three Fragments on Writing and Power</p>
+    <h1 class="hero-title">On <b>Wen</b></h1>
+    <div class="hero-hanzi" aria-label="wen in Chinese">文</div>
+  </div>
+  <div class="scroll-hint" aria-hidden="true"><span>scroll</span></div>
+</header>
+
+<!-- ═══ SECTION I ═══ -->
+<section class="sec" id="wenxuan" aria-label="Section one: The Wenxuan">
+  <div class="container">
+
+    <div class="sec-head r">
+      <div class="sec-num" aria-hidden="true">I</div>
+      <div class="sec-label">The Wenxuan</div>
+    </div>
+
+    <div class="prose r d1">
+      <p>The <i>Wenxuan</i> has a table of contents that would have made Foucault froth uncontrollably. It presents 37 categories of <i>wen</i>, and is edifying enough to be presented here entire.</p>
+    </div>
+
+    <div class="cat-section r">
+      <div class="cat-meta">The 37 categories of wen — hover to illuminate, or illuminate all at once</div>
+      <div class="cat-grid" id="catGrid" role="list" aria-label="37 categories of wen"></div>
+      <button class="cat-btn" id="litBtn" aria-pressed="false">Illuminate all — they are one</button>
+    </div>
+
+    <div class="prose r">
+      <p>Note the conflations of this word, <i>wen</i>. Consider that the scholars who compiled and studied from this book found between the Rhapsody on Snow and the Articles of Impeachment against an Inspector of Henan certain differences of form, of content, but certainly none of <em style="color:var(--red2)">type</em>; for from the vast body of writing that was available to him, Zhaoming anthologised (<i>xuan</i>: anthology) only what he found most beautiful, — and to say that a lyric must be better literature than an examination question or a declaration of war would only have confused him.</p>
+      <p>Why should such beautiful articles of impeachment be passed over? Because they were used for something? Are not lyrics used as drinking songs? And did not Old Mei Sheng invent the rhapsody to cure a prince of his madness? — though this last probably isn't true...</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="hr r" aria-hidden="true"><span class="hr-zh">卜</span></div>
+
+<!-- ═══ SECTION II ═══ -->
+<section class="sec" id="bones" aria-label="Section two: The Bones">
+  <div class="container">
+
+    <div class="sec-head r">
+      <div class="sec-num" aria-hidden="true">II</div>
+      <div class="sec-label">The Bones</div>
+    </div>
+
+    <div class="prose r d1">
+      <p>The oldest Chinese writing we have was scratched into the fibulae of oxen and the shells of tortoises. Cast into fire, the bones would fissure (generally a trivalent junction, conf. Chinese <span class="zh">卜</span>, prophecy), and that break was what the seers read. The characters drawn onto the bones we still have were probably written afterwards, to record a prediction, sometimes followed by retrospections refuting or compounding the earlier writing: sometimes this meant material to keep a village entertained for a week or so: 'Sacrifice three sheep to Lady Geng.' Then, 'Sacrifice five sheep to Lady Geng.' Then, 'Seven sheep for Lady Geng!' Then, 'Wait! No sheep for Lady Geng!' Then, 'Wait! Yes! Sheep!'</p>
+    </div>
+
+    <div class="bu-wrap r" role="img" aria-label="The Chinese character bu, meaning prophecy or divination">
+      <div class="bu-char" title="卜 — prophecy; the fissure in the oracle bone">卜</div>
+      <div class="bu-label">卜 &nbsp;·&nbsp; prophecy &nbsp;·&nbsp; the fissure &nbsp;·&nbsp; the crack</div>
+    </div>
+
+    <div class="prose r">
+      <p>The shaman said:</p>
+    </div>
+
+    <div class="oracle-block r" role="img" aria-label="Oracle bone inscription: bu shi xin yi — You will not live to eat the new harvest">
+      <div class="oracle-chars" lang="zh">不食新矣</div>
+      <div class="oracle-gloss">
+        <em>[You will] not [live]</em><br>
+        to eat the new [harvest].
+      </div>
+    </div>
+
+    <div class="prose r">
+      <p>This is, I confess, not direct from a scapula but mediated through the <i>Zuozhuan</i>, itself an expatiation of the <i>Annals of Spring and Autumn</i>. The <i>Annals</i> are very dry; the <i>Zuozhuan</i> is very beautiful. Beautiful and, like Dante, it seems to have brought its age to an end. For the first time there are translucencies, ironies; for the first time, literature becomes delightful. Here are the lords and ministers of a very ancient Celestial Kingdom, drawn clearly, movingly, passing before you like ghosts.</p>
+      <p>And we can draw an almost vulgarly obvious connection between aphorism and prophecy. Were they literary artefacts? Would the shamans have noticed a difference? Would Zhaoming? Always, always there's something incantatory.</p>
+    </div>
+
+  </div>
+</section>
+
+<div class="hr r" aria-hidden="true"><span class="hr-zh">文</span></div>
+
+<!-- ═══ SECTION III ═══ -->
+<section class="sec" id="utopia-sec" aria-label="Section three: The Same Utopia">
+  <div class="container">
+
+    <div class="sec-head r">
+      <div class="sec-num" aria-hidden="true">III</div>
+      <div class="sec-label">The Same Utopia</div>
+    </div>
+
+    <div class="prose r d1">
+      <p>One of the Bonampak murals in Mexico shows the scribes of a conquered city huddled, squatting, their hands mutilated: presumably the kings of the Classic Maya, their rule dependent not just on the grand old tyranny but also on the rituals (for they were, not are, rituals) of persuasion, took exception to the instruments of others' power. The image is therefore more semantically precise than any of those other gorgeous, frightening victory-murals left by every civilisation that bothered with murals: it represents the erasure of a statal order, — or rather, the production of a statal order.</p>
+    </div>
+
+    <div class="triptych r" role="region" aria-label="Three figures reaching for the same utopia">
+      <div class="tri-panel">
+        <div class="tri-zh" aria-hidden="true">昭</div>
+        <div class="tri-name">Zhaoming<br>Crown Prince of Liang</div>
+        <div class="tri-action">Anthology</div>
+        <div class="tri-quote">From the vast body of writing, he anthologised only what he found most beautiful</div>
+      </div>
+      <div class="tri-panel">
+        <div class="tri-zh" aria-hidden="true">皇</div>
+        <div class="tri-name">Qin Shi Huang<br>The First Emperor</div>
+        <div class="tri-action">Burning &amp; Burial</div>
+        <div class="tri-quote">He ordered the burning of the books and the burying of the scholars</div>
+      </div>
+      <div class="tri-panel">
+        <div class="tri-zh" aria-hidden="true">◆</div>
+        <div class="tri-name">The Mayan Conqueror<br>Classic Period</div>
+        <div class="tri-action">Mutilation</div>
+        <div class="tri-quote">The scribes of a conquered city — huddled, squatting, their hands mutilated</div>
+      </div>
+    </div>
+
+    <div class="utopia r">
+      <span class="utopia-zh" aria-hidden="true">文</span>
+      <p>Were they not all three reaching for the same utopia?</p>
+    </div>
+
+    <div class="prose r" style="margin-top:3rem">
+      <p>The man for whom China is named ascended the throne and ordered the burning of the books and the burying of the scholars. Zhaoming, who made an anthology, was the crown prince of Liang. He and Qin Shi Huang and that Mayan conqueror, — were they not all three reaching for the same utopia?</p>
+    </div>
+
+  </div>
+</section>
+
+<footer>
+  <span class="footer-zh" aria-hidden="true">文</span>
+  <span class="footer-gloss">wen &nbsp;·&nbsp; writing &nbsp;·&nbsp; culture &nbsp;·&nbsp; pattern &nbsp;·&nbsp; literature &nbsp;·&nbsp; power</span>
+</footer>
+
+<script>
+const categories = [
+  ['01','Rhapsodies',false],
+  ['02','Lyrics',false],
+  ['03','Lyrics in the barbarian style',true],
+  ['04','Rhapsodies in the manner of the Seven Stimuli',true],
+  ['05','Royal edicts',false],
+  ['06','Patents of nobility',false],
+  ['07','Royal commands',false],
+  ['08','Royal instructions',false],
+  ['09','Examination questions',true],
+  ['10','Memoirs',false],
+  ['11','Letters to princes',false],
+  ['12','Letters between princes',false],
+  ['13','Articles of impeachment',true],
+  ['14','Memoranda',false],
+  ['15','Letters of introduction',false],
+  ['16','Other letters',false],
+  ['17','Declarations of war',true],
+  ['18','Records of ministers making fools of princes',true],
+  ['19','Imaginary conversations',true],
+  ['20','Lyrics in the half-barbarian style',true],
+  ['21','Prefaces',false],
+  ['22','Panegyrics',false],
+  ['23','Encomia of dead celebrities',true],
+  ['24','Prophecies',true],
+  ['25','Historical episodes',false],
+  ['26','Judgements on historical episodes',false],
+  ['27','Essays',false],
+  ['28','Essays in verse',true],
+  ['29','Letters of admonishment',false],
+  ['30','Inscriptions',false],
+  ['31','Ritual elegies',false],
+  ['32','Non-ritual elegies',true],
+  ['33','Exterior epitaphs',true],
+  ['34','Interior epitaphs',true],
+  ['35','Conduct reports',false],
+  ['36','Letters of condolence',false],
+  ['37','Prayers',true],
+];
+
+const grid = document.getElementById('catGrid');
+categories.forEach(([n,name,notable]) => {
+  const el = document.createElement('div');
+  el.className = 'cat-item' + (notable ? ' notable' : '');
+  el.setAttribute('role','listitem');
+  el.innerHTML = `<span class="cat-n">${n}</span><span class="cat-name">${name}</span>`;
+  grid.appendChild(el);
+});
+
+let lit = false;
+const btn = document.getElementById('litBtn');
+btn.addEventListener('click', () => {
+  lit = !lit;
+  document.querySelectorAll('.cat-item').forEach((el, i) => {
+    setTimeout(() => el.classList.toggle('lit', lit), i * 28);
+  });
+  btn.textContent = lit ? 'Dim — they are many' : 'Illuminate all — they are one';
+  btn.classList.toggle('active', lit);
+  btn.setAttribute('aria-pressed', lit);
+});
+
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
+}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.r').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

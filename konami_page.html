@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secret Page - Antitesi Magazine</title>
+    <script src="js/articles-and-utils.js"></script>
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<script src="js/flying-magazine.js"><\/script>');
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/index_style.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <style>
+        .secret-links {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .logo-link {
+            position: absolute;
+            pointer-events: all;
+            transition: all 0.3s var(--ease);
+        }
+
+        .logo-link img {
+            width: 150px;
+            height: 150px;
+            object-fit: contain;
+            opacity: 0.4;
+            transition: all 0.3s var(--ease);
+        }
+
+        .logo-link:hover img {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        body.dark-mode .logo-link img {
+            filter: invert(1);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="progress-bar"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-cluster">
+        <a href="index.html">Home</a>
+        <a href="explore.html">Explore</a>
+        <a href="about.html">About</a>
+        <a href="archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <!-- Secret Page Content -->
+    <section class="secret-page active">
+        <p style="font-family: var(--grotesk); max-width: 500;">To know something that you might not need, but you
+            might do on this strange little world of ours.</p>
+
+        <div class="secret-links">
+            <a href="https://archive.org/details/zines" class="logo-link" target="_blank" rel="noopener"
+                style="top: 22%; left: 21%; transform: scale(1);">
+                <img src="multimedia/logos/archive.png" alt="Archive">
+            </a>
+            <a href="https://liveuamap.com/" class="logo-link" target="_blank" rel="noopener"
+                style="top: 15%; right: 20%; transform: scale(0.95);">
+                <img src="multimedia/logos/liveuamap.png" alt="Live UA Map">
+            </a>
+            <a href="https://radio.garden/" class="logo-link" target="_blank" rel="noopener"
+                style="bottom: 23%; left: 24%; transform: scale(1.4);">
+                <img src="multimedia/logos/radiogarden.png" alt="Radio Garden">
+            </a>
+            <a href="https://acleddata.com/" class="logo-link" target="_blank" rel="noopener"
+                style="bottom: 52%; left: 80%; transform: scale(0.82);">
+                <img src="multimedia/logos/acled.png" alt="Acled Data">
+            </a>
+            <a href="https://warontherocks.com/" class="logo-link" target="_blank" rel="noopener"
+                style="bottom: 23%; left: 75%; transform: scale(1.05);">
+                <img src="multimedia/logos/war-on-the-rocks.png" alt="War On The Rocks">
+            </a>
+            <a href="https://bellingcat.com/" class="logo-link" target="_blank" rel="noopener"
+                style="bottom: 60%; left: 45%; transform: scale(0.8);">
+                <img src="multimedia/logos/bcat.png" alt="Bellingcat">
+            </a>
+            <a href="https://thequietus.com/" class="logo-link" target="_blank" rel="noopener"
+                style="bottom: 15%; left: 10%; transform: scale(1.0);">
+                <img src="multimedia/logos/thequietus.png" alt="The Quietus">
+            </a>
+            <a href="https://africasacountry.com/" class="logo-link" target="_blank" rel="noopener"
+                style="top: 12%; left: 8%; transform: scale(1.2);">
+                <img src="multimedia/logos/africa-is-a-country.png" alt="Africa is a Country">
+            </a>
+            <a href="https://en.crimethinc.com/" class="logo-link" target="_blank" rel="noopener"
+                style="bottom: 12%; right: 40%; transform: scale(1.25);">
+                <img src="multimedia/logos/crimethinc.png" alt="CrimethInc">
+            </a>
+        </div>
+    </section>
+
+    <!-- Keyboard Shortcuts Hint -->
+    <div class="shortcuts-hint"></div>
+
+
+    <script>
+        // Dark mode
+        window.addEventListener('load', () => {
+            if (localStorage.getItem('darkMode') === 'true')
+                document.body.classList.add('dark-mode');
+        });
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        }
+
+        // Color on interaction
+        document.addEventListener('click', changeColor);
+        document.querySelectorAll('.logo-link').forEach(link => {
+            link.addEventListener('mouseenter', () => changeColor());
+        });
+
+        // Navigation
+        function returnToHome() { window.location.href = 'index'; }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' || e.key === 'h' || e.key === 'H') returnToHome();
+            if (e.key === 'a' || e.key === 'A') openNextArticle();
+            if (e.key === 'd' || e.key === 'D') toggleDarkMode();
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive - Antitesi Magazine</title>
+    
+    <!-- Redirect to mobile version on mobile devices -->
+    <script>
+        (function () {
+            const isMobile = window.innerWidth < 768 &&
+                /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                window.location.replace('/archive/mobile');
+            }
+        })();
+    </script>
+
+    <script src="js/articles-and-utils.js"></script>
+    <script src="archive/research-mode.js"></script>
+    <!-- Device detection: FlyingMagazine & Three.js import for desktop only -->
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<script type="importmap">\n{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/examples/jsm/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}\n<\/script>');
+        }
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="css/spark_styles.css">\n<script>window.magazineSparkMode = true;<\/script>\n<script src="js/flying-magazine.js"><\/script>');
+        }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/index_style.css">
+    <link rel="stylesheet" href="css/mobile.css">
+ <style>
+
+.archive-grid.is-switching .article-entry {
+    opacity: 0;
+    transform: scale(0.95) translateY(10px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+}
+        .archive-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 6rem 2rem 0rem;
+        }
+
+        .research-mode-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 150;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.6s var(--ease);
+        }
+        body.dark-mode .research-mode-overlay { background: rgba(0, 0, 0, 0.95); }
+        .research-mode-overlay.active { opacity: 0.8; pointer-events: all; }
+
+        .keyword-graph-canvas {
+            width: 100%; height: 100%;
+            cursor: pointer;
+            position: absolute;
+            top: 0; left: 0;
+        }
+
+        .archive-header { margin-bottom: 3rem; text-align: center; }
+
+        .archive-title {
+            font-family: var(--display);
+            font-size: clamp(3rem, 8vw, 6rem);
+            line-height: 0.9;
+            margin-bottom: 1rem;
+            letter-spacing: -0.03em;
+        }
+
+        .archive-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            justify-content: center;
+            margin-bottom: 3rem;
+            font-family: var(--grotesk);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .control-section { display: flex; align-items: center; gap: 0.75rem; }
+        .control-label { opacity: 0.5; white-space: nowrap; }
+
+        .filter-button {
+            background: none;
+            border: 1px solid currentColor;
+            color: inherit;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: all 0.3s var(--ease);
+            opacity: 0.3;
+            font-family: inherit;
+            font-size: inherit;
+            letter-spacing: inherit;
+            text-transform: inherit;
+        }
+        .filter-button:hover,
+        .filter-button.active {
+            opacity: 1;
+            background: var(--dynamic-color);
+            color: var(--white);
+            border-color: var(--dynamic-color);
+        }
+
+        .archive-grid {
+            display: grid;
+            grid-template-columns: repeat(var(--cols, 4), 1fr);
+            grid-auto-rows: 120px;
+            gap: 0.75rem;
+            margin: 2rem 0;
+        }
+@keyframes cardIn {
+    from { opacity: 0; transform: translateY(28px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+        .article-entry {
+            grid-column: span var(--w, 1);
+            grid-row: span var(--h, 1);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border-radius: 2px;
+            background: #fff;
+            color: #000;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            transition: box-shadow 0.4s var(--ease);
+            text-decoration: none;
+            display: block;
+            animation: cardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+            animation-delay: calc(var(--i, 0) * 35ms);
+        }
+
+        body.dark-mode .article-entry {
+            background: #000;
+            color: #f1ebeb;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .block-description {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            padding: 3rem 1.25rem 1.5rem;
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                rgba(255,255,255,0.97) 28%,
+                rgba(255,255,255,1) 100%);
+            font-family: var(--grotesk);
+            font-size: 0.8rem;
+            line-height: 1.65;
+            letter-spacing: 0.01em;
+            color: #111;
+            transform: translateY(100%);
+            transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 3;
+        }
+        body.dark-mode .block-description {
+            background: linear-gradient(to bottom,
+                transparent 0%,
+                rgba(0,0,0,0.97) 28%,
+                rgba(0,0,0,1) 100%);
+            color: #f1ebeb;
+        }
+        .article-entry:hover .block-description { transform: translateY(0); }
+
+        .color-stripe {
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 100%;
+            height: 5px;
+            display: flex;
+            z-index: 4;
+            transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .color-stripe span { flex: 1; }
+        .article-entry:hover .color-stripe { height: 10px; }
+
+        .article-entry:hover {
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+            z-index: 2;
+        }
+
+        .article-entry.highlighted {
+            outline: 3px solid var(--dynamic-color);
+            outline-offset: 3px;
+            z-index: 3;
+        }
+
+        .block-content {
+            position: absolute;
+            inset: 0;
+            padding: 1.25rem 1.25rem 1.75rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: opacity 0.35s var(--ease);
+            z-index: 2;
+        }
+        .article-entry:hover .block-content { opacity: 0.15; }
+
+        body.has-scrolled .block-hint {
+            opacity: 0 !important;
+            transition: opacity 0.6s var(--ease);
+        }
+
+        /* Small arrow hint — always visible, fades on hover */
+        .block-hint {
+            position: absolute;
+            top: 1rem; right: 1rem;
+            font-size: 0.65rem;
+            font-family: var(--grotesk);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            opacity: 0.25;
+            transition: opacity 0.3s var(--ease);
+            z-index: 2;
+            pointer-events: none;
+        }
+        .article-entry:hover .block-hint { opacity: 0; }
+
+        .block-title {
+            font-family: var(--display);
+            font-size: clamp(1.1rem, 1.6vw, 1.6rem);
+            line-height: 1.05;
+            letter-spacing: -0.01em;
+            margin: 0;
+        }
+
+        .article-entry[style*="--w: 2"] .block-title { font-size: clamp(1.4rem, 2vw, 2rem); }
+        .article-entry[style*="--w: 3"] .block-title { font-size: clamp(1.7rem, 2.6vw, 2.6rem); }
+
+        .block-meta {
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            opacity: 0.85;
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .block-author { font-weight: 500; }
+        .block-readtime { opacity: 0.7; }
+
+
+        /* ── Stats ───────────────────────────────────── */
+        .archive-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0rem;
+            margin: 4rem 0;
+            padding: 2rem 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        body.dark-mode .archive-stats { border-color: rgba(255, 255, 255, 0.1); }
+        .stat-item { text-align: center; }
+        .stat-number {
+            font-family: var(--display);
+            font-size: 3rem;
+            line-height: 1;
+            color: var(--dynamic-color);
+            transition: color 0.6s var(--ease);
+        }
+        .stat-label {
+            font-family: var(--grotesk);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.5;
+            margin-top: 0.5rem;
+        }
+
+        /* ── Research mode panel (unchanged) ─────────── */
+        .keyword-selection-panel {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid var(--dynamic-color);
+            border-radius: 4px;
+            padding: 1rem;
+            min-width: 200px;
+            max-width: 300px;
+            z-index: 200;
+            font-family: var(--grotesk);
+            font-size: 0.85rem;
+            backdrop-filter: blur(8px);
+        }
+        body.dark-mode .keyword-selection-panel {
+            background: rgba(0, 0, 0, 0.92);
+            color: var(--white);
+        }
+        .panel-header {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+        .panel-article {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s var(--ease);
+        }
+        body.dark-mode .panel-article { border-color: rgba(255, 255, 255, 0.1); }
+        .panel-article:last-child { border-bottom: none; }
+        .panel-article:hover {
+            background: var(--dynamic-color);
+            color: var(--white);
+            padding-left: 0.5rem;
+        }
+        .panel-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.75rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.6;
+            line-height: 1;
+        }
+        .panel-close:hover { opacity: 1; }
+
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true')
+            document.body.classList.add('dark-mode');
+    </script>
+    <div class="progress-bar"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-cluster">
+        <a href="index.html">Home</a>
+        <a href="explore.html">Explore</a>
+        <a href="about.html">About</a>
+    </nav>
+
+    <!-- Research Mode Overlay -->
+    <div class="research-mode-overlay" id="researchModeOverlay">
+        <canvas class="keyword-graph-canvas" id="keywordGraphCanvas"></canvas>
+    </div>
+
+    <!-- Archive Container -->
+    <div class="archive-container">
+
+        <header class="archive-header">
+            <h1 class="archive-title">Archive</h1>
+        </header>
+
+        <div class="archive-controls">
+            <div class="control-section">
+                <span class="control-label">View:</span>
+                <button class="filter-button active" data-view="timeline" onclick="setViewMode('timeline')">By
+                    Time</button>
+                <button class="filter-button" data-view="list" onclick="setViewMode('list')">By Author</button>
+            </div>
+        </div>
+
+        <main class="archive-grid" id="archiveGrid"></main>
+
+        <div class="archive-stats" id="archiveStats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalArticles">0</div>
+                <div class="stat-label">Articles</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalHours">0</div>
+                <div class="stat-label">Hours online</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Hint -->
+    <div class="shortcuts-hint"></div>
+
+    <script>
+        let currentFilter = { view: 'timeline' };
+
+        // Initialize Archive
+        function initializeArchive() {
+            if (typeof articles === 'undefined') {
+                console.warn('Articles data not loaded');
+                return;
+            }
+            calculateStatistics();
+            renderArticles();
+        }
+        window.addEventListener('load', () => {
+            initializeArchive();
+        });
+
+        function calculateStatistics() {
+            animateCounter('totalArticles', articles.length);
+            animateCounter('totalHours', 0);
+        }
+
+        function animateCounter(elementId, targetValue) {
+            const element = document.getElementById(elementId);
+            const duration = 1000;
+            const startTime = performance.now();
+
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easedProgress = 1 - Math.pow(1 - progress, 3);
+                element.textContent = Math.floor(targetValue * easedProgress);
+                if (progress < 1) requestAnimationFrame(updateCounter);
+            }
+
+            requestAnimationFrame(updateCounter);
+        }
+
+        function setViewMode(mode) {
+    currentFilter.view = mode;
+    document.querySelectorAll('[data-view]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === mode);
+    });
+    const grid = document.getElementById('archiveGrid');
+    grid.classList.add('is-switching');
+    setTimeout(() => {
+        renderArticles();
+        grid.classList.remove('is-switching');
+    }, 200);
+}
+
+        function parseDate(dateString) {
+            if (dateString === 'random') return new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28));
+            const months = {
+                'january': 0, 'february': 1, 'march': 2, 'april': 3,
+                'may': 4, 'june': 5, 'july': 6, 'august': 7,
+                'september': 8, 'october': 9, 'november': 10, 'december': 11
+            };
+            const parts = dateString.toLowerCase().split(' ');
+            return new Date(parseInt(parts[1]) || 2025, months[parts[0]] || 0, 1);
+        }
+
+        function getFilteredAndSortedArticles() {
+            return [...articles].sort((a, b) => {
+                if (currentFilter.view === 'timeline')
+                    return parseDate(b.publishDate) - parseDate(a.publishDate);
+                return a.author.localeCompare(b.author);
+            });
+        }
+
+        function formatCitations(citations) {
+            if (!citations || citations.length === 0) return '';
+            return citations.map(c => {
+                const [author, quote] = c.split('/');
+                return `"${quote}" - ${author}`;
+            }).join('<br>');
+        }
+        
+        // RENDER BLOCKS
+        function getColumnCount() {
+            const w = window.innerWidth;
+            if (w >= 1100) return 4;
+            if (w >= 800) return 3;
+            return 2;
+        }
+
+        // Pick a contrasting text color (black or white) based on bg luminance
+        function textColorFor(hex) {
+            const h = hex.replace('#', '');
+            const r = parseInt(h.substr(0, 2), 16);
+            const g = parseInt(h.substr(2, 2), 16);
+            const b = parseInt(h.substr(4, 2), 16);
+            const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+            return lum > 0.6 ? '#111' : '#fff';
+        }
+
+function assignBlockDimensions(articleList, cols) {
+    // Curated size templates — anarchic but nothing grotesquely large
+    // Each entry is [colSpan, rowSpan]. Max w:2 keeps things classy.
+    const templates = [
+        [1,1], [2,1], [1,2], [1,1],
+        [1,1], [1,2], [2,1], [1,1],
+        [2,2], [1,1], [1,1], [2,1],
+        [1,2], [1,1], [2,1], [1,1],
+    ];
+
+    const dims = [];
+    let colTracker = Array(cols).fill(0);
+    let templateIdx = 0;
+
+    for (let i = 0; i < articleList.length; i++) {
+        const articlesLeft = articleList.length - i;
+
+        // Find leftmost shallowest column
+        const minFilled = Math.min(...colTracker);
+        let startCol = colTracker.indexOf(minFilled);
+
+        // How many contiguous free cols from startCol?
+        let freeRun = 0;
+        for (let c = startCol; c < cols; c++) {
+            if (colTracker[c] === minFilled) freeRun++;
+            else break;
+        }
+
+        // Pick next template, clamp w to what's actually free (max 2)
+        let [tw, th] = templates[templateIdx % templates.length];
+        templateIdx++;
+        let w = Math.min(tw, freeRun, 2);
+        if (articlesLeft === 1) w = Math.min(freeRun, 2);
+        w = Math.max(1, w);
+        let h = (w === 1) ? th : th; // keep h from template
+
+        dims.push({ w, h });
+
+        for (let c = 0; c < w; c++) {
+            colTracker[startCol + c] = minFilled + h;
+        }
+    }
+    return dims;
+}
+
+        function renderArticles() {
+            const archiveGrid = document.getElementById('archiveGrid');
+            const cols = getColumnCount();
+            archiveGrid.style.setProperty('--cols', cols);
+
+            const sorted = getFilteredAndSortedArticles();
+            const dims = assignBlockDimensions(sorted, cols);
+            archiveGrid.innerHTML = sorted.map((article, i) => {
+    const { w, h } = dims[i];
+                const colors = (article.colors && article.colors.length) ? article.colors : ['#888'];
+                const stripe = `<div class="color-stripe">${colors.map(c => `<span style="background:${c}"></span>`).join('')}</div>`;
+                return `
+                    <a class="article-entry"
+                    href="/articles/${article.folder}/${article.filename}"
+                    data-article-id="${article.id}"
+                    style="--w: ${w}; --h: ${h}; --i: ${i}">
+                        <div class="block-hint">↗</div>
+                        <div class="block-content">
+                            <h2 class="block-title">${article.title}</h2>
+                            <div class="block-meta">
+                                <span class="block-author">${article.author}</span>
+                                <span class="block-readtime">${article.publishDate ? article.publishDate : ''}${article.readTime ? ' · ' + article.readTime : ''}</span>
+                            </div>
+                        </div>
+                        <div class="block-description">${article.description || article.recommendationDesc || ''}</div>
+                        ${stripe}
+                    </a>
+                `;
+            }).join('');
+            archiveGrid.querySelectorAll('.article-entry').forEach(attachTilt);
+        }
+
+        function attachTilt(el) {
+            el.addEventListener('mousemove', e => {
+                const r = el.getBoundingClientRect();
+                const x = (e.clientX - r.left) / r.width  - 0.5;
+                const y = (e.clientY - r.top)  / r.height - 0.5;
+                el.style.transition = 'transform 0.05s linear, box-shadow 0.4s var(--ease)';
+                el.style.transform = `perspective(600px) rotateY(${x * 10}deg) rotateX(${-y * 10}deg) translateZ(8px)`;
+                el.style.boxShadow = `${-x * 20}px ${-y * 20}px 40px rgba(0,0,0,0.2)`;
+            });
+            el.addEventListener('mouseleave', () => {
+                el.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.5s var(--ease)';
+                el.style.transform = '';
+                el.style.boxShadow = '';
+            });
+        }
+
+        // Hide ↗ hints once user has scrolled (they've got it)
+        window.addEventListener('scroll', () => {
+            document.body.classList.add('has-scrolled');
+        }, { passive: true, once: true });
+
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(renderArticles, 200);
+        });
+
+        initProgressBar();
+
+        // Research Mode — module in archive/research-mode.js
+        ResearchMode.init({ onArticleSelected: highlightAndScrollToArticle });
+
+        function highlightAndScrollToArticle(targetArticle) {
+            document.querySelectorAll('.article-entry').forEach(e => e.classList.remove('highlighted'));
+            const el = document.querySelector(`[data-article-id="${targetArticle.id}"]`);
+            if (el) {
+                el.classList.add('highlighted');
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => el.classList.remove('highlighted'), 3000);
+            }
+        }
+
+        if (isDesktop) {
+            initKeyboardShortcuts({
+                extraKeys: {
+                    'a': openNextArticle,
+                    'A': openNextArticle,
+                    'Escape': returnToHome,
+                    'h': returnToHome,
+                    'H': returnToHome,
+                }
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'r' || e.key === 'R') {
+                    ResearchMode.toggle();
+                }
+            });
+
+/*             window.perryTortureMessages = [
+                "Your turn, perhaps?",
+                "We do publish things here, you know.",
+            ];
+
+            // Create Perry Lee viewer div
+            const viewer = document.createElement('div');
+            viewer.id = 'viewer';
+            document.body.appendChild(viewer);
+
+            // Load Perry Lee module
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = 'js/perry-lee.js';
+            document.body.appendChild(script); */
+
+        }
+    </script>
+</body>
+
+</html>

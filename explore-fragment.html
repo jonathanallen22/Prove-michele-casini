@@ -1,0 +1,49 @@
+<section class="standard-page">
+
+        <div class="draw-section">
+            <div class="draw-canvas-wrap">
+                <div class="draw-title-row">
+                    <div class="color-picker-inline">
+                        <div class="color-chips js-color-chips"></div>
+                        <div class="color-wheel-wrap js-color-wheel-wrap">
+                            <canvas class="color-wheel js-color-wheel" width="220" height="220"></canvas>
+                            <div class="color-wheel-hub"></div>
+                            <div class="color-wheel-hub-text">pick up<br>to 3 colors<br>and</div>
+                        </div>
+                    </div>
+                    <div class="draw-canvas-title">Draw a&nbsp;<span class="psychedelic-line">line</span></div>
+                </div>
+                <div class="drawing-canvas-container">
+                    <canvas class="drawing-canvas" id="drawingCanvas" width="1600" height="700"></canvas>
+                </div>
+            </div>
+
+            <div class="draw-bottom-row">
+                <div class="draw-instructions-only">
+                    smooth curves → narrative &nbsp;·&nbsp; sharp angles → analytical &nbsp;·&nbsp; color → tonal register
+                </div>
+            </div>
+
+            <!-- Mobile-only color picker (below canvas) -->
+            <div class="color-picker-section">
+                <div class="color-wheel-wrap js-color-wheel-wrap">
+                    <canvas class="color-wheel js-color-wheel" width="260" height="260"></canvas>
+                    <div class="color-wheel-hub"></div>
+                    <div class="color-wheel-hub-text">pick up<br>to 3 colors</div>
+                </div>
+                <div class="color-chips js-color-chips"></div>
+            </div>
+
+            <div class="article-recommendation" id="articleRec">
+                <span id="recText"></span>
+            </div>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="toolbar-section">
+            <div class="toolbar-bar" id="toolbarBar">
+                <!-- tiles injected by JS -->
+            </div>
+        </div>
+
+    </section>

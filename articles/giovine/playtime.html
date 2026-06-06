@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Semantic Bottleneck Field</title>
+
+<style>
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+    background: #05060a;
+    font-family: system-ui, sans-serif;
+}
+
+canvas{
+    position:fixed;
+    top:0; left:0;
+    width:100vw; height:100vh;
+    display:block;
+    z-index:0;
+}
+
+/* Toggle ─ neutral language, doesn't preempt interpretation */
+#btn{
+    position:fixed;
+    bottom:18px; left:12px;
+    padding:8px 14px;
+    font-size:11px;
+    letter-spacing:0.18em;
+    text-transform:uppercase;
+    background:transparent;
+    color:#fff;
+    border:1px solid rgba(255,255,255,0.25);
+    cursor:pointer;
+    z-index:10;
+    transition: border-color .2s, color .2s;
+}
+#btn:hover{ border-color:#ff3366; color:#ff3366; }
+#btn .arr{ opacity:0.5; margin: 0 0.5em; }
+
+#desc{
+    position:fixed;
+    bottom:24px;
+    left:200px;
+    right:280px;
+    font-size:11px;
+    line-height:1.4;
+    letter-spacing:0.06em;
+    color:rgba(255,255,255,0.45);
+    z-index:10;
+    pointer-events:none;
+}
+
+/* Readout panel: cold numbers in the corner */
+#readout{
+    position:fixed;
+    bottom:22px; right:14px;
+    font-size:10px;
+    line-height:1.6;
+    letter-spacing:0.16em;
+    text-transform:uppercase;
+    color:rgba(255,255,255,0.5);
+    z-index:10;
+    pointer-events:none;
+    text-align:right;
+    font-variant-numeric: tabular-nums;
+}
+#readout .num{ color:#fff; opacity:0.85; }
+</style>
+</head>
+
+<body>
+
+<button id="btn">
+    <span id="btn-mode">free</span> <span class="arr">/</span> <span style="opacity:0.5">monetized</span>
+</button>
+
+<span id="desc">
+    needs and availability of
+    <span style="color:#f4a261">food</span>,
+    <span style="color:#e63946">care</span>,
+    <span style="color:#2a9d8f">knowledge</span>,
+    <span style="color:#4361ee">time</span> —
+    flowing freely, or routed through a single point.
+</span>
+
+<div id="readout">
+    avg path length <span class="num" id="r-path">—</span>
+</div>
+
+<canvas id="c"></canvas>
+
+<script>
+const c = document.getElementById("c");
+const ctx = c.getContext("2d");
+const btn = document.getElementById("btn");
+const btnMode = document.getElementById("btn-mode");
+const rPath = document.getElementById("r-path");
+
+let W, H, dpr;
+
+function resize(){
+    dpr = window.devicePixelRatio || 1;
+    W = window.innerWidth;
+    H = window.innerHeight;
+    c.width = W * dpr;
+    c.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener("resize", resize);
+resize();
+
+// ─────────────────────────────────────────────
+// TYPES (kept from original — color-coded needs)
+// ─────────────────────────────────────────────
+const TYPES = [
+    {name: "food",      c: "#f4a261"},
+    {name: "time",      c: "#2a9d8f"},
+    {name: "care",      c: "#e63946"},
+    {name: "knowledge", c: "#4361ee"}
+];
+
+const N = 140;
+const LINK_RANGE = 140;     // max pairwise distance to consider linked
+const SKIM_RATE = 0.30;     // fraction of particles absorbed at the bottleneck
+const PARTICLE_SPEED = 2.4; // pixels/frame (raised so monetized doesn't drag)
+
+const pts = [];
+for(let i = 0; i < N; i++){
+    pts.push({
+        x: W/2 + (Math.random()-0.5)*W*0.6,
+        y: H/2 + (Math.random()-0.5)*H*0.6,
+        vx: 0, vy: 0,
+        type: TYPES[i % TYPES.length],
+        role: Math.random() < 0.5 ? "d" : "o"   // demand / offer (used for motion bias only)
+    });
+}
+
+// ─────────────────────────────────────────────
+// PARTICLES — these carry "value" along the visible links
+//
+// Each particle has:
+//   from, to      — endpoint nodes
+//   waypoints     — list of {x, y} the particle traverses in order
+//   segIdx, segT  — which segment it's on and progress 0..1 along it
+//   color         — inherited from the source's type
+//   alive         — false when delivered or skimmed
+// ─────────────────────────────────────────────
+const particles = [];
+const MAX_PARTICLES = 140;     // cap to keep render cost stable
+
+let monetized = false;
+let absorbedCount = 0;         // total skimmed by the bottleneck
+let deliveredCount = 0;        // total that reached their destination
+let totalSpawned = 0;
+
+let t = 0;
+
+function center(){ return {x: W/2, y: H/2}; }
+
+function dist(a, b){ return Math.hypot(a.x - b.x, a.y - b.y); }
+
+// ─────────────────────────────────────────────
+// NODE DYNAMICS (unchanged — light brownian drift)
+// ─────────────────────────────────────────────
+function update(){
+    for(const p of pts){
+        const bias = p.role === "d" ? -0.01 : 0.01;
+        p.vx += bias + (Math.random()-0.5)*0.2;
+        p.vy +=        (Math.random()-0.5)*0.2;
+        p.vx *= 0.92;
+        p.vy *= 0.92;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.x = Math.max(0, Math.min(W, p.x));
+        p.y = Math.max(0, Math.min(H, p.y));
+    }
+}
+
+// ─────────────────────────────────────────────
+// LINK SAMPLING — pick eligible source-dest pairs and
+// occasionally spawn a particle along the link.
+//
+// We also accumulate the path length statistic here, since
+// we're already iterating pairs. The full O(N²) scan runs
+// every LINK_SCAN_EVERY frames to keep the cost bounded.
+// The list of currently-visible links is cached so drawLinks
+// doesn't have to redo the pairwise scan on every render.
+// ─────────────────────────────────────────────
+const LINK_SCAN_EVERY = 3;
+let pathLenSum = 0;
+let pathLenCount = 0;
+let activeLinks = [];   // cached: {a, b, alpha, color}
+
+function processLinks(){
+    if(t % LINK_SCAN_EVERY !== 0) return;
+    pathLenSum = 0;
+    pathLenCount = 0;
+    activeLinks.length = 0;
+    const c0 = center();
+
+    for(let i = 0; i < N; i++){
+        for(let j = i + 1; j < N; j++){
+            const a = pts[i];
+            const b = pts[j];
+            const d = dist(a, b);
+            if(d > LINK_RANGE) continue;
+
+            const sameType = a.type.name === b.type.name;
+            const strength = sameType ? 1 : 0.25;
+
+            // cache for drawLinks
+            activeLinks.push({
+                a, b,
+                alpha: (1 - d/LINK_RANGE) * strength * 0.22,
+                color: a.type.c,
+            });
+
+            // path length statistic
+            const pathLen = monetized
+                ? dist(a, c0) + dist(c0, b)
+                : d;
+            pathLenSum += pathLen * strength;
+            pathLenCount += strength;
+
+            // particle spawn — compensated for the scan throttling
+            if(particles.length < MAX_PARTICLES &&
+               Math.random() < 0.004 * strength * LINK_SCAN_EVERY){
+                spawnParticle(a, b);
+            }
+        }
+    }
+}
+
+// Spawned particles store *references* to their source and destination
+// nodes, not snapshots of their positions. This way the path bends in
+// real time as the endpoints drift via brownian motion — particles
+// chase a moving target rather than firing at a stale memory.
+//
+// The bottleneck (center) is the one fixed point in the system: in
+// monetized mode the path goes source → fixed center → moving dest,
+// which is precisely the asymmetry Lorenzo describes (universal
+// currency connection vs dynamic actors).
+function spawnParticle(a, b){
+    particles.push({
+        from: a,        // live reference
+        to: b,          // live reference
+        viaCenter: monetized,  // captured at spawn time; if the user toggles
+                               // mid-flight the particle keeps its original route
+        segIdx: 0,
+        segT: 0,
+        color: a.type.c,
+        alive: true,
+        skimmed: false,
+    });
+    totalSpawned++;
+}
+
+// Helper: get the current world position of waypoint `i` for particle p.
+// Waypoint 0 is always the source; the last waypoint is always the dest.
+// If viaCenter is true, waypoint 1 is the fixed center.
+function waypointPos(p, i){
+    if(i === 0) return p.from;
+    if(p.viaCenter){
+        if(i === 1) return center();   // recomputed each call — cheap
+        if(i === 2) return p.to;
+    } else {
+        if(i === 1) return p.to;
+    }
+    return null;
+}
+
+function waypointCount(p){ return p.viaCenter ? 3 : 2; }
+
+// ─────────────────────────────────────────────
+// PARTICLE STEP — advance along the current segment;
+// roll the skim die when arriving at the bottleneck.
+// Segment length is recomputed every frame from live endpoint
+// positions, so a moving destination just means the segment
+// stretches or shrinks; the particle's screen-space speed stays
+// constant (PARTICLE_SPEED pixels/frame) regardless.
+// ─────────────────────────────────────────────
+function updateParticles(){
+    for(const p of particles){
+        if(!p.alive) continue;
+        const seg = waypointPos(p, p.segIdx);
+        const next = waypointPos(p, p.segIdx + 1);
+        if(!next){ p.alive = false; deliveredCount++; continue; }
+        const segLen = Math.hypot(next.x - seg.x, next.y - seg.y) || 0.0001;
+        p.segT += PARTICLE_SPEED / segLen;
+        if(p.segT >= 1){
+            p.segT = 0;
+            p.segIdx++;
+            // arrived at the bottleneck — roll skim die
+            if(p.viaCenter && p.segIdx === 1){
+                if(Math.random() < SKIM_RATE){
+                    p.alive = false;
+                    p.skimmed = true;
+                    absorbedCount++;
+                }
+            }
+            if(p.segIdx >= waypointCount(p) - 1){
+                // delivered — handled on next tick by the !next check
+            }
+        }
+    }
+    // garbage-collect dead particles
+    for(let i = particles.length - 1; i >= 0; i--){
+        if(!particles[i].alive) particles.splice(i, 1);
+    }
+}
+
+// ─────────────────────────────────────────────
+// DRAWING
+// ─────────────────────────────────────────────
+function drawLinks(){
+    const c0 = center();
+    // Hundreds of individual beginPath/stroke calls kill the framerate,
+    // especially in monetized mode where every line also converges on
+    // the same central pixels (massive overdraw). Batch by color and
+    // quantized alpha so we issue ~16 strokes total instead of ~600.
+    const buckets = new Map();
+    for(const link of activeLinks){
+        // quantize alpha to 0.04 steps → ~6 buckets per color, ~24 total
+        const aq = Math.round(link.alpha * 25) / 25;
+        if(aq <= 0) continue;
+        const key = link.color + '|' + aq;
+        let arr = buckets.get(key);
+        if(!arr){ arr = []; buckets.set(key, arr); }
+        arr.push(link);
+    }
+    ctx.lineWidth = 1;
+    for(const [key, links] of buckets){
+        const [color, aq] = key.split('|');
+        ctx.globalAlpha = parseFloat(aq);
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        for(const link of links){
+            const a = link.a, b = link.b;
+            ctx.moveTo(a.x, a.y);
+            if(!monetized){
+                ctx.lineTo(b.x, b.y);
+            } else {
+                ctx.lineTo(c0.x, c0.y);
+                ctx.lineTo(b.x, b.y);
+            }
+        }
+        ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+}
+
+function drawParticles(){
+    // Batch by color so we issue ~4 paths total instead of 2 per particle.
+    const byColor = new Map();
+    for(const p of particles){
+        if(!p.alive) continue;
+        const seg = waypointPos(p, p.segIdx);
+        const next = waypointPos(p, p.segIdx + 1);
+        if(!next) continue;
+        const x = seg.x + (next.x - seg.x) * p.segT;
+        const y = seg.y + (next.y - seg.y) * p.segT;
+        let arr = byColor.get(p.color);
+        if(!arr){ arr = []; byColor.set(p.color, arr); }
+        arr.push(x, y);
+    }
+    for(const [color, xs] of byColor){
+        ctx.fillStyle = color;
+        // glow pass
+        ctx.globalAlpha = 0.25;
+        ctx.beginPath();
+        for(let i = 0; i < xs.length; i += 2){
+            ctx.moveTo(xs[i] + 5, xs[i+1]);
+            ctx.arc(xs[i], xs[i+1], 5, 0, Math.PI*2);
+        }
+        ctx.fill();
+        // core pass
+        ctx.globalAlpha = 0.95;
+        ctx.beginPath();
+        for(let i = 0; i < xs.length; i += 2){
+            ctx.moveTo(xs[i] + 2.2, xs[i+1]);
+            ctx.arc(xs[i], xs[i+1], 2.2, 0, Math.PI*2);
+        }
+        ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+}
+
+function drawUSD(){
+    if(!monetized) return;
+    const c0 = center();
+
+    // bottleneck halo intensifies as more value accumulates
+    const accumulation = Math.min(1, absorbedCount / 400);
+    const radius = 18 + accumulation * 14;
+
+    // smaller halo — the previous 3.5×radius radial gradient was a
+    // huge full-alpha-blend region every frame and tanked the framerate
+    const haloR = radius * 1.8;
+    const g = ctx.createRadialGradient(c0.x, c0.y, radius * 0.6, c0.x, c0.y, haloR);
+    g.addColorStop(0, `rgba(255, 51, 102, ${0.35 + accumulation*0.35})`);
+    g.addColorStop(1, "rgba(255, 51, 102, 0)");
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(c0.x, c0.y, haloR, 0, Math.PI*2);
+    ctx.fill();
+
+    // solid disk
+    ctx.fillStyle = "#0c0d12";
+    ctx.beginPath();
+    ctx.arc(c0.x, c0.y, radius, 0, Math.PI*2);
+    ctx.fill();
+    ctx.strokeStyle = `rgba(255, 51, 102, ${0.6 + accumulation*0.4})`;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // dollar glyph
+    ctx.fillStyle = "#fff";
+    ctx.font = `${14 + accumulation*4}px system-ui`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("$", c0.x, c0.y);
+}
+
+function drawNodes(){
+    // Batch nodes by color. Two passes per color (glow + core).
+    const byColor = new Map();
+    for(const p of pts){
+        const glow = 0.5 + 0.5 * Math.sin(t * 0.01 + p.x * 0.01);
+        let arr = byColor.get(p.type.c);
+        if(!arr){ arr = []; byColor.set(p.type.c, arr); }
+        arr.push(p.x, p.y, glow);
+    }
+    for(const [color, data] of byColor){
+        ctx.fillStyle = color;
+        // outer glow — averaged alpha, single path
+        ctx.beginPath();
+        for(let i = 0; i < data.length; i += 3){
+            const a = 0.4 * data[i+2];
+            // we can't easily vary alpha per-arc in one path, so use
+            // the average glow alpha for the batch. Loss is invisible.
+            ctx.moveTo(data[i] + 2.4, data[i+1]);
+            ctx.arc(data[i], data[i+1], 2.4, 0, Math.PI*2);
+        }
+        ctx.globalAlpha = 0.3;  // approximated average of 0.4 * glow over the batch
+        ctx.fill();
+        // core dots
+        ctx.beginPath();
+        for(let i = 0; i < data.length; i += 3){
+            ctx.moveTo(data[i] + 1.1, data[i+1]);
+            ctx.arc(data[i], data[i+1], 1.1, 0, Math.PI*2);
+        }
+        ctx.globalAlpha = 0.9;
+        ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+}
+
+// ─────────────────────────────────────────────
+// READOUT — running average, updated at low rate
+// to avoid jittery numbers
+// ─────────────────────────────────────────────
+let avgPath = 0;
+
+function updateReadout(){
+    if(pathLenCount > 0){
+        const inst = pathLenSum / pathLenCount;
+        avgPath = avgPath * 0.92 + inst * 0.08;
+    }
+    if(t % 6 === 0){
+        rPath.textContent = avgPath ? Math.round(avgPath) + " px" : "—";
+    }
+}
+
+// ─────────────────────────────────────────────
+// MAIN LOOP
+// ─────────────────────────────────────────────
+function draw(){
+    // soft trail rather than full clear — particles leave a brief tail
+    ctx.fillStyle = "rgba(5, 6, 10, 0.22)";
+    ctx.fillRect(0, 0, W, H);
+
+    drawLinks();
+    drawParticles();
+    drawNodes();
+    drawUSD();   // last — so nothing shows through the bottleneck disk
+}
+
+function loop(){
+    t++;
+    update();
+    processLinks();
+    updateParticles();
+    draw();
+    updateReadout();
+    requestAnimationFrame(loop);
+}
+loop();
+
+// ─────────────────────────────────────────────
+// TOGGLE — flip the regime; reset accumulators so the
+// readout reflects only the current mode's behavior
+// ─────────────────────────────────────────────
+// ─────────────────────────────────────────────
+// TOGGLE — flip the regime AND refresh the field. New random
+// positions, no in-flight particles, fresh stats. Makes the
+// transition feel like a phase change rather than a slow morph.
+// ─────────────────────────────────────────────
+function scatterField(){
+    for(const p of pts){
+        p.x = W/2 + (Math.random()-0.5) * W * 0.6;
+        p.y = H/2 + (Math.random()-0.5) * H * 0.6;
+        p.vx = 0; p.vy = 0;
+    }
+    particles.length = 0;
+    activeLinks.length = 0;
+    // hard clear the trail so we don't see ghost particles fading
+    ctx.fillStyle = "#05060a";
+    ctx.fillRect(0, 0, W, H);
+}
+
+btn.onclick = () => {
+    monetized = !monetized;
+    btn.innerHTML = monetized
+        ? `<span style="opacity:0.5">free</span> <span class="arr">/</span> <span>monetized</span>`
+        : `<span>free</span> <span class="arr">/</span> <span style="opacity:0.5">monetized</span>`;
+    // refresh the field — fresh distribution, fresh measurement
+    absorbedCount = 0;
+    deliveredCount = 0;
+    totalSpawned = 0;
+    avgPath = 0;
+    scatterField();
+};
+</script>
+
+</body>
+</html>

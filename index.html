@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antitesi Magazine</title>
+
+    <!-- Device detection: FlyingMagazine & Three.js import for desktop only -->
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // Three.js importmap: needed by desktop Perry AND mobile intro
+        document.write('<script type="importmap">\n{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/examples/jsm/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}\n<\/script>');
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="css/spark_styles.css">');
+            document.write('<script>window.magazineSparkMode = true;<\/script>');
+            document.write('<script src="js/flying-magazine.js"><\/script>');
+        }
+    </script>
+    <script src="js/articles-and-utils.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [["$", "$"], ["\\(", "\\)"]],
+                displayMath: [["$$", "$$"], ["\\[", "\\]"]]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/index_style.css">
+    <link rel="stylesheet" href="css/mobile.css?v=2">
+    <link rel="stylesheet" href="css/explore-section.css">
+
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+    
+    <!-- Mobile-only welcome intro (Perry Lee greeting) -->
+    <script>
+        if (!isDesktop && sessionStorage.getItem('perryIntroSeen') !== 'true') {
+            const introScript = document.createElement('script');
+            introScript.type = 'module';
+            introScript.src = 'js/perry-lee-intro.js';
+            document.body.appendChild(introScript);
+        }
+    </script>
+
+    <div class="progress-bar"></div>
+
+    <!-- Landing Page -->
+    <section class="landing" id="landing">
+        <!--<canvas class="generative-bg" id="bgCanvas"></canvas>-->
+        <h1 class="thesis-statement">
+            <span class="desktop-only">Complexity exists.</span>
+            <span class="desktop-only">Curiosity connects.<br></span>
+            <span class="mobile-only">Curiosity Connects.<br></span>
+        </h1>
+    </section>
+
+    <!-- Navigation -->
+    <nav class="nav-cluster">
+        <a href="#explore">Explore</a>
+        <a href="about.html">About</a>
+        <a href="archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <div class="shortcuts-hint"></div>
+
+    <section class="standard-page explore-section" id="explore">
+        <div class="draw-section">
+            <div class="draw-canvas-wrap">
+                <div class="draw-title-row">
+                    <div class="color-picker-inline">
+                        <div class="color-chips js-color-chips"></div>
+                        <div class="color-wheel-wrap js-color-wheel-wrap">
+                            <canvas class="color-wheel js-color-wheel" width="220" height="220"></canvas>
+                            <div class="color-wheel-hub"></div>
+                            <div class="color-wheel-hub-text">pick up<br>to 3 colors<br>and</div>
+                        </div>
+                    </div>
+                    <div class="draw-canvas-title">Draw a&nbsp;<span class="psychedelic-line">line</span></div>
+                </div>
+                <div class="drawing-canvas-container">
+                    <canvas class="drawing-canvas" id="drawingCanvas" width="1600" height="700"></canvas>
+                </div>
+            </div>
+
+            <div class="draw-bottom-row">
+                <div class="draw-instructions-only">
+                    smooth curves → narrative &nbsp;·&nbsp; sharp angles → analytical &nbsp;·&nbsp; color → tonal register
+                </div>
+            </div>
+
+            <div class="color-picker-section">
+                <div class="color-wheel-wrap js-color-wheel-wrap">
+                    <canvas class="color-wheel js-color-wheel" width="260" height="260"></canvas>
+                    <div class="color-wheel-hub"></div>
+                    <div class="color-wheel-hub-text">pick up<br>to 3 colors</div>
+                </div>
+                <div class="color-chips js-color-chips"></div>
+            </div>
+
+            <div class="article-recommendation" id="articleRec">
+                <span id="recText"></span>
+            </div>
+        </div>
+
+        <div class="toolbar-section">
+            <div class="toolbar-bar" id="toolbarBar"></div>
+        </div>
+    </section>
+
+    <script>
+        // Thesis statement: tap to toggle dark mode, triple-tap → Konami page
+        let _thesisTaps = 0, _thesisTapTimer;
+        document.querySelector('.thesis-statement').addEventListener('click', () => {
+            _thesisTaps++;
+            clearTimeout(_thesisTapTimer);
+            if (_thesisTaps >= (isDesktop ? 7 : 3)) { 
+                _thesisTaps = 0;
+                window.location.href = 'konami_page';
+                return;
+            }
+            toggleDarkMode();
+            _thesisTapTimer = setTimeout(() => { _thesisTaps = 0; }, 600);
+        });
+
+        // Keyboard Shortcuts and Perry Lee: desktop only
+        if (isDesktop) {
+            initKeyboardShortcuts({
+                extraKeys: {
+                    'a': openNextArticle,
+                    'A': openNextArticle,
+                    'Escape': () => document.getElementById('landing').scrollIntoView({ behavior: 'smooth' }),
+                    'h': () => document.getElementById('landing').scrollIntoView({ behavior: 'smooth' }),
+                    'H': () => document.getElementById('landing').scrollIntoView({ behavior: 'smooth' }),
+                }
+            });
+
+            // Perry Lee torture messages
+            window.perryTortureMessages = [
+                "…okay. Fine. You want a secret.",
+                "There is one, you know?",
+                "It's not something you click.",
+                "It's a sequence. Directions first...",
+                "...then a couple of letters.",
+                "Trying to make me tell you, aren't you.",
+                "Fine. I'll give you a hint.",
+                "Just... type\n↑↑ ↓↓ ← → ← → b a.",
+                "I probably shouldn't have said that.",
+                "Too late now.",
+                "Gamers knew it for decades anyway…"
+            ];
+
+            // Create Perry Lee viewer div
+            const viewer = document.createElement('div');
+            viewer.id = 'viewer';
+            document.body.appendChild(viewer);
+
+            // Load Perry Lee module
+            const script = document.createElement('script');
+            script.type = 'module';
+            script.src = 'js/perry-lee.js';
+            document.body.appendChild(script);
+        }
+    </script>
+
+    <script>
+        (function () {
+            const wheelWraps = Array.from(document.querySelectorAll('.js-color-wheel-wrap'));
+            const chipContainers = Array.from(document.querySelectorAll('.js-color-chips'));
+            const MAX_COLORS = 3;
+            const SELECT_TOLERANCE = 18;
+            let selectedHues = [];
+
+            function drawColorWheel(canvas) {
+                const ctx = canvas.getContext('2d');
+                const size = canvas.width;
+                const cx = size / 2, cy = size / 2;
+                const outerR = size / 2 - 2;
+                const innerR = outerR * 0.55;
+
+                ctx.clearRect(0, 0, size, size);
+
+                const STEP = 0.5;
+                for (let deg = 0; deg < 360; deg += STEP) {
+                    const start = ((deg - 90) * Math.PI) / 180;
+                    const end = ((deg + STEP - 90) * Math.PI) / 180;
+                    ctx.beginPath();
+                    ctx.moveTo(cx + Math.cos(start) * innerR, cy + Math.sin(start) * innerR);
+                    ctx.arc(cx, cy, outerR, start, end);
+                    ctx.lineTo(cx + Math.cos(end) * innerR, cy + Math.sin(end) * innerR);
+                    ctx.arc(cx, cy, innerR, end, start, true);
+                    ctx.closePath();
+                    ctx.fillStyle = `hsl(${deg}, 80%, 55%)`;
+                    ctx.fill();
+                }
+            }
+
+            wheelWraps.forEach(wrap => {
+                const canvas = wrap.querySelector('.js-color-wheel');
+                if (canvas) drawColorWheel(canvas);
+            });
+
+            function pointToHue(wrap, clientX, clientY) {
+                const rect = wrap.getBoundingClientRect();
+                const cx = rect.width / 2;
+                const cy = rect.height / 2;
+                const dx = clientX - rect.left - cx;
+                const dy = clientY - rect.top - cy;
+                const dist = Math.hypot(dx, dy);
+
+                const outerR = rect.width / 2;
+                const innerR = outerR * 0.55;
+                if (dist < innerR * 0.9 || dist > outerR * 1.05) return null;
+
+                let angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                angle += 90;
+                if (angle < 0) angle += 360;
+                return angle;
+            }
+
+            function hueDistanceCircular(a, b) {
+                const d = Math.abs(a - b) % 360;
+                return Math.min(d, 360 - d);
+            }
+
+            function renderMarkers() {
+                wheelWraps.forEach(wrap => {
+                    wrap.querySelectorAll('.color-marker').forEach(m => m.remove());
+
+                    const rect = wrap.getBoundingClientRect();
+                    if (rect.width === 0) return;
+                    const size = rect.width;
+                    const cx = size / 2, cy = size / 2;
+                    const outerR = size / 2;
+                    const innerR = outerR * 0.55;
+                    const r = (innerR + outerR) / 2;
+
+                    selectedHues.forEach((hue, idx) => {
+                        const angle = (hue - 90) * Math.PI / 180;
+                        const x = cx + Math.cos(angle) * r;
+                        const y = cy + Math.sin(angle) * r;
+
+                        const marker = document.createElement('div');
+                        marker.className = 'color-marker';
+                        marker.style.left = x + 'px';
+                        marker.style.top = y + 'px';
+                        marker.style.background = `hsl(${hue}, 80%, 55%)`;
+                        marker.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            selectedHues.splice(idx, 1);
+                            renderMarkers();
+                            renderChips();
+                        });
+                        wrap.appendChild(marker);
+                    });
+                });
+            }
+
+            function renderChips() {
+                chipContainers.forEach(container => {
+                    container.innerHTML = '';
+                    selectedHues.forEach((hue, idx) => {
+                        const chip = document.createElement('span');
+                        chip.className = 'color-chip';
+                        chip.style.background = `hsl(${hue}, 80%, 55%)`;
+                        chip.title = 'Click to remove';
+                        chip.addEventListener('click', () => {
+                            selectedHues.splice(idx, 1);
+                            renderMarkers();
+                            renderChips();
+                        });
+                        container.appendChild(chip);
+                    });
+                });
+            }
+
+            wheelWraps.forEach(wrap => {
+                wrap.addEventListener('click', (e) => {
+                    const hue = pointToHue(wrap, e.clientX, e.clientY);
+                    if (hue === null) return;
+
+                    const nearIdx = selectedHues.findIndex(h => hueDistanceCircular(h, hue) < SELECT_TOLERANCE);
+                    if (nearIdx !== -1) {
+                        selectedHues.splice(nearIdx, 1);
+                    } else if (selectedHues.length < MAX_COLORS) {
+                        selectedHues.push(hue);
+                    } else {
+                        let closest = 0, minD = Infinity;
+                        selectedHues.forEach((h, i) => {
+                            const d = hueDistanceCircular(h, hue);
+                            if (d < minD) { minD = d; closest = i; }
+                        });
+                        selectedHues[closest] = hue;
+                    }
+                    renderMarkers();
+                    renderChips();
+                });
+            });
+
+            renderChips();
+
+            const drawCanvas = document.getElementById('drawingCanvas');
+            const drawCtx = drawCanvas.getContext('2d');
+            let isDrawing = false, lastPoint = null, points = [], drawingProgress = 0;
+
+            function getStrokeColor(p) {
+                if (selectedHues.length === 0) {
+                    return `hsl(${(p * 360) % 360}, 80%, 55%)`;
+                }
+                if (selectedHues.length === 1) {
+                    return `hsl(${selectedHues[0]}, 80%, 55%)`;
+                }
+                const n = selectedHues.length;
+                const cyc = ((p * 0.9) % 1 + 1) % 1;
+                const seg = cyc * n;
+                const i = Math.floor(seg) % n;
+                const tRaw = seg - Math.floor(seg);
+
+                const TRANSITION_WIDTH = 0.45;
+                const half = TRANSITION_WIDTH / 2;
+                let t;
+                if (tRaw < 0.5 - half)      t = 0;
+                else if (tRaw > 0.5 + half) t = 1;
+                else {
+                    const u = (tRaw - (0.5 - half)) / TRANSITION_WIDTH;
+                    t = u * u * (3 - 2 * u);
+                }
+
+                const a = selectedHues[i];
+                const b = selectedHues[(i + 1) % n];
+                let diff = b - a;
+                if (diff > 180) diff -= 360;
+                if (diff < -180) diff += 360;
+                const hue = (a + diff * t + 360) % 360;
+                return `hsl(${hue}, 80%, 55%)`;
+            }
+
+            function drawGrid() {
+                const w = drawCanvas.width, h = drawCanvas.height;
+                const isDark = document.body.classList.contains('dark-mode');
+                drawCtx.fillStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.045)';
+                for (let x = 80; x < w; x += 80) {
+                    for (let y = 80; y < h; y += 80) {
+                        drawCtx.beginPath();
+                        drawCtx.arc(x, y, 1.5, 0, Math.PI * 2);
+                        drawCtx.fill();
+                    }
+                }
+            }
+            drawGrid();
+
+            function getCanvasPoint(clientX, clientY) {
+                const rect = drawCanvas.getBoundingClientRect();
+                return {
+                    x: (clientX - rect.left) * (drawCanvas.width / rect.width),
+                    y: (clientY - rect.top) * (drawCanvas.height / rect.height)
+                };
+            }
+
+            function analyzeSharpness(pts) {
+                if (pts.length < 5) return 0;
+
+                let totalLen = 0;
+                const segs = [];
+                for (let i = 1; i < pts.length; i++) {
+                    const d = Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
+                    segs.push(d);
+                    totalLen += d;
+                }
+                if (totalLen < 40) return 0;
+
+                const N = Math.min(200, Math.max(30, Math.floor(totalLen / 5)));
+                const step = totalLen / (N - 1);
+                const rs = [pts[0]];
+                let acc = 0, j = 1;
+                for (let i = 1; i < N - 1; i++) {
+                    const target = i * step;
+                    while (j < pts.length && acc + segs[j-1] < target) {
+                        acc += segs[j-1];
+                        j++;
+                    }
+                    if (j >= pts.length) break;
+                    const t = (target - acc) / segs[j-1];
+                    rs.push({
+                        x: pts[j-1].x + t * (pts[j].x - pts[j-1].x),
+                        y: pts[j-1].y + t * (pts[j].y - pts[j-1].y)
+                    });
+                }
+                rs.push(pts[pts.length - 1]);
+
+                const sm = rs.map((p, i) => {
+                    if (i === 0 || i === rs.length - 1) return p;
+                    const a = rs[i-1], b = rs[i], c = rs[i+1];
+                    const xs = [a.x, b.x, c.x].sort((u, v) => u - v);
+                    const ys = [a.y, b.y, c.y].sort((u, v) => u - v);
+                    return { x: xs[1], y: ys[1] };
+                });
+
+                const W = 4;
+                const angles = [];
+                for (let i = W; i < sm.length - W; i++) {
+                    const ax = sm[i].x - sm[i-W].x, ay = sm[i].y - sm[i-W].y;
+                    const bx = sm[i+W].x - sm[i].x, by = sm[i+W].y - sm[i].y;
+                    const mag = Math.hypot(ax, ay) * Math.hypot(bx, by);
+                    if (mag < 1e-10) { angles.push(0); continue; }
+                    const cos = Math.max(-1, Math.min(1, (ax*bx + ay*by) / mag));
+                    angles.push(Math.acos(cos));
+                }
+                if (!angles.length) return 0;
+
+                const cum = [0];
+                for (let i = 1; i < sm.length; i++) {
+                    cum.push(cum[i-1] + Math.hypot(sm[i].x - sm[i-1].x, sm[i].y - sm[i-1].y));
+                }
+                const L = cum[cum.length - 1];
+
+                const rect = drawCanvas.getBoundingClientRect();
+                const internalPerCss = rect.width === 0 ? 1 : drawCanvas.width / rect.width;
+                const windowLen = 2 * 96 * internalPerCss;
+
+                function maxAngleInArc(start, end) {
+                    let maxA = 0;
+                    for (let k = 0; k < angles.length; k++) {
+                        const arc = cum[k + W];
+                        if (arc >= start && arc <= end && angles[k] > maxA) {
+                            maxA = angles[k];
+                        }
+                    }
+                    return maxA;
+                }
+
+                const nMain = Math.max(1, Math.ceil(L / windowLen));
+                const mainLen = L / nMain;
+                const windows = [];
+                for (let i = 0; i < nMain; i++) {
+                    windows.push([i * mainLen, (i + 1) * mainLen]);
+                }
+                for (let i = 1; i < nMain; i++) {
+                    const c = i * mainLen;
+                    const half = mainLen / 2;
+                    windows.push([Math.max(0, c - half), Math.min(L, c + half)]);
+                }
+
+                const maxes = windows.map(([s, e]) => maxAngleInArc(s, e));
+                const mean = maxes.reduce((s, v) => s + v, 0) / maxes.length;
+                return Math.min(1, mean / Math.PI);
+            }
+
+            function hexToHue(hex) {
+                const m = hex.replace('#', '');
+                const r = parseInt(m.substring(0, 2), 16) / 255;
+                const g = parseInt(m.substring(2, 4), 16) / 255;
+                const b = parseInt(m.substring(4, 6), 16) / 255;
+                const max = Math.max(r, g, b), min = Math.min(r, g, b);
+                const d = max - min;
+                if (d === 0) return 0;
+                let h;
+                if (max === r) h = ((g - b) / d) % 6;
+                else if (max === g) h = (b - r) / d + 2;
+                else h = (r - g) / d + 4;
+                h *= 60;
+                if (h < 0) h += 360;
+                return h;
+            }
+
+            function circularMean(hues) {
+                if (!hues.length) return 0;
+                let sx = 0, sy = 0;
+                for (const h of hues) {
+                    const r = h * Math.PI / 180;
+                    sx += Math.cos(r);
+                    sy += Math.sin(r);
+                }
+                sx /= hues.length;
+                sy /= hues.length;
+                let deg = Math.atan2(sy, sx) * 180 / Math.PI;
+                if (deg < 0) deg += 360;
+                return deg;
+            }
+
+            function colorDistance(userHues, articleHexes) {
+                if (!userHues.length || !articleHexes || !articleHexes.length) return 0;
+                const articleHues = articleHexes.map(hexToHue);
+                const Hd = circularMean(userHues);
+                const Ha = circularMean(articleHues);
+                return hueDistanceCircular(Hd, Ha) / 180;
+            }
+
+            function analyzeDrawing() {
+                if (typeof articles === 'undefined' || !articles.length) return;
+
+                const sharpness = analyzeSharpness(points);
+                const userHasColor = selectedHues.length > 0;
+                const wSharp = 0.6;
+                const wColor = 0.4;
+
+                function dist(dS, dC) {
+                    return Math.sqrt(
+                        wSharp * dS * dS +
+                        wColor * dC * dC
+                    );
+                }
+
+                const best = articles.reduce((prev, curr) => {
+                    const dSharpPrev = (prev.sharpness ?? 0.5) - sharpness;
+                    const dSharpCurr = (curr.sharpness ?? 0.5) - sharpness;
+
+                    const dColorPrev = userHasColor ? colorDistance(selectedHues, prev.colors) : 0;
+                    const dColorCurr = userHasColor ? colorDistance(selectedHues, curr.colors) : 0;
+
+                    return dist(dSharpCurr, dColorCurr) < dist(dSharpPrev, dColorPrev)
+                        ? curr
+                        : prev;
+                });
+
+                const sharpType = sharpness > 0.5 ? 'sharp angles' : 'smooth curves';
+                const sharpStyle = sharpness > 0.5 ? 'analytical, conceptual thinking' : 'narrative, flowing ideas';
+
+                document.getElementById('recText').innerHTML =
+                    `Your ${sharpType} suggest a preference for ${sharpStyle}. <strong>Recommended for you:</strong><br>` +
+                    `<a href="${articlePath(best)}" style="color:inherit;text-decoration:underline;">"${best.title}"</a> — ${best.recommendationDesc || ''}`;
+                document.getElementById('articleRec').classList.add('visible');
+            }
+
+            function startDraw(x, y) {
+                drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+                drawGrid();
+                document.getElementById('articleRec').classList.remove('visible');
+                drawCanvas.closest('.draw-section').classList.add('drawing');
+                isDrawing = true;
+                drawingProgress = 0;
+                lastPoint = getCanvasPoint(x, y);
+                points = [lastPoint];
+            }
+
+            function moveDraw(x, y) {
+                if (!isDrawing) return;
+                const p = getCanvasPoint(x, y);
+                drawingProgress += 0.02;
+                drawCtx.strokeStyle = getStrokeColor(drawingProgress);
+                drawCtx.lineWidth = 3;
+                drawCtx.lineCap = 'round';
+                drawCtx.beginPath();
+                drawCtx.moveTo(lastPoint.x, lastPoint.y);
+                drawCtx.lineTo(p.x, p.y);
+                drawCtx.stroke();
+                points.push(p);
+                lastPoint = p;
+            }
+
+            function endDraw() {
+                if (isDrawing && points.length > 5) analyzeDrawing();
+                isDrawing = false;
+                drawCanvas.closest('.draw-section').classList.remove('drawing');
+            }
+
+            drawCanvas.addEventListener('mousedown', e => startDraw(e.clientX, e.clientY));
+            drawCanvas.addEventListener('mousemove', e => moveDraw(e.clientX, e.clientY));
+            drawCanvas.addEventListener('mouseup', endDraw);
+            drawCanvas.addEventListener('touchstart', e => {
+                e.preventDefault();
+                startDraw(e.touches[0].clientX, e.touches[0].clientY);
+            });
+            drawCanvas.addEventListener('touchmove', e => {
+                e.preventDefault();
+                moveDraw(e.touches[0].clientX, e.touches[0].clientY);
+            });
+            drawCanvas.addEventListener('touchend', endDraw);
+
+            function buildToolbar() {
+                const bar = document.getElementById('toolbarBar');
+                if (!bar) return;
+
+                const articlesHtml = () => {
+                    if (typeof articles === 'undefined' || !articles.length) {
+                        return '<p style="opacity:0.4;font-size:0.85rem;">No articles loaded.</p>';
+                    }
+                    return articles.map(a => `
+                    <a href="${articlePath(a)}" class="article-item">
+                        <h4>${a.title}
+                            <span style="font-weight:400;opacity:0.45;font-size:0.72rem;">
+                                ${a.publishDate || ''} · ${a.readTime || ''}
+                            </span>
+                        </h4>
+                        <p>${a.description || ''}</p>
+                    </a>`).join('');
+                };
+
+                const tiles = [
+                    {
+                        num: '01', name: 'Essays',
+                        scrollable: true,
+                        content: () => articlesHtml()
+                    },
+                    {
+                        num: '02', name: 'Playlist',
+                        content: () => `<div style="max-width:360px;"><iframe style="border-radius:0;width:100%;height:152px;display:block;border:none;"
+                        src="https://open.spotify.com/embed/playlist/1UQ7pG01imfZRid6JVeEhS?utm_source=generator"
+                        frameBorder="0" allowfullscreen
+                        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                        loading="lazy"></iframe></div>`
+                    },
+                    {
+                        num: '03', name: 'Algorithm',
+                        content: () => `
+                        <p style="font-size:0.95rem; text-align:center;">
+                        \\[ \\underset{a \\in \\{\\text{articles}\\}}{\\operatorname{argmin}} \\sqrt{(S_d - S_a)^2 + d_{\\text{hue}}(H_d, H_a)^2} \\]
+                        </p>
+                        <p style="font-size:0.8rem;opacity:0.6;margin-top:0.5rem;">
+                        Where S is smoothness, and H is the circular mean of the
+                        hues — for the drawing (H<sub>d</sub>) and for the
+                        article (H<sub>a</sub>). Our recommendation logic in action.
+                        </p>`
+                    },
+                    {
+                        num: '04', name: 'Citation',
+                        content: () => `<p id="randomCitation"
+                        style="font-style:italic;font-size:1rem;line-height:1.6;opacity:0.85;">
+                        "Language is a virus from outer space." — William S. Burroughs
+                        </p>`
+                    },
+                    {
+                        num: '05', name: 'Methodology',
+                        content: () => `<p style="font-size:0.88rem;line-height:1.6;opacity:0.7;">
+                        Our research combines archival depth with computational methods.
+                        Every claim is traceable. Every image is contextualized.
+                        </p>`
+                    },
+                    {
+                        num: '06', name: 'Our Desk',
+                        content: () => `
+                        <div class="map-panel-wrap">
+                            <iframe src="map/map.html?embed" loading="lazy" tabindex="-1"></iframe>
+                            <div class="map-panel-overlay" onclick="window.location.href='map/map.html'">
+                                <span>Open our desk →</span>
+                            </div>
+                        </div>`
+                    },
+                ];
+
+                bar.innerHTML = tiles.map((t, i) => `
+                <div class="tool-tile" id="tile-${i}"
+                     onmouseenter="clearTimeout(window._tileTimer)"
+                     onmouseleave="window._tileTimer = setTimeout(() => {
+                         document.querySelectorAll('.tool-tile.pinned').forEach(t=>t.classList.remove('pinned'));
+                     }, 250)">
+                    <div class="tool-panel ${t.scrollable ? 'scrollable' : ''}"
+                         onmouseenter="clearTimeout(window._tileTimer)"
+                         onmouseleave="window._tileTimer = setTimeout(() => {
+                             document.querySelectorAll('.tool-tile.pinned').forEach(t=>t.classList.remove('pinned'));
+                         }, 250)">
+                        <div class="tool-panel-inner" data-label="${t.name}">${t.content()}</div>
+                    </div>
+                    <div class="tool-tile-label">
+                        <span class="tool-tile-num">${t.num}</span>
+                        <span class="tool-tile-name">${t.name}</span>
+                    </div>
+                </div>`).join('');
+
+                const cit = document.getElementById('randomCitation');
+                if (cit && typeof getRandomCitation === 'function') {
+                    cit.textContent = getRandomCitation();
+                }
+
+                if (window.MathJax) MathJax.typesetPromise();
+            }
+
+            function getRandomCitation() {
+                let all = [];
+                if (typeof articles !== 'undefined') {
+                    articles.forEach(a => { if (a.citations) all = all.concat(a.citations); });
+                }
+                if (!all.length) return '"Language is a virus from outer space." — William S. Burroughs';
+                const [author, quote] = all[Math.floor(Math.random() * all.length)].split('/');
+                return `"${quote}" — ${author}`;
+            }
+
+            window.addEventListener('load', () => {
+                buildToolbar();
+            });
+
+            initProgressBar();
+        })();
+    </script>
+
+</body>
+
+</html>

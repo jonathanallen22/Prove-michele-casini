@@ -1,0 +1,241 @@
+/* ──────────────────────────────────────────────────────────────
+   Giovine widgets — shared styles
+   Three interactive elements embedded in "A Game of Pretense":
+     .lam-*    lamination canvas
+     .btl-*    currency bottleneck
+   ────────────────────────────────────────────────────────────── */
+
+/* Shared wrapper */
+.giovine-figure {
+    margin: 3rem -2rem;
+    position: relative;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: var(--white, #fff);
+    user-select: none;
+    -webkit-user-select: none;
+}
+body.dark-mode .giovine-figure {
+    background: #0a0a0a;
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.giovine-caption {
+    margin: 0.6rem -2rem 0;
+    font-family: var(--grotesk, 'Inter', sans-serif);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    opacity: 0.4;
+    text-align: center;
+}
+
+/* Slider — used by widgets 1 and 2 */
+.giovine-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 2px;
+    background: rgba(0, 0, 0, 0.15);
+    outline: none;
+    cursor: pointer;
+}
+body.dark-mode .giovine-slider {
+    background: rgba(255, 255, 255, 0.18);
+}
+.giovine-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--dynamic-color);
+    border: none;
+    cursor: grab;
+}
+.giovine-slider::-moz-range-thumb {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--dynamic-color);
+    border: none;
+    cursor: grab;
+}
+
+.giovine-slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 0.4rem;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.4;
+    font-family: var(--grotesk, 'Inter', sans-serif);
+}
+.giovine-slider-labels span.active {
+    opacity: 1;
+    color: var(--dynamic-color);
+    transition: color 0.3s, opacity 0.3s;
+}
+
+.giovine-controls {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+body.dark-mode .giovine-controls {
+    border-top-color: rgba(255, 255, 255, 0.1);
+}
+
+.giovine-readout {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    font-family: var(--grotesk, 'Inter', sans-serif);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    opacity: 0.35;
+    pointer-events: none;
+    text-align: right;
+}
+
+/* ── Widget 1: lamination canvas ───────────────────────────── */
+.lam-wrap {
+    position: relative;
+    max-width: 900px;
+    margin: 4rem auto;
+    border: 1px solid rgba(255,255,255,.12);
+    overflow: hidden;
+}
+
+#lam-canvas {
+    display: block;
+    width: 100%;
+    height: 600px;
+    cursor: grab;
+    touch-action: none;
+}
+
+#lam-canvas.dragging {
+    cursor: grabbing;
+}
+
+.lam-readout {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    opacity: .35;
+    pointer-events: none;
+}
+
+.lam-controls {
+    padding: 1.25rem 1.5rem;
+    border-top: 1px solid rgba(255,255,255,.1);
+}
+
+.lam-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: .4rem;
+    font-size: .65rem;
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    opacity: .4;
+}
+
+.lam-labels span.active {
+    opacity: 1;
+    color: var(--dynamic-color);
+}
+
+.lam-controls input[type=range] {
+    width: 100%;
+}
+
+
+/* ── Widget 3: bottleneck ──────────────────────────────────── */
+.btl-figure {
+    position: relative;
+    padding: 0;
+    max-width: 900px;
+    margin: 4rem auto;
+}
+
+.btl-canvas-wrap {
+    position: relative;
+    width: 100%;
+}
+
+.btl-canvas-wrap canvas {
+    display: block;
+    width: 100%;
+    height: 440px;
+}
+
+/* Toggle button — bottom-left of the canvas */
+#btl-toggle {
+    position: absolute;
+    bottom: 14px;
+    left: 16px;
+    padding: 0;
+    font-family: var(--grotesk, 'Inter', sans-serif);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    background: transparent;
+    border: none;
+    color: #fff;
+    cursor: pointer;
+    z-index: 2;
+    opacity: 0.7;
+    transition: opacity 0.2s, color 0.2s;
+}
+body:not(.dark-mode) #btl-toggle { color: #000; }
+#btl-toggle:hover { opacity: 1; color: var(--dynamic-color); }
+#btl-toggle .btl-arr { opacity: 0.35; margin: 0 0.5em; }
+
+/* Path-length readout — bottom-right of the canvas */
+.btl-readout {
+    position: absolute;
+    bottom: 14px;
+    right: 16px;
+    font-family: var(--grotesk, 'Inter', sans-serif);
+    font-size: 10px;
+    line-height: 1.5;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #fff;
+    opacity: 0.5;
+    z-index: 2;
+    pointer-events: none;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+body:not(.dark-mode) .btl-readout { color: #000; }
+.btl-readout .btl-num {
+    opacity: 0.9;
+    margin-left: 0.4em;
+}
+
+.btl-figure .giovine-caption {
+    display: block;
+    margin: 0.5rem 0rem 0.5rem;
+    font-family: var(--serif, 'Crimson Pro', serif);
+    font-size: 0.85rem;
+    letter-spacing: 0;
+    text-transform: none;
+    font-style: italic;
+    text-align: center;
+}
+
+/* Mobile */
+@media (max-width: 600px) {
+    .btl-canvas-wrap canvas { height: 360px; }
+    #btl-toggle {
+        bottom: 14px; left: 12px;
+        padding: 7px 12px; font-size: 10px;
+    }
+    .btl-readout {
+        bottom: 56px; right: 14px;
+        font-size: 9px;
+    }
+}

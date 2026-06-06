@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>durrachiensis — hallucination</title>
+<style>
+  html, body { margin: 0; padding: 0; overflow: hidden; background: #000;
+    font-family: ui-monospace, monospace; color: #aaa;
+    touch-action: none; -webkit-user-select: none; user-select: none; }
+
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 4;
+    background: radial-gradient(ellipse at center,
+      transparent 50%, rgba(0,0,0,0.55) 100%);
+  }
+
+  #loading { position: fixed; inset: 0; display: flex; align-items: center;
+    justify-content: center; font-size: 12px; letter-spacing: 3px;
+    text-transform: uppercase; color: #888; }
+
+  #hint {
+    position: fixed; bottom: 14px; left: 14px; max-width: 80vw;
+    font-size: 10px; letter-spacing: 1.5px; line-height: 1.7;
+    text-transform: uppercase; opacity: 0.55; z-index: 5;
+    pointer-events: none; transition: opacity 1.5s ease;
+  }
+  #hint.fade { opacity: 0; }
+
+  #intro {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 50; backdrop-filter: blur(4px);
+    transition: opacity 0.6s ease;
+  }
+  #intro.hide { opacity: 0; pointer-events: none; }
+  #intro .box {
+    max-width: 460px; padding: 28px 30px; border: 1px solid #2a2a2a;
+    background: rgba(15,15,15,0.85); color: #ddd;
+  }
+  #intro h1 { font-size: 11px; letter-spacing: 4px; margin: 0 0 16px;
+    color: #8ec; text-transform: uppercase; font-weight: normal; }
+  #intro p { font-size: 12px; line-height: 1.7; margin: 8px 0;
+    letter-spacing: 0.5px; color: #bbb; }
+  #intro .key { color: #8ec; font-weight: bold; }
+  #intro button { margin-top: 18px; background: transparent;
+    border: 1px solid #444; color: #ddd; font-family: inherit;
+    font-size: 11px; padding: 8px 18px; cursor: pointer;
+    letter-spacing: 2px; text-transform: uppercase; }
+  #intro button:hover { border-color: #8ec; color: #8ec; }
+</style>
+</head>
+<body>
+<div id="loading">loading</div>
+
+<div id="intro">
+  <div class="box">
+    <h1>durrachiensis · hallucination</h1>
+    <div id="introDesktop" style="display:none">
+      <p><span class="key">drag</span> mouse — look around</p>
+      <p><span class="key">W A S D</span> — move forward / left / back / right</p>
+      <p><span class="key">Space / C</span> — move up / down</p>
+      <p><span class="key">Shift</span> — move faster</p>
+      <p><span class="key">Arrow keys</span> — rotate the view</p>
+      <p><span class="key">Scroll</span> — zoom</p>
+    </div>
+    <div id="introMobile" style="display:none">
+      <p><span class="key">One finger</span> — drag to look around</p>
+      <p><span class="key">Two fingers</span> — pinch to zoom, drag to pan</p>
+    </div>
+    <button id="introClose">enter</button>
+  </div>
+</div>
+
+<div id="hint"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { PLYLoader } from 'three/addons/loaders/PLYLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ═══════════════════════════════════════════════════════════════════
+//  CONFIG
+// ═══════════════════════════════════════════════════════════════════
+const CLOUDS = [
+  {
+    name: 'Roman Bathroom',
+    url: '../../multimedia/durrachiensis-media/RomanBath.ply',
+    position: [17, 90, -17],
+    rotation: [-1.534, 0.014, -1.596],
+    scale: 60,
+    pointSize: 28,
+    opacity: 0.8,
+  },
+  {
+    name: 'Bathroom',
+    url: '../../multimedia/durrachiensis-media/Bathroom.ply',
+    position: [-279.4, -124.8, -33.9],
+    rotation: [-1.571, 0, 1.5224],
+    scale: 0.909,
+    pointSize: 28,
+    opacity: 0.8,
+  },
+];
+
+const CAMERA_BOUNDS = {
+  enabled: true,
+  origin: [10, 132, -5],
+  size:   [920, 360, 480],
+};
+
+const INITIAL_CAMERA = {
+  position: [246.944, 111.8949, -59.5306],
+  target:   [-14.3084, 70.6392, -53.5868],
+};
+
+const SCENE = {
+  moveSpeed: 70,       // wasd speed (world units / sec)
+  rotateSpeed: 1.1,    // arrow keys rotation (rad / sec)
+  shiftBoost: 3,       // shift multiplies move speed
+
+  // ── performance tuning ──
+  // hard pixel-ratio cap — lower = fewer fragments to shade. Try 0.75 if still slow.
+  pixelRatio: 1.25,
+  // each cloud is decimated down to (at most) this many points on load.
+  // lower = faster but sparser.
+  maxPoints: 650000,
+};
+// ═══════════════════════════════════════════════════════════════════
+
+const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+document.getElementById(isTouch ? 'introMobile' : 'introDesktop').style.display = 'block';
+
+const introEl = document.getElementById('intro');
+const hintEl  = document.getElementById('hint');
+hintEl.textContent = isTouch ? 'one finger · two fingers' : 'wasd · arrows · drag · scroll';
+
+function dismissIntro() {
+  if (!introEl.isConnected) return;
+  introEl.classList.add('hide');
+  setTimeout(() => introEl.remove(), 700);
+  setTimeout(() => hintEl.classList.add('fade'), 4000);
+  window.removeEventListener('keydown', introKey);
+}
+function introKey(e) { if (['Enter', 'Escape', 'Space'].includes(e.code)) dismissIntro(); }
+document.getElementById('introClose').addEventListener('click', dismissIntro);
+introEl.addEventListener('click', e => { if (e.target === introEl) dismissIntro(); });
+window.addEventListener('keydown', introKey);
+
+// ─── renderer / camera ───────────────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, SCENE.pixelRatio));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x000000);
+document.body.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 20000);
+camera.position.fromArray(INITIAL_CAMERA.position);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;       // snappier than before
+controls.rotateSpeed = 0.9;
+controls.zoomSpeed = 1.4;
+controls.screenSpacePanning = true;
+controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
+
+// ─── minimal shader: vertex colors, soft round points, additive blend ─
+const vert = /* glsl */`
+  attribute vec3 color;
+  uniform float uSize;
+  varying vec3 vColor;
+  void main() {
+    vColor = color;
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    gl_Position = projectionMatrix * mv;
+    gl_PointSize = uSize * (50.0 / max(0.1, -mv.z));
+  }
+`;
+const frag = /* glsl */`
+  uniform float uOpacity;
+  varying vec3 vColor;
+  void main() {
+    vec2 uv = gl_PointCoord - 0.5;
+    float d = length(uv);
+    if (d > 0.5) discard;
+    float soft = smoothstep(0.5, 0.1, d);
+    gl_FragColor = vec4(vColor, soft * uOpacity);
+  }
+`;
+
+// ─── loading ────────────────────────────────────────────────────────
+const loader = new PLYLoader();
+let loadedCount = 0;
+
+// keep every Nth point to bring the cloud under maxPoints
+function decimate(geom, step) {
+  if (step <= 1) return geom;
+  const srcPos = geom.attributes.position.array;
+  const srcCol = geom.attributes.color ? geom.attributes.color.array : null;
+  const srcN = geom.attributes.position.count;
+  const dstN = Math.floor(srcN / step);
+  const dstPos = new Float32Array(dstN * 3);
+  const dstCol = srcCol ? new Float32Array(dstN * 3) : null;
+  for (let i = 0; i < dstN; i++) {
+    const j = i * step;
+    dstPos[i*3]   = srcPos[j*3];
+    dstPos[i*3+1] = srcPos[j*3+1];
+    dstPos[i*3+2] = srcPos[j*3+2];
+    if (dstCol) {
+      dstCol[i*3]   = srcCol[j*3];
+      dstCol[i*3+1] = srcCol[j*3+1];
+      dstCol[i*3+2] = srcCol[j*3+2];
+    }
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.BufferAttribute(dstPos, 3));
+  if (dstCol) g.setAttribute('color', new THREE.BufferAttribute(dstCol, 3));
+  return g;
+}
+
+function makeCloud(geom, cfg) {
+  // auto-decimate dense clouds to keep frame rate reasonable
+  const count = geom.attributes.position.count;
+  if (count > SCENE.maxPoints) {
+    const step = Math.ceil(count / SCENE.maxPoints);
+    geom = decimate(geom, step);
+    console.log(`[${cfg.name}] decimated ${count} → ${geom.attributes.position.count} pts`);
+  }
+
+  if (!geom.hasAttribute('color')) {
+    const n = geom.attributes.position.count;
+    const arr = new Float32Array(n * 3).fill(1);
+    geom.setAttribute('color', new THREE.BufferAttribute(arr, 3));
+  }
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      uSize:    { value: cfg.pointSize },
+      uOpacity: { value: cfg.opacity },
+    },
+    vertexShader: vert,
+    fragmentShader: frag,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+  const pts = new THREE.Points(geom, mat);
+  pts.position.fromArray(cfg.position);
+  pts.rotation.fromArray(cfg.rotation);
+  pts.scale.setScalar(cfg.scale);
+  return pts;
+}
+
+let confineBounds = null;
+function initBounds() {
+  camera.position.fromArray(INITIAL_CAMERA.position);
+  controls.target.fromArray(INITIAL_CAMERA.target);
+  if (CAMERA_BOUNDS.enabled) {
+    const o = new THREE.Vector3().fromArray(CAMERA_BOUNDS.origin);
+    const h = new THREE.Vector3().fromArray(CAMERA_BOUNDS.size).multiplyScalar(0.5);
+    confineBounds = new THREE.Box3(o.clone().sub(h), o.clone().add(h));
+  }
+}
+
+CLOUDS.forEach(cfg => {
+  loader.load(cfg.url, geom => {
+    scene.add(makeCloud(geom, cfg));
+    if (++loadedCount === CLOUDS.length) {
+      document.getElementById('loading').remove();
+      initBounds();
+    }
+  }, undefined, err => {
+    console.error('failed to load', cfg.url, err);
+    document.getElementById('loading').innerText = 'failed: ' + cfg.url;
+  });
+});
+
+// ─── keyboard: WASD = move, arrows = rotate around target ────────────
+const keys = Object.create(null);
+window.addEventListener('keydown', e => { keys[e.code] = true; });
+window.addEventListener('keyup',   e => { keys[e.code] = false; });
+
+function handleKeyboard(dt) {
+  const fwd = new THREE.Vector3();
+  camera.getWorldDirection(fwd);
+  const right = new THREE.Vector3().crossVectors(fwd, camera.up).normalize();
+
+  // translate
+  const speed = SCENE.moveSpeed * dt * (keys['ShiftLeft'] || keys['ShiftRight'] ? SCENE.shiftBoost : 1);
+  const move = new THREE.Vector3();
+  if (keys['KeyW']) move.add(fwd);
+  if (keys['KeyS']) move.sub(fwd);
+  if (keys['KeyD']) move.add(right);
+  if (keys['KeyA']) move.sub(right);
+  if (keys['Space']) move.y += 1;
+  if (keys['KeyC']) move.y -= 1;
+  if (move.lengthSq() > 0) {
+    move.normalize().multiplyScalar(speed);
+    camera.position.add(move);
+    controls.target.add(move);
+  }
+
+  // rotate
+  const rot = SCENE.rotateSpeed * dt;
+  let yaw = 0, pitch = 0;
+  if (keys['ArrowLeft'])  yaw   += rot;
+  if (keys['ArrowRight']) yaw   -= rot;
+  if (keys['ArrowUp'])    pitch += rot;
+  if (keys['ArrowDown'])  pitch -= rot;
+  if (yaw || pitch) {
+    const offset = new THREE.Vector3().subVectors(camera.position, controls.target);
+    if (yaw) offset.applyQuaternion(new THREE.Quaternion().setFromAxisAngle(camera.up, yaw));
+    if (pitch) {
+      const fwdN = offset.clone().negate().normalize();
+      const sideAxis = new THREE.Vector3().crossVectors(fwdN, camera.up).normalize();
+      offset.applyQuaternion(new THREE.Quaternion().setFromAxisAngle(sideAxis, pitch));
+    }
+    camera.position.copy(controls.target).add(offset);
+    camera.lookAt(controls.target);
+  }
+}
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ─── loop ───────────────────────────────────────────────────────────
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+
+  handleKeyboard(dt);
+  controls.update();
+
+  if (confineBounds) {
+    camera.position.clamp(confineBounds.min, confineBounds.max);
+    controls.target.clamp(confineBounds.min, confineBounds.max);
+  }
+
+  renderer.render(scene, camera);
+}
+animate();
+</script>
+</body>
+</html>

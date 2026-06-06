@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soffritto Sonoro — Marquis | Antitesi Magazine</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --black: #111111;
+            --white: #ffffff;
+            --gray:  #f4f4f4;
+            --serif:   'Crimson Pro', serif;
+            --grotesk: 'Inter', sans-serif;
+            --display: 'Fraunces', serif;
+            --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+            --dynamic-color: #c8440a;   /* burnt Lagos orange */
+            --dynamic-dim:   #6b2005;
+        }
+
+        body {
+            font-family: var(--serif);
+            background: var(--white);
+            color: var(--black);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        body.dark-mode { background: var(--black); color: var(--gray); }
+
+        /* grain overlay */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+            opacity: 0.025;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        /* progress bar */
+        .progress-bar {
+            position: fixed; left: 0; top: 0;
+            width: 2px; height: 0%;
+            background: var(--dynamic-color);
+            opacity: 0.9; z-index: 1000;
+            transition: height 0.1s linear;
+            pointer-events: none;
+        }
+
+        /* nav */
+        nav {
+            position: fixed; top: 2rem; right: 2rem; z-index: 100;
+            display: flex; gap: 1.5rem;
+            font-family: var(--grotesk); font-size: 0.7rem;
+            text-transform: uppercase; letter-spacing: 0.14em;
+        }
+        nav a { color: var(--black); text-decoration: none; opacity: 0.22; transition: opacity 0.25s; }
+        body.dark-mode nav a { color: var(--gray); }
+        nav a:hover { opacity: 1; }
+
+        /* article */
+        .article-view { max-width: 660px; margin: 0 auto; padding: 7rem 2rem 12rem; }
+
+        .article-title {
+            font-family: var(--display);
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 700; line-height: 1.08; letter-spacing: -0.025em;
+            margin-bottom: 1.4rem;
+        }
+        .article-meta {
+            font-family: var(--grotesk); font-size: 0.68rem;
+            text-transform: uppercase; letter-spacing: 0.16em;
+            opacity: 0.28; display: flex; gap: 1.4rem; margin-bottom: 0.5rem;
+        }
+        .article-author {
+            font-family: var(--grotesk); font-size: 0.75rem;
+            opacity: 0.38; letter-spacing: 0.08em; margin-bottom: 0;
+        }
+
+        header {
+            padding-bottom: 2.4rem;
+            border-bottom: 1px solid rgba(0,0,0,0.09);
+            margin-bottom: 3rem;
+        }
+        body.dark-mode header { border-bottom-color: rgba(255,255,255,0.07); }
+
+        .article-content { font-size: 1.18rem; line-height: 1.9; }
+        .article-content p { margin-bottom: 1.6rem; }
+        .article-content em { font-style: italic; }
+        .article-content strong { font-weight: 600; }
+
+        /* ── layer indicator ── */
+        #layer-indicator {
+            position: fixed; left: 2rem; top: 50%;
+            transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 0.65rem;
+            z-index: 100;
+        }
+
+        .layer-pill {
+            font-family: var(--grotesk); font-size: 0.52rem;
+            text-transform: uppercase; letter-spacing: 0.18em;
+            opacity: 0.1;
+            transition: opacity 0.9s var(--ease), color 0.9s var(--ease);
+            white-space: nowrap; display: flex; align-items: center; gap: 0.45rem;
+        }
+        .layer-pill::before {
+            content: '';
+            display: inline-block; width: 4px; height: 4px;
+            border-radius: 50%; background: currentColor;
+            opacity: 0.4;
+            transition: transform 0.35s, opacity 0.35s;
+        }
+        .layer-pill.active {
+            opacity: 0.7;
+            color: var(--dynamic-color);
+        }
+
+        @keyframes heat-pulse {
+            0%, 100% { transform: scale(1.6); opacity: 0.9; }
+            50%       { transform: scale(2.5); opacity: 1; }
+        }
+        .layer-pill.active::before {
+            animation: heat-pulse 1.4s ease-in-out infinite;
+        }
+
+        /* different pulse speeds per layer */
+        #pill-basso.active::before        { animation-duration: 1.2s; }
+        #pill-percussioni.active::before  { animation-duration: 0.6s; }
+        #pill-coltello.active::before     { animation-duration: 0.45s; }
+        #pill-fiati.active::before        { animation-duration: 1.8s; }
+
+        /* divider */
+        .divider {
+            width: 32px; height: 2px;
+            background: var(--dynamic-color); opacity: 0.6; margin: 3rem 0;
+            border-radius: 1px;
+        }
+
+        /* article-next */
+        .article-next {
+            margin-top: 5rem; padding-top: 2rem;
+            border-top: 1px solid rgba(0,0,0,0.09);
+            font-family: var(--grotesk); font-size: 0.68rem;
+            text-transform: uppercase; letter-spacing: 0.18em;
+            display: flex; gap: 2rem; align-items: center;
+        }
+        body.dark-mode .article-next { border-top-color: rgba(255,255,255,0.08); }
+        .article-next a {
+            color: var(--black); text-decoration: none; opacity: 0.35;
+            transition: opacity 0.25s;
+        }
+        .article-next a:hover { opacity: 1; color: var(--dynamic-color); }
+
+        .shortcuts-hint {
+            position: fixed; bottom: 2rem; left: 2rem;
+            font-family: var(--grotesk); font-size: 0.75rem;
+            opacity: 0.13; z-index: 100;
+        }
+
+        @media (max-width: 767px) { #layer-indicator { display: none; } }
+    </style>
+</head>
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true')
+            document.body.classList.add('dark-mode');
+    </script>
+
+    <div class="progress-bar"></div>
+
+    <nav>
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+    </nav>
+
+    <!-- Layer indicator -->
+    <div id="layer-indicator">
+        <div class="layer-pill" id="pill-soffritto">soffritto</div>
+        <div class="layer-pill" id="pill-basso">basso</div>
+        <div class="layer-pill" id="pill-percussioni">percussioni</div>
+        <div class="layer-pill" id="pill-coltello">coltello</div>
+        <div class="layer-pill" id="pill-fiati">fiati</div>
+    </div>
+
+    <article class="article-view">
+
+        <header>
+            <h1 class="article-title">Soffritto Sonoro (click e volume su)</h1>
+            <div class="article-meta">
+                <span>Part IV</span>
+                <span>~4 min read</span>
+                <span>April 2026</span>
+            </div>
+            <div class="article-author">by Marquis</div>
+        </header>
+
+        <div class="article-content">
+
+            <p>La musica, per come la vedo io, funziona come un soffritto. Si parte dalla base —
+            spesso dalla tradizione, da ciò che ti riporta a casa, all'infanzia. Il ritmo e
+            l'armonia che contengono già la melodia, sono come un soffritto di scalogno o di aglio:
+            cambia tutto, dà già una direzione.</p>
+
+            <p>Scorri verso il basso. Mentre leggi, qualcosa si assembla — esattamente come un soffritto costruisce un piatto.</p>
+
+            <div class="divider"></div>
+
+            <p>Comincia con il calore. La padella scalda. L'olio sfrigola — quel rumore bianco e grasso che è già, in sé, una promessa di sapore. Non ancora musica, ma già suono intenzionale.</p>
+
+            <p>Poi entra il basso. Profondo, radicato nel ventre della terra. Come Fela Kuti che
+            tiene il ritmo con il piede sinistro mentre il resto del corpo vola sopra Lagos.
+            Il basso afrobeat non segue la melodia — <em>la precede, la contiene, la rende possibile.</em></p>
+
+            <div class="divider"></div>
+
+            <p>Giocare significa manipolare codici culturali. L'afrobeat lo sa da sempre: ogni pattern poliritimico
+            è un'equazione che si risolve nel corpo, non nella testa. La campana agogo — metallica, insistente —
+            tesse la griglia su cui tutto il resto si appoggia.</p>
+
+            <p>Il coltello. La cipolla. Il ritmo della cucina è lo stesso del tamburo —
+            necessario, trasformante, impossibile da ignorare. Tagliare è una forma di musica.</p>
+
+            <div class="divider"></div>
+
+            <p>I fiati arrivano per ultimi — come fanno sempre i corni nella Lagos di Fela.
+            Entrano quando il soffritto è già pronto, quando il piatto può reggere la loro
+            potenza. Stabs brevi, carichi, incandescenti.</p>
+
+            <p>La magia è la sospensione temporanea delle regole percettive — e la musica è lo strumento
+            più antico che abbiamo per attraversarla. <strong>Il soffritto è finito. Il piatto è pronto.</strong></p>
+
+        </div>
+
+        <div class="article-next">
+            <a href="template_mouse.html">I — mouse</a>
+            <a href="template_confini.html">II — confini</a>
+            <a href="template_ritmo.html">III — ritmo</a>
+        </div>
+
+    </article>
+
+    <div class="shortcuts-hint">P → prev · ESC → home</div>
+
+    <script>
+    // ── Progress bar ────────────────────────────────────────────────────────────
+    window.addEventListener('scroll', () => {
+        const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+        document.querySelector('.progress-bar').style.height = pct + '%';
+        updateAudio(pct / 100);
+        updateIndicator(pct / 100);
+    });
+
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape' || e.key === 'h' || e.key === 'H') window.location.href = '../../index.html';
+        if (e.key === 'p'      || e.key === 'P')                  window.location.href = 'template_ritmo.html';
+    });
+
+    // ── Layer indicator ──────────────────────────────────────────────────────────
+    const pills = {
+        soffritto:   document.getElementById('pill-soffritto'),
+        basso:       document.getElementById('pill-basso'),
+        percussioni: document.getElementById('pill-percussioni'),
+        coltello:    document.getElementById('pill-coltello'),
+        fiati:       document.getElementById('pill-fiati'),
+    };
+
+    function updateIndicator(t) {
+        pills.soffritto.classList.toggle('active',   t >= 0.01);
+        pills.basso.classList.toggle('active',       t >= 0.08);
+        pills.percussioni.classList.toggle('active', t >= 0.25);
+        pills.coltello.classList.toggle('active',    t >= 0.38);
+        pills.fiati.classList.toggle('active',       t >= 0.55);
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // ── AUDIO ENGINE — AFROBEAT SOFFRITTO ────────────────────────────────────
+    // ════════════════════════════════════════════════════════════════════════════
+    let ctx, masterGain;
+
+    // ── Tempo grid ─────────────────────────────────────────────────────────────
+    const TEMPO     = 100;           // BPM  — classic Fela pace
+    const BEAT      = 60 / TEMPO;   // 0.6 s per beat
+    const SIXTEENTH = BEAT / 4;     // 0.15 s per 16th note
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // LAYER 1 — SOFFRITTO (olio che sfrigola)
+    // Noise colorato + AM oscillator che simula le bolle dell'olio in padella
+    // ════════════════════════════════════════════════════════════════════════════
+    let sizzleGain, sizzleFilter, sizzleAM;
+
+    function buildSoffritto() {
+        // Noise source (3 secondi in loop)
+        const bufLen = ctx.sampleRate * 3;
+        const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+
+        const noiseSrc = ctx.createBufferSource();
+        noiseSrc.buffer = buf;
+        noiseSrc.loop = true;
+
+        // Band-pass centrato sulla frequenza di sfrigolio (~2kHz)
+        sizzleFilter = ctx.createBiquadFilter();
+        sizzleFilter.type = 'bandpass';
+        sizzleFilter.frequency.value = 2000;
+        sizzleFilter.Q.value = 0.7;
+
+        // High-pass per eliminare il ronzio basso
+        const hpf = ctx.createBiquadFilter();
+        hpf.type = 'highpass';
+        hpf.frequency.value = 1100;
+
+        // Modulazione di ampiezza: simula le bolle irregolari dell'olio
+        sizzleAM = ctx.createOscillator();
+        sizzleAM.type = 'sine';
+        sizzleAM.frequency.value = 10; // Hz — cambierà con il calore (scroll)
+        const amDepth = ctx.createGain();
+        amDepth.gain.value = 0.28;
+
+        sizzleGain = ctx.createGain();
+        sizzleGain.gain.value = 0;
+
+        noiseSrc.connect(sizzleFilter);
+        sizzleFilter.connect(hpf);
+        hpf.connect(sizzleGain);
+
+        // AM modulation via gain
+        sizzleAM.connect(amDepth);
+        amDepth.connect(sizzleGain.gain);
+
+        sizzleGain.connect(masterGain);
+        noiseSrc.start();
+        sizzleAM.start();
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // LAYER 2 — BASSO AFRO (linea di basso sequenziata, stile Fela)
+    // Pattern sincopato in Mi minore, 16 step, sawtooth filtrato
+    // ════════════════════════════════════════════════════════════════════════════
+    let bassoGain, bassoRunning = false, bassoNextTime = 0, bassoStep = 0;
+
+    const BASS_HZ = { 'E2': 82.41, 'G2': 98.00, 'A2': 110.00, 'B2': 123.47, 'D2': 73.42 };
+    // Pattern afrobeat tipico: basso risponde al kick ma anticipa la melodia
+    const BASS_SEQ = [
+        'E2', '.',   '.',   'E2',
+        'A2', '.',   '.',   '.',
+        'E2', '.',   'G2',  '.',
+        'A2', '.',   '.',   'B2'
+    ];
+
+    function scheduleBassNote(hz, time) {
+        const osc  = ctx.createOscillator();
+        const filt = ctx.createBiquadFilter();
+        const env  = ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.value = hz;
+        filt.type = 'lowpass';
+        filt.frequency.value = 550;
+        filt.Q.value = 2.5;
+        // attacco rapido, decadimento sulla semibiscroma
+        env.gain.setValueAtTime(0, time);
+        env.gain.linearRampToValueAtTime(0.85, time + 0.006);
+        env.gain.exponentialRampToValueAtTime(0.001, time + SIXTEENTH * 1.75);
+        osc.connect(filt); filt.connect(env); env.connect(bassoGain);
+        osc.start(time); osc.stop(time + SIXTEENTH * 2);
+    }
+
+    function tickBasso() {
+        if (!bassoRunning) return;
+        while (bassoNextTime < ctx.currentTime + 0.15) {
+            const note = BASS_SEQ[bassoStep % BASS_SEQ.length];
+            if (note !== '.') scheduleBassNote(BASS_HZ[note], bassoNextTime);
+            bassoStep++;
+            bassoNextTime += SIXTEENTH;
+        }
+        requestAnimationFrame(tickBasso);
+    }
+
+    function buildBasso() {
+        bassoGain = ctx.createGain();
+        bassoGain.gain.value = 0;
+        // Waveshaper soft-clip per calore analogico
+        const ws = ctx.createWaveShaper();
+        const curve = new Float32Array(512);
+        for (let i = 0; i < 512; i++) {
+            const x = (i * 2) / 512 - 1;
+            curve[i] = (Math.PI + 150) * x / (Math.PI + 150 * Math.abs(x));
+        }
+        ws.curve = curve;
+        bassoGain.connect(ws);
+        ws.connect(masterGain);
+    }
+
+    function startBasso() {
+        if (bassoRunning) return;
+        bassoRunning   = true;
+        bassoNextTime  = ctx.currentTime + 0.05;
+        tickBasso();
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // LAYER 3 — PERCUSSIONI AFROBEAT
+    // Kick sincopato + Snare backbeat + Hi-hat 8th + Agogo bell (il cuore!)
+    // ════════════════════════════════════════════════════════════════════════════
+    let percGain, percRunning = false, percNextTime = 0, percStep = 0;
+
+    // 16-step sequencer patterns
+    // Kick: sincopato — non solo su 1 e 3 ma con anticipo sulla quarta battuta
+    const PAT_KICK  = [1,0,0,0, 0,0,1,0, 1,0,0,0, 0,1,0,0];
+    // Snare: backbeat classico 2 e 4, più un ghost note
+    const PAT_SNARE = [0,0,0,0, 1,0,0,1, 0,0,0,0, 1,0,0,0];
+    // Hi-hat chiuso: crome (ogni due sedicesimi)
+    const PAT_HATC  = [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0];
+    // Hi-hat aperto: sulle "and" (third beat of each group)
+    const PAT_HATO  = [0,0,0,1, 0,0,0,0, 0,0,0,1, 0,0,0,0];
+    // Bell Agogo: il pattern poliritimico che definisce l'afrobeat
+    // Derivato dal "standard pattern" africano — asimmetrico e ipnotico
+    const PAT_BELL  = [1,0,1,0, 1,1,0,1, 0,1,0,1, 1,0,1,0];
+
+    function scheduleKick(time) {
+        const osc = ctx.createOscillator();
+        const env = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(165, time);
+        osc.frequency.exponentialRampToValueAtTime(44, time + 0.09);
+        env.gain.setValueAtTime(1.0, time);
+        env.gain.exponentialRampToValueAtTime(0.001, time + 0.22);
+        osc.connect(env); env.connect(percGain);
+        osc.start(time); osc.stop(time + 0.25);
+    }
+
+    function scheduleSnare(time, vol = 0.55) {
+        // Rumore
+        const bufLen = ctx.sampleRate * 0.14;
+        const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+        const nSrc = ctx.createBufferSource();
+        nSrc.buffer = buf;
+        const hpf = ctx.createBiquadFilter();
+        hpf.type = 'highpass'; hpf.frequency.value = 2800;
+        const nEnv = ctx.createGain();
+        nEnv.gain.setValueAtTime(vol, time);
+        nEnv.gain.exponentialRampToValueAtTime(0.001, time + 0.13);
+        nSrc.connect(hpf); hpf.connect(nEnv); nEnv.connect(percGain);
+        nSrc.start(time); nSrc.stop(time + 0.15);
+        // Tono rullante
+        const osc = ctx.createOscillator();
+        const tEnv = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.value = 215;
+        tEnv.gain.setValueAtTime(0.18, time);
+        tEnv.gain.exponentialRampToValueAtTime(0.001, time + 0.06);
+        osc.connect(tEnv); tEnv.connect(percGain);
+        osc.start(time); osc.stop(time + 0.07);
+    }
+
+    function scheduleHat(time, open = false) {
+        const dur = open ? 0.2 : 0.042;
+        const bufLen = Math.ceil(ctx.sampleRate * (dur + 0.01));
+        const buf = ctx.createBuffer(1, bufLen, ctx.sampleRate);
+        const d = buf.getChannelData(0);
+        for (let i = 0; i < bufLen; i++) d[i] = Math.random() * 2 - 1;
+        const src = ctx.createBufferSource();
+        src.buffer = buf;
+        const hpf = ctx.createBiquadFilter();
+        hpf.type = 'highpass'; hpf.frequency.value = open ? 7500 : 9500;
+        const env = ctx.createGain();
+        env.gain.setValueAtTime(open ? 0.28 : 0.16, time);
+        env.gain.exponentialRampToValueAtTime(0.001, time + dur);
+        src.connect(hpf); hpf.connect(env); env.connect(percGain);
+        src.start(time); src.stop(time + dur + 0.01);
+    }
+
+    function scheduleBell(time) {
+        // Campana agogo: due toni sovrapposti (suono metallico caratteristico)
+        [[820, 0.13], [1280, 0.08]].forEach(([hz, vol]) => {
+            const osc  = ctx.createOscillator();
+            const env  = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.value = hz;
+            env.gain.setValueAtTime(vol, time);
+            env.gain.exponentialRampToValueAtTime(0.001, time + 0.38);
+            osc.connect(env); env.connect(percGain);
+            osc.start(time); osc.stop(time + 0.40);
+        });
+        // Click metallico di attacco
+        const clickBuf = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * 0.006), ctx.sampleRate);
+        const cd = clickBuf.getChannelData(0);
+        for (let i = 0; i < cd.length; i++) cd[i] = Math.random() * 2 - 1;
+        const cSrc = ctx.createBufferSource();
+        cSrc.buffer = clickBuf;
+        const cEnv = ctx.createGain();
+        cEnv.gain.setValueAtTime(0.25, time);
+        cEnv.gain.exponentialRampToValueAtTime(0.001, time + 0.006);
+        cSrc.connect(cEnv); cEnv.connect(percGain);
+        cSrc.start(time); cSrc.stop(time + 0.008);
+    }
+
+    function tickPerc() {
+        if (!percRunning) return;
+        while (percNextTime < ctx.currentTime + 0.15) {
+            const s = percStep % 16;
+            if (PAT_KICK[s])  scheduleKick(percNextTime);
+            // ghost note più leggero
+            if (PAT_SNARE[s]) scheduleSnare(percNextTime, percStep % 16 === 7 ? 0.18 : 0.55);
+            if (PAT_HATC[s])  scheduleHat(percNextTime, PAT_HATO[s] === 1);
+            if (PAT_BELL[s])  scheduleBell(percNextTime);
+            percStep++;
+            percNextTime += SIXTEENTH;
+        }
+        requestAnimationFrame(tickPerc);
+    }
+
+    function buildPerc() {
+        percGain = ctx.createGain();
+        percGain.gain.value = 0;
+        percGain.connect(masterGain);
+    }
+
+    function startPerc() {
+        if (percRunning) return;
+        percRunning   = true;
+        percNextTime  = ctx.currentTime + 0.05;
+        tickPerc();
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // LAYER 4 — COLTELLO (coltello sul tagliere — cucina ritmica)
+    // Suono di taglio sincopato che si intreccia con le percussioni
+    // ════════════════════════════════════════════════════════════════════════════
+    let coltelloGain, coltelloRunning = false, coltelloNextTime = 0, coltelloStep = 0;
+
+    // Pattern di taglio: anticipa il beat o cade tra un colpo e l'altro
+    const PAT_CHOP  = [0,0,1,0, 0,0,0,1, 0,0,1,0, 0,1,0,0];
+
+    function scheduleChop(time) {
+        // Impatto del coltello: rumore ad alta frequenza, molto transitorio
+        const impactLen = Math.ceil(ctx.sampleRate * 0.018);
+        const impactBuf = ctx.createBuffer(1, impactLen, ctx.sampleRate);
+        const id = impactBuf.getChannelData(0);
+        for (let i = 0; i < impactLen; i++) id[i] = Math.random() * 2 - 1;
+        const iSrc = ctx.createBufferSource();
+        iSrc.buffer = impactBuf;
+        const bpf = ctx.createBiquadFilter();
+        bpf.type = 'bandpass'; bpf.frequency.value = 4200; bpf.Q.value = 2.5;
+        const iEnv = ctx.createGain();
+        iEnv.gain.setValueAtTime(0.65, time);
+        iEnv.gain.exponentialRampToValueAtTime(0.001, time + 0.018);
+        iSrc.connect(bpf); bpf.connect(iEnv); iEnv.connect(coltelloGain);
+        iSrc.start(time); iSrc.stop(time + 0.022);
+
+        // Risonanza del tagliere in legno: tono basso smorzato
+        const boardOsc = ctx.createOscillator();
+        const boardEnv = ctx.createGain();
+        boardOsc.type = 'sine';
+        boardOsc.frequency.value = 290 + Math.random() * 30;
+        boardEnv.gain.setValueAtTime(0.09, time);
+        boardEnv.gain.exponentialRampToValueAtTime(0.001, time + 0.045);
+        boardOsc.connect(boardEnv); boardEnv.connect(coltelloGain);
+        boardOsc.start(time); boardOsc.stop(time + 0.05);
+    }
+
+    function tickColtello() {
+        if (!coltelloRunning) return;
+        while (coltelloNextTime < ctx.currentTime + 0.15) {
+            const s = coltelloStep % 16;
+            if (PAT_CHOP[s]) scheduleChop(coltelloNextTime);
+            coltelloStep++;
+            coltelloNextTime += SIXTEENTH;
+        }
+        requestAnimationFrame(tickColtello);
+    }
+
+    function buildColtello() {
+        coltelloGain = ctx.createGain();
+        coltelloGain.gain.value = 0;
+        coltelloGain.connect(masterGain);
+    }
+
+    function startColtello() {
+        if (coltelloRunning) return;
+        coltelloRunning   = true;
+        coltelloNextTime  = ctx.currentTime + 0.05;
+        tickColtello();
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // LAYER 5 — FIATI / CORNI (stabs di ottoni, stile Fela Kuti)
+    // Due oscillatori sawtooth leggermente scordati + filtro lowpass inviluppato
+    // Frase in Mi minore: E4 G4 A4 — corni che chiamano e rispondono
+    // ════════════════════════════════════════════════════════════════════════════
+    let fiatiGain, fiatiRunning = false, fiatiTimer, fiatiStep = 0;
+
+    // Frase cornistica: stabs brevi + pause + note lunghe tenute
+    const HORN_PHRASE = [
+        { hz: 329.63, dur: 0.07 },   // E4  — stab
+        { hz: 0,      dur: 0.05 },   // rest
+        { hz: 329.63, dur: 0.07 },   // E4  — stab ripetuto
+        { hz: 0,      dur: 0.05 },   // rest
+        { hz: 392.00, dur: 0.07 },   // G4
+        { hz: 440.00, dur: 0.16 },   // A4  — tenuto
+        { hz: 0,      dur: 0.22 },   // pausa
+        { hz: 493.88, dur: 0.07 },   // B4  — risposta
+        { hz: 440.00, dur: 0.07 },   // A4
+        { hz: 392.00, dur: 0.28 },   // G4  — risoluzione lunga
+        { hz: 0,      dur: 0.40 },   // lunga pausa (respiro)
+    ];
+
+    function scheduleHornNote(hz, dur) {
+        const now = ctx.currentTime;
+        // Due oscillatori: fondamentale + quinta (chorus naturale)
+        [hz, hz * 1.0035, hz * 1.5].forEach((f, i) => {
+            const osc  = ctx.createOscillator();
+            const filt = ctx.createBiquadFilter();
+            const env  = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.value = f;
+            filt.type = 'lowpass';
+            filt.frequency.value = i === 2 ? 1400 : 3000;
+            filt.Q.value = 1.8;
+            const vol = i === 2 ? 0.08 : 0.18;
+            env.gain.setValueAtTime(0, now);
+            env.gain.linearRampToValueAtTime(vol, now + 0.006);
+            env.gain.setValueAtTime(vol, now + dur - 0.01);
+            env.gain.exponentialRampToValueAtTime(0.001, now + dur + 0.04);
+            osc.connect(filt); filt.connect(env); env.connect(fiatiGain);
+            osc.start(now); osc.stop(now + dur + 0.06);
+        });
+    }
+
+    function playHornStep() {
+        if (!fiatiRunning) return;
+        const note = HORN_PHRASE[fiatiStep % HORN_PHRASE.length];
+        fiatiStep++;
+        if (note.hz > 0) scheduleHornNote(note.hz, note.dur);
+        fiatiTimer = setTimeout(playHornStep, (note.dur + 0.012) * 1000);
+    }
+
+    function buildFiati() {
+        fiatiGain = ctx.createGain();
+        fiatiGain.gain.value = 0;
+        fiatiGain.connect(masterGain);
+    }
+
+    function startFiati() {
+        if (fiatiRunning) return;
+        fiatiRunning = true;
+        playHornStep();
+    }
+
+    function stopFiati() {
+        fiatiRunning = false;
+        clearTimeout(fiatiTimer);
+    }
+
+    // ════════════════════════════════════════════════════════════════════════════
+    // INIT
+    // ════════════════════════════════════════════════════════════════════════════
+    function initAudio() {
+        ctx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = ctx.createGain();
+        masterGain.gain.value = 0.72;
+        masterGain.connect(ctx.destination);
+
+        buildSoffritto();
+        buildBasso();
+        buildPerc();
+        buildColtello();
+        buildFiati();
+    }
+
+    // ── Ramp helper ─────────────────────────────────────────────────────────────
+    function ramp(param, target, dur = 1.2) {
+        param.cancelScheduledValues(ctx.currentTime);
+        param.setValueAtTime(param.value, ctx.currentTime);
+        param.linearRampToValueAtTime(target, ctx.currentTime + dur);
+    }
+
+    let bassoActive = false, percActive = false, coltelloActive = false, fiatiActive = false;
+
+    // ── Update on scroll (t = 0..1) ─────────────────────────────────────────────
+    function updateAudio(t) {
+        if (!ctx) return;
+        if (ctx.state === 'suspended') ctx.resume();
+
+        // ── SOFFRITTO: olio che sfrigola
+        //    Inizia subito, evolve con il calore, si riduce leggermente a fine scroll
+        const sizzleVol = t < 0.55
+            ? 0.055 + t * 0.05               // cresce lentamente (padella che scalda)
+            : Math.max(0.02, 0.083 - (t - 0.55) * 0.12);  // si stabilizza
+        ramp(sizzleGain.gain, sizzleVol, 1.8);
+        // filtro si apre (temperatura cresce)
+        sizzleFilter.frequency.value = 1600 + t * 3200;
+        // AM più veloce = olio più caldo, più vivace
+        sizzleAM.frequency.value = 7 + t * 28;
+
+        // ── BASSO: entra a 8%, forte fino alla fine
+        const bassoVol = t < 0.08 ? 0 : Math.min(1, (t - 0.08) / 0.12) * 0.62;
+        ramp(bassoGain.gain, bassoVol, 1.0);
+        if (t >= 0.08 && !bassoActive) { bassoActive = true;  startBasso(); }
+        if (t <  0.04 && bassoActive)  { bassoActive = false; bassoRunning = false; }
+
+        // ── PERCUSSIONI: entrano a 25%
+        const percVol = t < 0.25 ? 0 : Math.min(1, (t - 0.25) / 0.14) * 1.05;
+        ramp(percGain.gain, percVol, 0.7);
+        if (t >= 0.25 && !percActive) { percActive = true;  startPerc(); }
+        if (t <  0.18 && percActive)  { percActive = false; percRunning = false; }
+
+        // ── COLTELLO: entra a 38%, pattern sincopato sul rhythm
+        const coltelloVol = t < 0.38 ? 0 : Math.min(1, (t - 0.38) / 0.10) * 0.72;
+        ramp(coltelloGain.gain, coltelloVol, 0.6);
+        if (t >= 0.38 && !coltelloActive) { coltelloActive = true;  startColtello(); }
+        if (t <  0.30 && coltelloActive)  { coltelloActive = false; coltelloRunning = false; }
+
+        // ── FIATI: entrano a 55%, il piatto è quasi pronto
+        const fiatiVol = t < 0.55 ? 0 : Math.min(1, (t - 0.55) / 0.16) * 0.85;
+        ramp(fiatiGain.gain, fiatiVol, 1.1);
+        if (t >= 0.55 && !fiatiActive) { fiatiActive = true;  startFiati(); }
+        if (t <  0.45 && fiatiActive)  { fiatiActive = false; stopFiati(); }
+    }
+
+    // ── Avvio su primo gesto utente ─────────────────────────────────────────────
+    function tryInit() {
+        if (ctx) return;
+        initAudio();
+        updateAudio(0);
+    }
+
+    window.addEventListener('load',      () => { try { tryInit(); } catch(e) {} });
+    document.addEventListener('click',       tryInit, { once: true });
+    document.addEventListener('scroll',      tryInit, { once: true });
+    document.addEventListener('touchstart',  tryInit, { once: true });
+    </script>
+</body>
+</html>

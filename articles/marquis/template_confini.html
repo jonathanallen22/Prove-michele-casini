@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confini — Marquis | Antitesi Magazine</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #000;
+            --white: #fff;
+            --gray: #f3f3f3;
+            --serif: 'Crimson Pro', serif;
+            --grotesk: 'Inter', sans-serif;
+            --display: 'Fraunces', serif;
+            --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+            --dynamic-color: #ff9933;
+        }
+
+        body {
+            font-family: var(--serif);
+            background: var(--white);
+            color: var(--black);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        body.dark-mode {
+            background: var(--black);
+            color: var(--gray);
+        }
+
+        .progress-bar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 0%;
+            background: var(--dynamic-color);
+            opacity: 0.4;
+            z-index: 1000;
+            transition: height 0.1s linear;
+            pointer-events: none;
+        }
+
+        .nav-cluster {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            z-index: 100;
+            display: flex;
+            gap: 1.5rem;
+            font-family: var(--grotesk);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .nav-cluster a {
+            color: var(--black);
+            text-decoration: none;
+            opacity: 0.3;
+            transition: opacity 0.3s;
+        }
+
+        body.dark-mode .nav-cluster a {
+            color: var(--gray);
+        }
+
+        .nav-cluster a:hover {
+            opacity: 1;
+        }
+
+        .article-view {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 6rem 2rem 8rem;
+        }
+
+        .article-header {
+            margin-bottom: 3rem;
+        }
+
+        .article-title {
+            font-family: var(--display);
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            margin-bottom: 1rem;
+        }
+
+        .article-meta {
+            font-family: var(--grotesk);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            opacity: 0.35;
+            display: flex;
+            gap: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .article-author {
+            font-family: var(--grotesk);
+            font-size: 0.8rem;
+            opacity: 0.5;
+            letter-spacing: 0.06em;
+        }
+
+        .article-content {
+            font-size: 1.2rem;
+            line-height: 1.85;
+        }
+
+        .article-content p {
+            margin-bottom: 1.6rem;
+        }
+
+
+
+        /* scolapasta */
+        .colander-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+
+        #colander-svg {
+            overflow: visible;
+        }
+
+        /* quadrato */
+        .square-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 0.5rem;
+        }
+
+        #concrete-square {
+            font-family: var(--serif);
+            font-size: 0.82rem;
+            line-height: 1.25;
+        }
+
+        #concrete-square .sq-line {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .article-next {
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            font-family: var(--grotesk);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        body.dark-mode .article-next {
+            border-top-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .article-next a {
+            color: var(--dynamic-color);
+            text-decoration: none;
+        }
+
+        .article-next a:hover {
+            opacity: 0.6;
+        }
+
+        .shortcuts-hint {
+            position: fixed;
+            bottom: 2rem;
+            left: 2rem;
+            font-family: var(--grotesk);
+            font-size: 0.75rem;
+            opacity: 0.2;
+            z-index: 100;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true')
+            document.body.classList.add('dark-mode');
+    </script>
+
+    <div class="progress-bar"></div>
+    <nav class="nav-cluster">
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+    </nav>
+
+    <article class="article-view">
+        <header class="article-header">
+            <h1 class="article-title">Confini</h1>
+            <div class="article-meta"><span>Part II</span><span>~3 min read</span><span>April 2026</span></div>
+            <div class="article-author">by Marquis</div>
+        </header>
+
+        <div class="article-content">
+
+            <p>Credo infatti che esistano due macro-approcci alle cose: quello didattico e quello
+                intuitivo. Nella mia vita, i due non hanno mai trovato pace.</p>
+
+            <div class="colander-wrap">
+                <svg id="colander-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+            </div>
+
+            <p style="margin: 2.5rem 0 2rem; font-size: 1rem; opacity: 0.5; font-style: italic;">
+                (I know this is ugly. You get the idea: borders, and identity. Text can be contained - generate itself
+                in shapes.)
+            </p>
+
+            <div class="square-wrap">
+                <div id="concrete-square"></div>
+            </div>
+
+
+        </div>
+
+        <div class="article-next"><a href="template_ritmo">Next →</a></div>
+    </article>
+
+    <div class="shortcuts-hint">P → prev · N → next · ESC → home</div>
+
+    <script>
+        window.addEventListener('scroll', () => {
+            const pct = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+            document.querySelector('.progress-bar').style.height = pct + '%';
+        });
+
+        const colors = ['#ff9933', '#ff3366', '#3366ff', '#33ff66', '#9933ff', '#33ffff'];
+        let ci = 0;
+        function changeColor() { ci = (ci + 1) % colors.length; document.documentElement.style.setProperty('--dynamic-color', colors[ci]); }
+        document.addEventListener('click', changeColor);
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' || e.key === 'h' || e.key === 'H') window.location.href = '../../index';
+            if (e.key === 'n' || e.key === 'N') window.location.href = 'template3';
+            if (e.key === 'p' || e.key === 'P') window.location.href = 'template_mouse';
+        });
+
+        // ── wait for font so measurements are accurate ─────────
+        document.fonts.ready.then(() => {
+            buildColander();
+            buildSquare();
+        });
+
+        // ════════════════════════════════════════════════════════
+        // SCOLAPASTA
+        // Words placed on concentric rings. Each ring has N slots
+        // evenly spaced. Some slots are empty (the "buchi").
+        // Slight positional jitter makes it feel organic.
+        // ════════════════════════════════════════════════════════
+        function buildColander() {
+            const WORDS = `Nella mia vita la mia carriera scolastica è stata costellata di buchi come uno scolapasta mi sono sempre sentito nel posto sbagliato riluttante di fronte a insegnamenti pesanti e unidirezionali non avevo ancora la capacità di relativizzare i pensieri ma dentro di me sentivo una spinta verso l'altrove`.split(' ').filter(Boolean);
+
+            const svg = document.getElementById('colander-svg');
+            const isDark = document.body.classList.contains('dark-mode');
+            const textFill = isDark ? '#f3f3f3' : '#000';
+
+            // Layout: rows of words, row widths shaped like a circle.
+            // Each row's width = 2 * sqrt(R² - (y - CY)²)
+            const R = 160;       // circle radius in px
+            const ROW_H = 22;    // px per row
+            const CELL_W = 52;   // px per word slot (fixed grid)
+            const GAP_PROB = 0.22; // probability a slot is a whitespace gap
+
+            const ROWS = Math.floor((2 * R) / ROW_H);
+            const CX = R + 20;
+            const CY = R;
+            const totalH = ROWS * ROW_H;
+
+            svg.setAttribute('width', (CX * 2).toString());
+            svg.setAttribute('height', totalH.toString());
+            svg.setAttribute('viewBox', `0 0 ${CX * 2} ${totalH}`);
+
+            let wi = 0;
+
+            for (let row = 0; row < ROWS; row++) {
+                const y = row * ROW_H + ROW_H / 2;
+                const dy = y - CY;
+
+                // how many cells fit on this row inside the circle
+                const halfWidth = Math.sqrt(Math.max(0, R * R - dy * dy));
+                const nCells = Math.max(1, Math.floor((halfWidth * 2) / CELL_W));
+                const rowStartX = CX - (nCells * CELL_W) / 2 + CELL_W / 2;
+
+                for (let col = 0; col < nCells; col++) {
+                    const x = rowStartX + col * CELL_W;
+                    const isGap = Math.random() < GAP_PROB;
+                    const word = isGap ? '' : WORDS[wi++ % WORDS.length];
+                    if (!word) continue;
+
+                    const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    t.setAttribute('x', x.toFixed(1));
+                    t.setAttribute('y', y.toFixed(1));
+                    t.setAttribute('text-anchor', 'middle');
+                    t.setAttribute('dominant-baseline', 'middle');
+                    t.setAttribute('font-family', 'Crimson Pro, serif');
+                    t.setAttribute('font-size', '13');
+                    t.setAttribute('fill', textFill);
+                    t.setAttribute('opacity', (0.5 + Math.random() * 0.5).toFixed(2));
+                    t.textContent = word;
+                    svg.appendChild(t);
+                }
+            }
+        }
+
+        // ════════════════════════════════════════════════════════
+        // QUADRATO — concrete poetry
+        //
+        // Algorithm:
+        // 1. Measure every word's pixel width via Canvas API
+        // 2. Binary-search for the line-width W where the
+        //    resulting text block has height ≈ W (i.e. square)
+        // 3. Render each line as a flex row with space-between
+        //    so every line fills edge-to-edge, last line too
+        // ════════════════════════════════════════════════════════
+        function buildSquare() {
+            const TEXT = `Ero certo che molte delle cose che a scuola e attorno a me venivano dette fossero vere solo in relazione a un determinato contesto geografico storico religioso e politico insomma qualcosa lontano da me mi chiamava e risuonava più forte che mai`;
+            const words = TEXT.split(' ').filter(Boolean);
+
+            const FS = 13;       // px (≈ 0.82rem)
+            const LH = FS * 1.25;
+
+            // pixel-accurate measurement
+            const mc = document.createElement('canvas').getContext('2d');
+            mc.font = `400 ${FS}px 'Crimson Pro', serif`;
+            const spW = mc.measureText(' ').width;
+            const ww = words.map(w => mc.measureText(w).width);
+
+            function layout(lineW) {
+                const lines = [];
+                let cur = [], curW = 0;
+                for (let i = 0; i < words.length; i++) {
+                    if (!cur.length) { cur = [i]; curW = ww[i]; }
+                    else if (curW + spW + ww[i] <= lineW) { cur.push(i); curW += spW + ww[i]; }
+                    else { lines.push([...cur]); cur = [i]; curW = ww[i]; }
+                }
+                if (cur.length) lines.push(cur);
+                return { lines, height: lines.length * LH };
+            }
+
+            // binary search for squareness
+            let lo = 60, hi = 700, best = 300;
+            for (let k = 0; k < 24; k++) {
+                const mid = (lo + hi) / 2;
+                const { height } = layout(mid);
+                if (mid < height) lo = mid;   // too tall → widen
+                else { hi = mid; best = mid; } // too wide/square → record & narrow
+            }
+
+            const { lines } = layout(best);
+            const el = document.getElementById('concrete-square');
+            el.style.width = Math.round(best) + 'px';
+            el.innerHTML = '';
+
+            lines.forEach((lineIdxs, li) => {
+                const lineWords = lineIdxs.map(i => words[i]);
+                const row = document.createElement('div');
+                row.className = 'sq-line';
+
+                if (lineWords.length === 1) {
+                    // single word on a line: just left-align it
+                    row.style.justifyContent = 'flex-start';
+                    const s = document.createElement('span');
+                    s.textContent = lineWords[0];
+                    row.appendChild(s);
+                } else {
+                    // multiple words: space-between stretches line to full width
+                    lineWords.forEach(w => {
+                        const s = document.createElement('span');
+                        s.textContent = w;
+                        row.appendChild(s);
+                    });
+                }
+
+                el.appendChild(row);
+            });
+        }
+    </script>
+</body>
+
+</html>

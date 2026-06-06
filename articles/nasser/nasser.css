@@ -1,0 +1,325 @@
+/* ════════════════════════════════════════════════════════════════
+   NASSER — "Zhourat"
+
+   A colored-fluid cellular automaton (after w-shadow, 2009) runs
+   as the article's living substrate: a single absolute, document-
+   tall canvas behind every line of prose. The text reads on top
+   of it. See nasser.js for the simulation engine.
+   ════════════════════════════════════════════════════════════════ */
+
+:root {
+    /* Zhourat-inspired palette */
+    --z-cream:      #f5ecd9;
+    --z-cream-deep: #ecdfc4;
+    --z-rose:       #c47b5a;
+    --z-rose-soft:  #e3a98b;
+    --z-sage:       #8fa572;
+    --z-sage-soft:  #b6c79c;
+    --z-ochre:      #d4a04a;
+    --z-plum:       #6b4a5a;
+    --z-ink:        #3a2e26;
+}
+
+/* ─── Body becomes transparent so the field shows through ────── */
+body {
+    background: var(--z-cream);
+    position: relative;
+}
+body.dark-mode {
+    background: #14110e;
+}
+
+/* ─── Flora wreath ─────────────────────────────────────────────
+   Body-level container holding 18 absolutely-positioned flower
+   illustrations. The container itself is invisible; only the
+   children paint. pointer-events: none lets clicks pass through
+   so only the teapot is interactive. */
+.zhourat-flora {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;            /* above canvas (0), below article-view (2) */
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.zhourat-flower {
+    position: absolute;
+    /* left, top, width, transform set inline per-flower. */
+    height: auto;
+    display: block;
+    user-select: none;
+    -webkit-user-drag: none;
+    filter: drop-shadow(0 2px 4px rgba(58, 46, 38, 0.18));
+    transition: opacity 0.4s ease;
+}
+
+@media (max-width: 880px) {
+    .zhourat-flora {
+        height: 70vh;
+    }
+    .zhourat-flower {
+        /* Scale down a touch on small viewports. */
+        transform-origin: center;
+    }
+}
+
+/* ─── Teapot button ────────────────────────────────────────────
+   Anchored bottom-right of the viewport. Idle: gently breathes to
+   draw the reader's eye. While pouring: tilts 35°, no breathing,
+   cursor becomes grabbing. After the reader has poured once,
+   body.has-poured kills the breathing permanently. */
+@keyframes zhourat-breathe {
+    0%, 100% { transform: scale(0.96); }
+    50%      { transform: scale(1.04); }
+}
+
+.zhourat-teapot {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 140px;
+    height: 140px;
+    z-index: 4;
+    border: 0;
+    padding: 0;
+    background: transparent;
+    cursor: grab;
+    transform-origin: 25% 75%;   /* near the spout — tune after the SVG is in place */
+    filter: drop-shadow(0 6px 18px rgba(58, 46, 38, 0.25));
+    animation: zhourat-breathe 3s ease-in-out infinite;
+    transition: transform 0.35s cubic-bezier(.4, 0, .25, 1);
+    touch-action: none;          /* pointerdown fires immediately on touch */
+}
+
+.zhourat-teapot img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    pointer-events: none;        /* the button receives the events, not the img */
+}
+
+/* Invisible point marker at the spout tip. The button rotates around
+   transform-origin; this span rotates with the button so its screen
+   position is the spout's real pixel position — no rotation math in JS.
+   Negative left lets the marker sit just outside the button's box, at
+   the actual tip of the spout in the user's teapot.svg. */
+.zhourat-spout {
+    position: absolute;
+    left: -15%;
+    top: 70%;
+    width: 0;
+    height: 0;
+    pointer-events: none;
+}
+
+.zhourat-teapot:focus-visible {
+    outline: 2px dashed rgba(58, 46, 38, 0.45);
+    outline-offset: 6px;
+}
+
+.zhourat-teapot.is-pouring {
+    /* A real pouring tilt. The spout-marker span inside the button
+       rotates with this transform, so JS still reads the correct
+       spout pixel position. transform-origin (25% 75%, near the
+       spout) keeps the teapot pivoting around its own spout rather
+       than swinging off the cursor. */
+    transform: rotate(-32deg);
+    cursor: grabbing;
+    animation: none;
+    transition: transform 0.18s ease-out;
+}
+
+body.has-poured .zhourat-teapot {
+    animation: none;             /* one-time silence after first interaction */
+}
+
+body.zhourat-pouring {
+    cursor: grabbing;            /* whole-page cursor signal while pouring */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .zhourat-teapot {
+        animation: none;
+        transition: none;
+    }
+}
+
+@media (max-width: 880px) {
+    .zhourat-teapot {
+        bottom: 1rem;
+        right: 1rem;
+        width: 110px;
+        height: 110px;
+    }
+}
+
+/* First-time hint — anchored above the teapot in the bottom-right
+   corner. Solid plum background + cream text so it pops against
+   either light or dark page bg. z-index: 9999 keeps it above any
+   site chrome (shortcuts-hint, etc) that might otherwise hide it.
+   Fades out on first pour. */
+.zhourat-teapot-hint {
+    position: fixed;
+    right: 2rem;
+    bottom: calc(2rem + 140px + 0.8rem);  /* immediately above the teapot */
+    width: 190px;
+    text-align: center;
+    font-family: var(--display, "Cormorant Garamond", "Georgia", serif);
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1rem;
+    line-height: 1.25;
+    color: #f5ecd9;
+    background: #6b4a5a;                  /* z-plum — pops on any bg */
+    padding: 0.7rem 0.9rem;
+    border-radius: 4px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    pointer-events: none;
+    z-index: 9999;                        /* above everything else */
+    opacity: 1;
+    transition: opacity 0.6s ease;
+    animation: zhourat-hint-bob 2.4s ease-in-out infinite;
+}
+
+/* Triangle pointing down at the teapot. */
+.zhourat-teapot-hint::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    right: 60px;                          /* roughly above the teapot centre */
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid #6b4a5a;
+}
+
+@keyframes zhourat-hint-bob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-6px); }
+}
+
+body.dark-mode .zhourat-teapot-hint {
+    background: #c47b5a;                  /* z-rose for dark mode */
+    color: #14110e;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
+}
+body.dark-mode .zhourat-teapot-hint::after {
+    border-top-color: #c47b5a;
+}
+
+/* Fade out once the reader has poured once. */
+body.has-poured .zhourat-teapot-hint {
+    opacity: 0;
+    animation: none;
+}
+
+@media (max-width: 880px) {
+    .zhourat-teapot-hint {
+        right: 1rem;
+        bottom: calc(1rem + 110px + 0.6rem);
+        width: 170px;
+        font-size: 0.95rem;
+        padding: 0.55rem 0.7rem;
+    }
+    .zhourat-teapot-hint::after {
+        right: 45px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .zhourat-teapot-hint {
+        animation: none;
+        transition: none;
+    }
+}
+
+
+/* ─── The field canvas: absolute, document-tall, behind everything
+   pointer-events: none so the article text underneath remains
+   selectable, clickable, scrollable. opacity is set so the field
+   reads as paper-tone rather than competing with the prose.
+   height is set imperatively in JS to match
+   document.documentElement.scrollHeight. */
+#field-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    /* height is set imperatively in JS to match document.documentElement.scrollHeight */
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.82;
+    filter: blur(2px) saturate(0.95);
+    /* Soft vertical edge fade — top and bottom 4% fade to transparent
+       so the streams don't read as a hard rectangle at the document
+       boundaries. No horizontal fade: the streams need to be visible
+       all the way out to the gutters where they collide. */
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,1) 4%,
+        rgba(0,0,0,1) 96%,
+        rgba(0,0,0,0) 100%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        rgba(0,0,0,0) 0%,
+        rgba(0,0,0,1) 4%,
+        rgba(0,0,0,1) 96%,
+        rgba(0,0,0,0) 100%
+    );
+}
+
+body.dark-mode #field-canvas {
+    opacity: 0.88;
+    filter: blur(3px) saturate(0.95);
+}
+
+/* All page chrome and content lifts above the canvas. Note: we
+   do NOT touch `.nav-cluster`'s position — it stays `fixed; top:
+   2rem; right: 2rem` from index_style.css. The original z-index
+   100 already keeps it above the canvas. */
+.article-view,
+.shortcuts-hint {
+    position: relative;
+    z-index: 2;
+}
+.progress-bar { position: fixed; z-index: 1000; }
+
+/* ─── The article column sits directly on the page cream ────────
+   No frosted-glass wash; text reads on the body background.
+   margin-bottom gives drain space for the basin pool below the prose. */
+.article-view {
+    background: transparent;
+    margin-bottom: 45vh;
+}
+
+/* Title and meta stacking layer above the flora wreath. */
+.article-header {
+    position: relative;
+    z-index: 1;
+    padding-top: 3rem;
+}
+
+/* Nav lifts above the field too, but it sits in the corner where
+   the canvas is generally calm. A quiet local backdrop-blur on
+   each link keeps it crisp without becoming a heavy "header". */
+.nav-cluster a {
+    background: rgba(245, 236, 217, 0.55);
+    -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+    padding: 0.15rem 0.5rem;
+    border-radius: 2px;
+}
+body.dark-mode .nav-cluster a {
+    background: rgba(20, 17, 14, 0.55);
+}
+
+/* ─── Mobile ─────────────────────────────────────────────────── */
+@media (max-width: 880px) {
+    #field-canvas { opacity: 0.55; }
+}

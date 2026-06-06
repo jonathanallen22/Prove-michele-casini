@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Zhourat - Houssein Nasser | Antitesi Magazine</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Shared stylesheets (paths relative to articles/ subdirectory) -->
+    <link rel="stylesheet" href="../../css/index_style.css">
+    <link rel="stylesheet" href="../../css/article_style.css">
+    <link rel="stylesheet" href="../../css/mobile.css">
+
+    <!-- Article-specific stylesheet -->
+    <link rel="stylesheet" href="nasser.css">
+
+    <!-- Flying magazine: desktop only -->
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="../../css/spark_styles.css">');
+            document.write('<script>window.magazineSparkMode = true;<\/script>');
+            document.write('<script src="../../js/flying-magazine.js"><\/script>');
+        }
+    </script>
+
+    <script src="../../js/articles-and-utils.js"></script>
+
+    <style>
+        :root {
+            --dynamic-color: #c47b5a;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- run dark mode first otherwise the page flashes -->
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════
+         A small colored-fluid cellular automaton (after w-shadow,
+         2009) runs as the page's substrate. Six herb emitters
+         pulse palette-tinted liquid that flows, deflects off
+         margin obstacles, mixes by mass-weighted pigment carry,
+         and drains at the bottom. See nasser.js.
+         ═══════════════════════════════════════════════════════ -->
+    <canvas id="field-canvas" aria-hidden="true"></canvas>
+
+    <div class="progress-bar"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-cluster">
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+        <a href="../../archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <!-- Flora — populated at runtime by nasser.js. Empty container
+         here; the script generates random flower positions inside a
+         configurable zone, leaving an opening for the title text. -->
+    <div class="zhourat-flora" aria-hidden="true"></div>
+
+    <!-- Teapot — press-and-drag to pour water onto the wreath.
+         The .zhourat-spout marker sits at the spout tip in the SVG's
+         local coordinate space; the browser applies the button's
+         rotation to it for free, so JS just reads its bounding rect
+         to know where water should spawn. -->
+    <button class="zhourat-teapot" type="button" aria-label="Pour water from the teapot">
+        <img src="../../multimedia/nasser-media/teapot.svg" alt="" draggable="false">
+        <span class="zhourat-spout" aria-hidden="true"></span>
+    </button>
+    <!-- First-time hint, fades out after the reader's first pour. -->
+    <div class="zhourat-teapot-hint" aria-hidden="true">drag me to make some zhourat</div>
+
+    <!-- Article -->
+    <article class="article-view">
+
+        <header class="article-header">
+            <h1 class="article-title">Zhourat</h1>
+            <div class="article-meta" id="article-meta">
+                <span>Article</span>
+                <span>~8 min read</span>
+                <span>May 2026</span>
+            </div>
+            <div class="article-author" id="article-author">by Houssein Nasser</div>
+        </header>
+
+        <script>
+            (function () {
+                const filename = window.location.pathname.split('/').pop();
+                const data = (typeof articles !== 'undefined') && articles.find(a => a.filename === filename);
+                if (!data) return;
+                const meta = document.getElementById('article-meta');
+                const author = document.getElementById('article-author');
+                if (meta) meta.innerHTML = `<span>Article</span><span>~${data.readTime} read</span><span>${data.publishDate}</span>`;
+                if (author) author.textContent = 'by ' + data.author;
+            })();
+        </script>
+
+        <div class="article-content">
+
+            <p>Waiting for my flight to Salzburg, I look at the photographs of my wedding with nostalgia. It was a ceasefire. A fragile suspension, almost unreal. I remember the sensation of that liminal space, suspended between normality and its possible interruption. The streets were full, a feeling of the mundane was regaining its shape. Yet, beneath it all, a constant tension was palpable. Not an explicit fear, rather a quiet awareness.</p>
+
+            <p>In those days I often found myself drinking <em>zhourat</em>, an infusion of different herbs and flowers. Not one of them, taken individually, defines its flavour. It is their combination which characterises it, not because their differences disappear, but because they remain in balance. <em>Zhourat</em> reminds me of my country, Lebanon. An evident plurality, never concealed. And yet, despite everything, an expression of its unity persists. Not as a stable condition, but as a dynamic equilibrium, continuously put to the test.</p>
+
+            <p>Equilibrium is a theme I recognise in my work as well. In toxicology, damage is rarely immediate. Many substances act by altering subtle balances. As long as these hold, the system continues to function. When they begin to give way, change becomes visible.</p>
+
+            <p>In my project I observed an initially counterintuitive case. I expected an adaptive response to the introduction of a substance which increases oxidative stress: an increase in cellular defence systems, enzymes such as SOD and CAT, which neutralise species which are more reactive to oxygen. More stress, more defence. But this did not happen. As the concentration of the toxin increased, those systems decreased. The cell did not strengthen its response, it lost it.</p>
+
+            <p>The explanation lay at a deeper level. It was no longer merely a question of redox balance. The target had become the DNA, and therefore the very capacity of the cell to express its defences. This is the point in which the damage changes in nature. It is no longer simply an external interference, but a structural modification of how the system can respond. Not only is the cell itself attacked, but it is what the cell is able to do that is being altered.</p>
+
+            <p>Under these conditions, a fundamental principle emerges: resistance is not a choice, but a necessity for survival. The cell does not decide to resist; it simply activates, for as long as it can, any pathway to maintain its functions. Even a partial response may delay its collapse.</p>
+
+            <div class="section-divider"></div>
+
+            <p>This pattern does not remain confined to the lab. The conflict my country is experiencing is not limited to visible destruction, nor should we understand it as a straightforward attack on its complex identity. War operates deviously, eroding the mechanisms which allow our identity to persist.</p>
+
+            <p>Fear, uncertainty, and fragmentation do not kill you immediately. They act over time, shaping and muffling reactions and, when internalised, limiting the very capacity to respond. As with cells, the problem is not only the intensity of the stress, but &mdash; more worryingly &mdash; the loss of the response.</p>
+
+            <p>Yet, as long as part of that response survives, resistance can persist. Not only ideologically, but as a necessary condition to survival. Society, like a cell, continues to function as long as it retains even the smallest fragment of its response mechanisms.</p>
+
+            <div class="section-divider"></div>
+
+            <p>In this context, another shared element between the seemingly distant domains of who I am and what I do emerges: the search for truth and its transmission.</p>
+
+            <p>In the lab, scientists work to distinguish what is true from the vast amount of phenomena which appear. Data may be noisy, ambiguous, contradictory. Method exists precisely to reduce this ambiguity, to allow scientists to construct a representation of reality that is as reliable and communicable as possible.</p>
+
+            <p>In conflict, journalists are tasked with a comparable role. Here too there is noise: propaganda, fear, distorted narratives. Their job is not only to observe, but to make their reports truthful and accessible, maintaining coherence between reality and its account.</p>
+
+            <p>In both cases, truth is not merely knowledge. It is an instrument of resistance. For it is in a context of altered, unreliable, or concealed reality that society's response mechanisms are most exposed to the threat of manipulation, weakening, disruption, and disorganisation.</p>
+
+            <div class="section-divider"></div>
+
+            <p>Still, in living systems, damage is not the only possible outcome. Adaptation is always possible. Alternative pathways, compensations, forms of reorganisation. They do not restore the original equilibrium, but construct a new one &mdash; often imperfect, yet sufficient to carry on living.</p>
+
+            <p>In Lebanon, this dynamic is constant. What fails is replaced; what breaks is reorganised. There is no stability, but there is persistence in abundance.</p>
+
+            <p>Perhaps this is what truly defines identity. Not the absence of change, but the capacity to pass through it without dissolving.</p>
+
+            <p>Being born in Italy and having roots in Lebanon has never been a conflict to resolve, but a balance to maintain. Not always stable, not necessarily simple, but real. Just like <em>zhourat</em>: it is not a single element which defines its flavour, but the balance of them all.</p>
+
+            <p>Perhaps the same holds for identity. It is not fixed. It may be placed under pressure, it may be vulnerable, it may transform. But as long as the capacity to respond, to adapt, and to seek, transmit, and defend the truth remains, that identity will continue to exist.</p>
+
+        </div>
+
+    </article>
+
+    <!-- Keyboard shortcut hint -->
+    <div class="shortcuts-hint"></div>
+
+    <!-- Simulation -->
+    <script src="nasser.js"></script>
+
+    <script>
+        initKeyboardShortcuts({
+            extraKeys: {
+                'a': openNextArticle,
+                'A': openNextArticle,
+                'Escape': returnToHome,
+                'h': returnToHome,
+                'H': returnToHome,
+            }
+        });
+    </script>
+
+</body>
+
+</html>

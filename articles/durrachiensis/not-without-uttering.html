@@ -1,0 +1,2066 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>…not without uttering a host of obscene words… - Ianius Durrachiensis | Antitesi Magazine</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Crimson+Pro:ital,wght@0,400;0,600;1,400;1,600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../../css/index_style.css">
+    <link rel="stylesheet" href="../../css/article_style.css">
+    <link rel="stylesheet" href="../../css/mobile.css">
+
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="../../css/spark_styles.css">');
+            document.write('<script>window.magazineSparkMode = true;<\/script>');
+            document.write('<script src="../../js/flying-magazine.js"><\/script>');
+        }
+    </script>
+
+    <script src="../../js/articles-and-utils.js"></script>
+
+    <style>
+        :root {
+            --dynamic-color: #c8a96e;
+        }
+
+        html {
+            overflow-x: hidden;
+        }
+
+        /* ── Epigraph ── */
+        .epigraph {
+            font-family: 'Crimson Pro', serif;
+            font-style: italic;
+            font-size: 1.15rem;
+            line-height: 1.7;
+            opacity: 0.6;
+            margin: 3rem 0 0.4rem 0;
+            text-align: right;
+        }
+
+        .epigraph-source {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            opacity: 0.35;
+            display: block;
+            margin-bottom: 3rem;
+            text-align: right;
+        }
+
+        /* ── Graffiti blocks ── */
+        .graffito {
+            margin: 1.2rem 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0 1.5rem;
+            align-items: center;
+        }
+
+        .graffito-original {
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.10rem;
+            font-style: italic;
+            letter-spacing: 0.01em;
+            line-height: 1.55;
+            color: var(--dynamic-color);
+            text-align: right;
+        }
+
+        .graffito-translation {
+            font-family: 'Crimson Pro', serif;
+            font-size: 0.95rem;
+            opacity: 0.5;
+            font-style: normal;
+            padding-left: 1.5rem;
+            border-left: 2px solid var(--dynamic-color);
+            line-height: 1.55;
+        }
+
+        /* ── Carmelo Bene untranslated block ── */
+        .cb-block {
+            font-family: 'Crimson Pro', serif;
+            font-style: italic;
+            font-size: 1.15rem;
+            line-height: 1.7;
+            opacity: 0.6;
+            margin: 3rem 0 1.5rem 0;
+        }
+
+        /* superscript^1 */
+        .superscript {
+            font-size: 0.62rem;
+            vertical-align: super;
+            line-height: 0;
+        }
+
+
+        /* ── Footnotes ── */
+        .fn-ref {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.62rem;
+            vertical-align: super;
+            line-height: 0;
+            cursor: pointer;
+            color: var(--dynamic-color);
+            border-bottom: none;
+            margin-left: 1px;
+            user-select: none;
+            transition: opacity 0.15s;
+        }
+
+        .fn-ref:hover {
+            opacity: 0.6;
+        }
+
+        .fn-panel {
+            display: none;
+            background: var(--gray);
+            border-left: 2px solid var(--dynamic-color);
+            padding: 0.65rem 0.9rem;
+            margin: 0.5rem 0 1.5rem 0;
+            font-family: 'Crimson Pro', serif;
+            font-size: 0.88rem;
+            line-height: 1.6;
+            opacity: 0.85;
+            width: 100%;
+        }
+
+        body.dark-mode .fn-panel {
+            background: #111;
+        }
+
+        .fn-panel.open {
+            display: block;
+        }
+
+        .fn-panel em {
+            font-style: italic;
+        }
+
+        /* ── Appendix ── */
+        .appendix-rule {
+            width: 100%;
+            height: 2px;
+            background: currentColor;
+            opacity: 0.15;
+            margin: 3.5rem 0 2.5rem;
+        }
+
+        .appendix-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.58rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            opacity: 0.3;
+            display: block;
+            margin-bottom: 1.8rem;
+        }
+
+        .appendix-couplet {
+            font-family: 'Crimson Pro', serif;
+            font-style: italic;
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: var(--dynamic-color);
+            margin-bottom: 0.4rem;
+        }
+
+        .appendix-couplet-translation {
+            font-family: 'Crimson Pro', serif;
+            font-size: 0.9rem;
+            opacity: 0.45;
+            margin-bottom: 2rem;
+        }
+
+        /* ── Dear reader ── */
+        .dear-reader {
+            margin-top: 2.5rem;
+            font-size: 1.1rem;
+            line-height: 1.8;
+        }
+
+        .dear-reader p {
+            margin-bottom: 1.4rem;
+        }
+
+        /* ── Closing byline ── */
+        .closing-byline {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            opacity: 0.35;
+            margin-top: 3rem;
+        }
+
+        #non-est-hic-canvas {
+            position: absolute;
+            pointer-events: none;
+            z-index: 10;
+            opacity: 1;
+        }
+
+        .graffito-anchor {
+            position: relative;
+        }
+
+        /* Skip rendering work for graffiti SVGs while off-screen.
+           content-visibility: auto lets the browser bypass layout/paint
+           for any element outside the viewport. */
+        #p-tags svg,
+        #graffito-fn2 svg,
+        #graffito-fn3 svg {
+            content-visibility: auto;
+            contain-intrinsic-size: 400px 200px;
+        }
+
+        .phallus-gallery {
+            margin: 3rem 0;
+            border-top: none;
+        }
+
+        .phallus-gallery::before {
+            content: '';
+            display: block;
+            width: 100%;
+            height: 1px;
+            background: currentColor;
+            opacity: 0.2;
+            margin: 0 auto 1.5rem;
+        }
+
+        .gallery-caption {
+            /* SHOULD BE EQUAL TO APPENDIX CAPTION */
+            font-family: 'Inter', sans-serif;
+            font-size: 0.58rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            opacity: 0.3;
+            display: block;
+            margin-bottom: 1.8rem;
+        }
+
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.8rem;
+        }
+
+        .gallery-grid figure {
+            margin: 0;
+        }
+
+        .gallery-grid img {
+            width: 100%;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+            display: block;
+            filter: sepia(0.2) contrast(1.05);
+            transition: filter 0.3s;
+        }
+
+        .gallery-grid img:hover {
+            filter: sepia(0) contrast(1.1);
+        }
+
+        .gallery-grid figcaption {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.52rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            opacity: 0.35;
+            margin-top: 0.35rem;
+            line-height: 1.5;
+        }
+
+        .gallery-grid figure {
+            overflow: visible;
+            position: relative;
+        }
+
+        .gallery-grid img {
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), filter 0.3s;
+        }
+
+        /* Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .lightbox.open {
+            display: flex;
+        }
+
+        .lightbox img {
+            max-width: 80vw;
+            max-height: 78vh;
+            object-fit: contain;
+            display: block;
+        }
+
+        .lightbox-caption {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.58rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: #fff;
+            opacity: 0.4;
+            margin-top: 1rem;
+        }
+
+        .lightbox-close {
+            position: fixed;
+            top: 1.5rem;
+            right: 2rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #fff;
+            opacity: 0.4;
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: opacity 0.2s;
+        }
+
+        .lightbox-close:hover {
+            opacity: 1;
+        }
+
+        .lightbox-prev,
+        .lightbox-next {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.65rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #fff;
+            opacity: 0.4;
+            cursor: pointer;
+            background: none;
+            border: none;
+            transition: opacity 0.2s;
+        }
+
+        .lightbox-prev:hover,
+        .lightbox-next:hover {
+            opacity: 1;
+        }
+
+        .lightbox-prev {
+            left: 2rem;
+        }
+
+        .lightbox-next {
+            right: 2rem;
+        }
+
+        .brick-band {
+            position: relative;
+            margin: 3rem -100vw;
+            padding: 5.4rem 100vw;
+            background-color: rgba(200, 169, 110, 0.028);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='90'%3E%3Crect x='0.5' y='0.5' width='89' height='44' fill='none' stroke='rgba(0,0,0,0.055)' stroke-width='1'/%3E%3Crect x='90.5' y='0.5' width='89' height='44' fill='none' stroke='rgba(0,0,0,0.055)' stroke-width='1'/%3E%3Crect x='-44.5' y='45.5' width='89' height='44' fill='none' stroke='rgba(0,0,0,0.055)' stroke-width='1'/%3E%3Crect x='45.5' y='45.5' width='89' height='44' fill='none' stroke='rgba(0,0,0,0.055)' stroke-width='1'/%3E%3Crect x='135.5' y='45.5' width='89' height='44' fill='none' stroke='rgba(0,0,0,0.055)' stroke-width='1'/%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-size: 180px 90px;
+            overflow: visible;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        body.dark-mode .brick-band {
+            background-color: rgba(200, 169, 110, 0.018);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='90'%3E%3Crect x='0.5' y='0.5' width='89' height='44' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1'/%3E%3Crect x='90.5' y='0.5' width='89' height='44' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1'/%3E%3Crect x='-44.5' y='45.5' width='89' height='44' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1'/%3E%3Crect x='45.5' y='45.5' width='89' height='44' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1'/%3E%3Crect x='135.5' y='45.5' width='89' height='44' fill='none' stroke='rgba(255,255,255,0.07)' stroke-width='1'/%3E%3C/svg%3E");
+            border-top-color: rgba(255, 255, 255, 0.06);
+            border-bottom-color: rgba(255, 255, 255, 0.06);
+        }
+
+        @media (min-width: 767px) {
+
+            /*SOLO DESKTOP*/
+            .gallery-grid figure:hover img {
+                transform: scale(1.1);
+                filter: sepia(0) contrast(1.1);
+            }
+        }
+
+
+        /* ═══════════════════════════════════════════════════════════
+           EDITOR'S POV
+            A. anchors             — the spans the editor commented on
+            B. inline notes        — pop out right below the fragment when clicked
+            C. corner toggle       — always-visible "Editor's POV" button
+            D. magnifier cursor    — appears in POV mode, on the article
+            E. mobile              — toggle reveals tappable anchors
+           ═══════════════════════════════════════════════════════════ */
+
+        .article-view {
+            position: relative;
+        }
+
+        /* ─── A. ANCHORS ─── */
+        .ed-anchor {
+            position: relative;
+            transition: background-color 0.45s ease, box-shadow 0.45s ease;
+        }
+
+        /* Hand-drawn red ink circle around commented spots (POV active).
+           Vertical padding + clone box-decoration lets the oval extend
+           into the line's leading instead of being clipped by adjacent text. */
+        body.glasses-active .ed-anchor {
+            border: 1.4px solid rgba(178, 42, 29, 0.7);
+            border-radius: 60% 55% 65% 50% / 50% 60% 45% 55%;
+            padding: 0.22em 0.35em;
+            margin: 0 0.08em;
+            box-decoration-break: clone;
+            -webkit-box-decoration-break: clone;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* hover / open anchor → fuller ink, like a re-traced circle */
+        body.glasses-active .ed-anchor:hover,
+        body.glasses-active .ed-anchor.open {
+            border-color: var(--ink-red, #b22a1d);
+            background: rgba(178, 42, 29, 0.07);
+            box-shadow: 0 0 0 1px rgba(178, 42, 29, 0.35);
+        }
+
+        body.dark-mode.glasses-active .ed-anchor {
+            border-color: rgba(216, 72, 58, 0.75);
+        }
+
+        body.dark-mode.glasses-active .ed-anchor:hover,
+        body.dark-mode.glasses-active .ed-anchor.open {
+            border-color: var(--ink-red);
+            background: rgba(220, 70, 56, 0.12);
+            box-shadow: 0 0 0 1px rgba(220, 70, 56, 0.45);
+        }
+
+        /* ─── B. INLINE NOTES — pop out right below the commented fragment ─── */
+        /* Red proofreader's ink, used throughout the editorial layer. */
+        :root {
+            --ink-red: #b22a1d;
+        }
+
+        body.dark-mode {
+            --ink-red: #d8483a;
+        }
+
+        .ed-margin-note {
+            --stack-y: 0px;
+            /* JS-set offset to keep stacked notes from overlapping */
+            position: absolute;
+            width: 420px;
+            max-width: calc(100vw - 40px);
+            max-height: 320px;
+            overflow-y: auto;
+            font-family: 'Crimson Pro', serif;
+            font-size: 1.05rem;
+            line-height: 1.65;
+            color: #2c2622;
+            /* faint horizontal ruling, like a pad of correction paper */
+            background:
+                repeating-linear-gradient(to bottom,
+                    transparent 0,
+                    transparent 27px,
+                    rgba(178, 42, 29, 0.07) 27px,
+                    rgba(178, 42, 29, 0.07) 28px),
+                rgb(244, 244, 242);
+            border-left: 3px double var(--ink-red);
+            padding: 1.1rem 1.3rem 1.15rem 1.5rem;
+            opacity: 0;
+            pointer-events: none;
+            transform: translate(0, calc(-6px + var(--stack-y))) rotate(-0.35deg);
+            transition:
+                opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+            z-index: 30;
+            box-shadow:
+                0 1px 0 rgba(0, 0, 0, 0.04),
+                0 6px 16px rgba(0, 0, 0, 0.16),
+                0 22px 36px -18px rgba(0, 0, 0, 0.22);
+            border-radius: 1px;
+            cursor: auto;
+            /* notes themselves are not "magnifiable" */
+        }
+
+        /* Handwritten red "Ed." scribble — sits inside the note so it isn't clipped */
+        .ed-margin-note::before {
+            content: 'T.';
+            display: block;
+            font-family: 'Pinyon Script', 'Crimson Pro', cursive;
+            font-weight: 700;
+            font-size: 1.6rem;
+            line-height: 1;
+            color: var(--ink-red);
+            transform: rotate(-6deg);
+            transform-origin: left center;
+            letter-spacing: 0.02em;
+            margin: 0 0 0.55rem -0.15rem;
+        }
+
+        .ed-margin-note p {
+            margin: 0 0 0.75rem 0;
+        }
+
+        .ed-margin-note p:last-child {
+            margin-bottom: 0;
+        }
+
+        .ed-margin-note em {
+            font-style: italic;
+        }
+
+        /* Hand-underlined emphasis inside notes (red squiggle) */
+        .ed-margin-note strong {
+            font-weight: 600;
+            text-decoration: underline wavy var(--ink-red);
+            text-decoration-thickness: 1px;
+            text-underline-offset: 3px;
+        }
+
+        body.dark-mode .ed-margin-note {
+            background:
+                repeating-linear-gradient(to bottom,
+                    transparent 0,
+                    transparent 27px,
+                    rgba(216, 72, 58, 0.10) 27px,
+                    rgba(216, 72, 58, 0.10) 28px),
+                rgba(22, 20, 18, 0.96);
+            color: #ffffffd7;
+        }
+
+        .ed-margin-note.show {
+            opacity: 1;
+            transform: translate(0, var(--stack-y)) rotate(-0.35deg);
+            pointer-events: auto;
+        }
+
+        /* close-x in the corner of each open note */
+        .ed-note-close {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: var(--ink-red);
+            opacity: 0.55;
+            font-family: 'Caveat', cursive;
+            font-size: 1.05rem;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+            padding: 4px;
+        }
+
+        .ed-note-close:hover {
+            opacity: 1;
+        }
+
+        /* ── CORNER TOGGLE ── */
+        #ed-toggle {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.25rem;
+            background: #0a0a0a;
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 100px;
+            cursor: pointer;
+            z-index: 200;
+            font-family: var(--display-font), 'Inter', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 500;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.12),
+                0 8px 24px rgba(0, 0, 0, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.25s ease;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        #ed-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 4px 12px rgba(0, 0, 0, 0.16),
+                0 12px 32px rgba(0, 0, 0, 0.12);
+        }
+
+        #ed-toggle:active {
+            transform: scale(0.96);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        #ed-toggle .ed-toggle-icon {
+            width: 28px;
+            height: 15px;
+            flex-shrink: 0;
+        }
+
+        #ed-toggle .ed-toggle-icon * {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.6;
+            stroke-linecap: round;
+        }
+
+        #ed-toggle .ed-toggle-icon .lens {
+            fill: rgba(255, 255, 255, 0.07);
+        }
+
+        body.dark-mode #ed-toggle {
+            background: rgba(245, 245, 245, 0.92);
+            color: #111;
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+
+        body.dark-mode #ed-toggle .ed-toggle-icon .lens {
+            fill: rgba(0, 0, 0, 0.07);
+        }
+
+        body.glasses-active #ed-toggle,
+        body.editor-pov-mobile #ed-toggle {
+            background: var(--dynamic-color);
+            color: #111;
+            border-color: transparent;
+            box-shadow: 0 4px 20px color-mix(in srgb, var(--dynamic-color) 40%, transparent);
+        }
+
+        /* ─── D. MAGNIFIER CURSOR — gold-rimmed lens with subtle highlights ─── */
+        :root {
+            --magnifier: url("data:image/svg+xml;utf8,\
+%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60' viewBox='0 0 60 60' shape-rendering='crispEdges'%3E\
+%3Cdefs%3E\
+%3CradialGradient id='g' cx='40%25' cy='40%25' r='65%25'%3E\
+%3Cstop offset='0%25' stop-color='rgba(255,255,255,0.6)'/%3E\
+%3Cstop offset='60%25' stop-color='rgba(180,180,180,0.15)'/%3E\
+%3Cstop offset='100%25' stop-color='rgba(0,0,0,0.0)'/%3E\
+%3C/radialGradient%3E\
+%3C/defs%3E\
+%3Cline x1='34' y1='34' x2='54' y2='54' stroke='%23000' stroke-width='7.5' stroke-linecap='square'/%3E\
+%3Cline x1='34' y1='34' x2='54' y2='54' stroke='%23fff' stroke-width='3.75' stroke-linecap='square'/%3E\
+%3Ccircle cx='21' cy='21' r='18' fill='none' stroke='%23000' stroke-width='6'/%3E\
+%3Ccircle cx='21' cy='21' r='16.5' fill='url(%23g)'/%3E\
+%3Ccircle cx='21' cy='21' r='16.5' fill='none' stroke='%23fff' stroke-width='2.25'/%3E\
+%3Crect x='12' y='12' width='6' height='4.5' fill='rgba(255,255,255,0.75)'/%3E\
+%3Crect x='24' y='24' width='3' height='3' fill='rgba(255,255,255,0.4)'/%3E\
+%3C/svg%3E") 21 21, crosshair;
+        }
+
+        /* magnifier on the entire page while POV is active … */
+        body.glasses-active,
+        body.glasses-active * {
+            cursor: var(--magnifier);
+        }
+
+        /* … except interactive elements which keep their normal cursor */
+        body.glasses-active a,
+        body.glasses-active button,
+        body.glasses-active iframe,
+        body.glasses-active input,
+        body.glasses-active textarea,
+        body.glasses-active .ed-margin-note,
+        body.glasses-active .ed-margin-note *,
+        body.glasses-active #ed-toggle,
+        body.glasses-active #ed-toggle *,
+        body.glasses-active .nav-cluster,
+        body.glasses-active .nav-cluster * {
+            cursor: pointer;
+        }
+
+        body.glasses-active .ed-margin-note,
+        body.glasses-active .ed-margin-note p {
+            cursor: text;
+        }
+
+        /* commented fragments stay magnifiable (overrides the cursor: pointer above) */
+        body.glasses-active .ed-anchor,
+        body.glasses-active .ed-anchor * {
+            cursor: var(--magnifier);
+        }
+
+        /* ─── E. MOBILE ─── */
+        @media (max-width: 767px) {
+
+            /* On mobile the bottom nav-cluster covers the corner — lift the toggle above it. */
+            #ed-toggle {
+                bottom: calc(56px + env(safe-area-inset-bottom) + 0.9rem);
+                right: 0.9rem;
+                padding: 0.85rem 1.25rem;
+                font-size: 0.7rem;
+                z-index: 600;
+            }
+
+            /* Notes flow inline (after their parent block) and stay hidden until the user
+               taps the relevant fragment. Same model as desktop, just tap-to-reveal. */
+            .ed-margin-note {
+                position: static;
+                display: none;
+                width: auto;
+                max-width: 100%;
+                margin: 0.7rem 0 1.1rem;
+                transform: none;
+                max-height: none;
+            }
+
+            .ed-margin-note.show {
+                display: block;
+                opacity: 1;
+            }
+
+            /* In POV mode anchors get the dotted underline (so users see what's tappable)
+               and become tappable; an opened anchor gets the gold wash. */
+            body.editor-pov-mobile .ed-anchor {
+                border: 1.4px solid rgba(178, 42, 29, 0.7);
+                border-radius: 60% 55% 65% 50% / 50% 60% 45% 55%;
+                padding: 0.22em 0.35em;
+                margin: 0 0.08em;
+                box-decoration-break: clone;
+                -webkit-box-decoration-break: clone;
+                position: relative;
+                z-index: 1;
+                cursor: pointer;
+            }
+
+            body.editor-pov-mobile .ed-anchor.open {
+                border-color: var(--ink-red);
+                background: rgba(178, 42, 29, 0.08);
+                box-shadow: 0 0 0 1px rgba(178, 42, 29, 0.35);
+            }
+        }
+
+        /* ═══════════════════════════════════════════════════════════
+           HALLUCINATION embed
+           ═══════════════════════════════════════════════════════════ */
+        .halluc {
+            position: relative;
+            margin: 3rem 0;
+            border: 1px solid currentColor;
+            border-color: rgba(0, 0, 0, 0.12);
+            background: #000;
+            overflow: hidden;
+        }
+
+        body.dark-mode .halluc {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .halluc-frame {
+            width: 100%;
+            height: 620px;          /* taller — more room for the tool picker, color picker and the bathroom itself */
+            min-height: 480px;
+            border: 0;
+            display: block;
+        }
+        @media (max-width: 640px) {
+            .halluc-frame { height: 70vh; }   /* mobile: take a sensible chunk of the viewport */
+        }
+
+        /* Placeholder shown until the iframe is allowed to load.
+           Sits absolutely positioned over the iframe so layout is stable. */
+        .halluc-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            color: #777;
+            background:
+                radial-gradient(ellipse at center, rgba(255, 255, 255, 0.04) 0%, transparent 70%),
+                #000;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            z-index: 3;
+        }
+
+        .halluc-placeholder.hide {
+            opacity: 0;
+        }
+
+        .halluc-placeholder-label {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 0.35em;
+            text-transform: uppercase;
+            color: #aaa;
+        }
+
+        .halluc-placeholder-sub {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.55rem;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: #555;
+            transition: color 0.4s ease;
+        }
+
+        .halluc-placeholder[data-state="loading"] .halluc-placeholder-sub {
+            color: #999;
+        }
+
+        /* Loading bar — pure CSS, animates on the compositor.
+           Hidden by default (idle state). Reveals + sweeps when the
+           placeholder transitions to data-state="loading". */
+        .halluc-loader {
+            width: 180px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.06);
+            overflow: hidden;
+            position: relative;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .halluc-loader-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 40%;
+            background: linear-gradient(90deg,
+                    transparent 0%,
+                    rgba(255, 255, 255, 0.5) 50%,
+                    transparent 100%);
+            transform: translateX(-100%);
+        }
+
+        .halluc-placeholder[data-state="loading"] .halluc-loader {
+            opacity: 1;
+        }
+
+        .halluc-placeholder[data-state="loading"] .halluc-loader-bar {
+            animation: hallucSweep 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+            /* will-change tells the browser to keep this on its own
+               compositor layer — the sweep keeps animating smoothly
+               even if the renderer's main thread is busy parsing PLY. */
+            will-change: transform;
+        }
+
+        @keyframes hallucSweep {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(350%);
+            }
+        }
+
+        .halluc-caption {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.58rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            opacity: 0.3;
+            display: block;
+            margin-bottom: 0.7rem;
+        }
+
+        /* subtle hint, only visible while POV is active */
+        .halluc-hint {
+            font-family: 'Crimson Pro', serif;
+            font-style: italic;
+            font-size: 0.78rem;
+            letter-spacing: 0.04em;
+            text-transform: none;
+            color: var(--dynamic-color);
+            opacity: 0;
+            margin-left: 0.6rem;
+            transition: opacity 0.7s ease;
+            display: inline-block;
+        }
+
+        body.glasses-active .halluc-hint {
+            opacity: 0.65;
+        }
+
+        .halluc.swapped~.halluc-hint,
+        .halluc.swapped+.halluc-hint {
+            opacity: 0 !important;
+        }
+
+        .halluc-fullscreen {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.55);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.45rem 0.8rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.55rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            cursor: pointer;
+            z-index: 4;
+            opacity: 0.7;
+            transition: opacity 0.25s, background 0.25s;
+        }
+
+        .halluc-fullscreen:hover {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.8);
+        }
+
+        /* Subtle "configurator revealed" overlay shown briefly during the swap */
+        .halluc-cta {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.55);
+            color: var(--dynamic-color);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.8rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            text-decoration: none;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 5;
+            transition: opacity 0.5s ease;
+            backdrop-filter: blur(2px);
+        }
+
+        .halluc.lens-over .halluc-cta {
+            opacity: 1;
+        }
+
+        .halluc.swapped .halluc-cta {
+            opacity: 0 !important;
+        }
+
+        .halluc.swapped .halluc-frame {
+            animation: hallucReveal 0.7s ease;
+        }
+
+        @keyframes hallucReveal {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .halluc-frame {
+                height: 320px;
+            }
+        }
+
+        @media (max-width: 767px) {
+
+            /*SOLO MOBILE*/
+            .greek-fragment {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .graffito {
+                grid-template-columns: 1fr;
+                gap: 0.8rem 0;
+            }
+
+            .graffito-original {
+                font-size: 1.0rem;
+            }
+
+            .graffito-translation {
+                font-size: 0.9rem;
+                border-left: none;
+                padding-left: 0;
+                border-top: 1px solid var(--dynamic-color);
+                padding-top: 0.5rem;
+            }
+
+            .gallery-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+
+            /* ── Dear reader ── */
+            .dear-reader {
+                line-height: 1.4;
+            }
+
+            /* ── Carmelo Bene untranslated block ── */
+            .cb-block {
+                font-size: 1.1rem;
+                line-height: 1.5;
+                opacity: 0.6;
+                margin: 1.5rem 0 1.5rem 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    <div class="progress-bar"></div>
+
+    <nav class="nav-cluster">
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+        <a href="../../archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <article class="article-view">
+
+        <header class="article-header">
+            <h1 class="article-title">Futuitur cunnus pilosus</h1>
+            <div class="article-meta" id="article-meta">
+                <span>Article</span>
+                <span>~8 min read</span>
+                <span>May 2026</span>
+            </div>
+            <div class="article-author" id="article-author">by Ianius Durrachiensis</div>
+            <p class="epigraph">…not without uttering a host of obscene words…</p>
+            <span class="epigraph-source">M. De Sade, 120 days of Sodom, <span class="ed-anchor" data-cid="c0">p.
+                    164</span></span>
+        </header>
+
+        <script>
+            (function () {
+                const filename = window.location.pathname.split('/').pop();
+                const data = (typeof articles !== 'undefined') && articles.find(a => a.filename === filename);
+                if (!data) return;
+                const meta = document.getElementById('article-meta');
+                const author = document.getElementById('article-author');
+                if (meta) meta.innerHTML = `<span>Article</span><span>~${data.readTime} read</span><span>${data.publishDate}</span>`;
+                if (author) author.textContent = 'by ' + data.author;
+            })();
+        </script>
+
+        <div class="article-content">
+
+            <p><span class="ed-anchor" data-cid="c1">Bodleian Library, Oxford. Early May.</span></p>
+
+            <p>XIXth century rules of textual criticism, palaeography of medieval manuscripts, humanists’ conjectures,
+                Bentley-Luchs’ norm on iambic metre.
+                Romans? Probably never wrote a line of poetry without a German
+                golden-pince-nez-bowtie-stiff-detachable-<span class="ed-anchor" data-cid="c4">collar</span> philologist
+                lecturing them.</p>
+
+            <p>Ran to the loo. Massive shit. Tiles gleaming white, silicone caulk squeezed tight between them.
+                Smell antiseptic, sterile, absurdly posh. Ridiculous. Don’t we need the aroma of urea and shit?
+                Maybe the rumbling sound of someone else trying to relieve their <span class="ed-anchor"
+                    data-cid="c5">bowels</span>?</p>
+
+            <p>Idea strikes. At least something to read. Charcoal, chalk, a <em>fibula</em>? <span class="ed-anchor"
+                    data-cid="c6">Whatever pointed</span>. Better:
+                some <em>atramentum tectorium</em> to paint all over the walls? <span class="ed-anchor"
+                    data-cid="c7">Ended up taking a pen</span> (remember: NO PENS
+                ARE ALLOWED IN THE MANUSCRIPTS' <span class="ed-anchor" data-cid="c8">ROOM</span>).</p>
+
+            <p>Write something smart. <span class="ed-anchor" data-cid="c9">Bear in mind the pedantic orthodoxy (not all
+                    of the rules should be fucked…)</span>.</p>
+
+            <div class="graffito" id="graffito-fn1" onclick="toggleFn('fn1')">
+                <span class="graffito-original">Futuitur cunnus pilossus multo melius quam glaber<br>
+                    eadem continet vaporem et eadem vellit mentulam<span class="fn-ref">1</span></span>
+                <span class="graffito-translation">[A hairy cunt is fucked much better than a shaved one;<br>
+                    it retains <span class="ed-anchor" data-cid="c12">the heat and tickles the</span> cock]</span>
+            </div>
+            <div class="fn-panel" id="fn1"><em>CIL</em> IV 1830 (p. 212, 464, 1684). CIL stands for Corpus Inscriptionum
+                Latinarum; the number of the volume indicates the area it comes from, the IVth regards Pompeii and, more
+                in general, the Vesuvian area.</div>
+
+            <p>Error? Of course. Who notices. Surely my friend D., strict lecturer in Latin. <em>Memento, amice</em>:
+                "Knowledge rests not upon truth alone, but on error also" (C. Jung, Freud and Psychoanalysis, Collected
+                Works 4, Princeton, University Press, p. 774).
+                Do you know that if I weren't a philologist — am I really one? — I'd have been a psychoanalyst? Lacanian
+                school, obviously.</p>
+
+            <p>Not satisfied. Trousers still down. Need more scandal.</p>
+
+            <div class="graffito" id="graffito-fn2" onclick="toggleFn('fn2')">
+                <span class="graffito-original">Non est hic tutum tibi aperire culum<span class="fn-ref">2</span></span>
+                <span class="graffito-translation">[It's not safe to open your ass here]</span>
+            </div>
+            <div class="fn-panel" id="fn2"><em>CIL</em> IV 8899.</div>
+
+            <p>Then I draw a flipping prick, "a big chancrous cock laid open longitudinally" (H. Miller, Tropic of
+                Cancer, Paris, Obelisk Press, 1934). And I write near both sides:</p>
+
+            <div class="graffito" id="graffito-fn3" onclick="toggleFn('fn3')">
+                <span class="graffito-original">hanc ego cacavi<span class="fn-ref">3</span></span>
+                <span class="graffito-translation">[I have shat <span class="ed-anchor" data-cid="c13">out
+                        this</span>]</span>
+            </div>
+            <div class="fn-panel" id="fn3"><em>CIL</em> X 8145.</div>
+
+            <div class="brick-band">
+                <p id="p-tags">I thought of that time I was in Dalston, London. Everywhere half-torn posters worn by the
+                    rain, with political bullshit on it. The walls there are covered in graffiti, have you noticed it?
+                    Spray cans: red; black; neon green. Enormous <span class="ed-anchor" data-cid="c14">'tags'</span>.
+                    <span class="ed-anchor" data-cid="c15">Now
+                        remind the ancient Pompeii: if you haven't been, go and see the political graffiti and the
+                        'restaurant' advertisements (ticket is now 18€)</span>.
+                </p>
+            </div>
+
+            <p>We ended up getting into a club that night. Again, the loo. I won't say what two people were talking
+                about in the corner. Tiles <span class="ed-anchor" data-cid="c17">written</span> with everything: no
+                hierarchy, just accumulation. <em><span class="ed-anchor" data-cid="c18">Call 0573364
+                        for great blowjobs; A sad lesbian needs donation; I have fucked here, 'twas great.</span></em>
+            </p>
+
+            <p>I added something more exotic:</p>
+
+            <div class="graffito" onclick="toggleFn('fn4')">
+                <div class="graffito-original">
+                    ἴσος κιναίδου και κακῆς πόρνης ὁ νοῦς·<br>
+                    χαίρουσιν ἄμφω λαμβάνοντες κέρματα<br>
+                    κινούμενοί τε καὶ διατρυμώμενοι<br>
+                    βινούμενοί τε και διεσπεκλωμένοι<br>
+                    γομφούμενοί τε και διασφηνώμενοι<br>
+                    …<span class="fn-ref">4</span>
+                </div>
+                <div class="graffito-translation">
+                    [the mind of a faggot and a bad whore is the same:<br>
+                    both delight in taking cash,<br>
+                    in being screwed and bored through,<br>
+                    fucked and smashed,<br>
+                    doweled and wedged apart<br>
+                    …]
+                </div>
+            </div>
+            <div class="fn-panel" id="fn4">Frg. 328 W. (i.e., fragment 328 in Martin West's 1989 edition). It is
+                traditionally attributed to Archilochus (7th century BCE), but most probably the author is the smart
+                Greek scholar Leo Allatius (1586–1669)!</div>
+
+            <p>Ancient and contemporary. OBSCENE. All of it.</p>
+
+            <div class="cb-block" onclick="toggleFn('fn5')">
+                Osceno vuol dire appunto fuori dalla scena, cioè visibilmente invisibile di sé.<br><br>
+                Il porno si instaura dopo la morte del desiderio – morto sacrificato eros – l'aldilà del desiderio.
+                Quando tu fai qualcosa al di là della voglia, la voglia della voglia, questo è il porno. E' una
+                svogliatezza. Il porno è il manque, è quanto non è.<span class="fn-ref">5</span>
+            </div>
+            <div class="fn-panel" id="fn5">CB, Carmelo Bene, playwright and theatre actor, on an Italian TV show. I
+                won't translate this text, because, to put it in his words, <em>there is no need to understand</em>. A
+                brief explanation: December 1990. CB went to Moscow, to the Majakovskij Theatre, with his
+                <em>Achilleide</em> and with the reading of Russian poets (revisited his old 1962 Majakovskij
+                performance). Everything was in Italian. His <em>phoné</em> and the electronic music enchanted both
+                audience and critics, who compared him to their Nižinskij (please, reader, if you don't know this other
+                master of the <em>osceno</em>, study him!).
+            </div>
+
+            <p>This is what we look for with the obscene? Is this what theatre and (sexual) graffiti represent, both,
+                and in a similar way, ancient and contemporary?</p>
+
+            <div class="section-divider"></div>
+
+            <p>The light <span class="ed-anchor" data-cid="c19">turns back brighter</span>. Hallucination and nightmare,
+                I guess. Adjusted my Marinella tie <span class="ed-anchor" data-cid="c20">with
+                    blue-damasque decorations</span>, an automatic gesture. <span class="ed-anchor" data-cid="c21">Moved
+                    further</span> Ribbeck's Latin comic theatre fragments
+                (1898) and the last issue of the Pompeian graffiti (vol. 4.3). I <span class="ed-anchor"
+                    data-cid="c22">went on</span>: if I follow manuscript
+                <em>H</em>, this might be an iambic senarius (ia<span class="superscript">6</span>), but it would
+                <em>violate</em> Bentley-Luchs; if we split the text they might be two incomplete trochaic septenarii
+                (tr<span class="superscript">7</span>). Good idea.
+            </p>
+
+            <!-- GALLERY -->
+            <div class="phallus-gallery">
+                <p class="gallery-caption">Gallery · Parietes around the world</p>
+                <div class="gallery-grid">
+                    <figure>
+                        <img src="../../multimedia/durrachiensis-media/images/Peoples_cafe.jpg"
+                            style="object-fit: contain;" alt="Restroom graffiti in San Francisco">
+                        <figcaption>Restroom graffiti in San Francisco</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../../multimedia/durrachiensis-media/images/davao-city, philippines.jpg"
+                            style="object-fit: contain;" alt="Phallus Graffiti from Davao City, Philippines">
+                        <figcaption>Graffiti from Davao City, Philippines</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../../multimedia/durrachiensis-media/images/ejaculating_ancient.jpg"
+                            style="object-fit: contain;" alt="Fascinum from Leptis Magna (Libya)">
+                        <figcaption>Fascinum from Leptis Magna, Libya</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../../multimedia/durrachiensis-media/images/winged_graffiti2.jpg"
+                            style="object-fit: contain;" alt="Phallus graffiti in Logroño, Spain">
+                        <figcaption>Graffiti from Logroño, Spain</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../../multimedia/durrachiensis-media/images/hanc-ego.jpeg"
+                            style="object-fit: contain;" alt="Phallus for a Pompeii house address (from MANN, Naples)">
+                        <figcaption>Pompeii house address, at MANN, Naples</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../../multimedia/durrachiensis-media/images/latrinalia_helsinki.JPG"
+                            style="object-fit: contain;" alt="Latrinalia from Helsinki, Finland">
+                        <figcaption>Latrinalia from Helsinki, Finland</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../../multimedia/durrachiensis-media/images/winged_metal.webp"
+                            style="object-fit: contain;"
+                            alt="Phallus-shaped charm from Italy; Bronze; 1st - 3rd century AD">
+                        <figcaption>Charm from Italy; Bronze; 1st - 3rd century AD</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../../multimedia/durrachiensis-media/images/pompeii_graffiti.jpg"
+                            style="object-fit: contain;" alt="Phallus graffiti at the Odeon in Pompeii">
+                        <figcaption>Graffiti at the Odeon in Pompeii</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../../multimedia/durrachiensis-media/images/sidney.jpg" style="object-fit: contain;"
+                            alt="Phallus graffiti in Sidney, Australia">
+                        <figcaption>Graffiti from Sidney, Australia</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../../multimedia/durrachiensis-media/images/Priapus.webp" style="object-fit: contain;"
+                            alt="Fresco of Priapus, Casa dei Vettii, Pompeii">
+                        <figcaption>Fresco of Priapus, Casa dei Vettii, Pompeii</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../../multimedia/durrachiensis-media/images/tintinnabulum.jpg"
+                            style="object-fit: contain;"
+                            alt="A tintinnabulum, a magico-religious phallus thought to ward off the evil eye and bring good fortune and prosperity, found in Pompeii">
+                        <figcaption>A Tintinnabulum found in Pompeii</figcaption>
+                    </figure>
+                    <figure>
+                        <img src="../../multimedia/durrachiensis-media/images/latrinalia_edimburgo.avif"
+                            style="object-fit: contain;" alt="Latrinalia from Edinburgh, Scotland">
+                        <figcaption>Latrinalia from Edinburgh, Scotland</figcaption>
+                    </figure>
+                </div>
+            </div>
+
+            <!-- HALLUCINATION embed -->
+            <div class="appendix-rule"></div>
+            <span class="halluc-caption">Hallucination · A bathroom inside a bathroom<em class="halluc-hint">— knock
+                    thrice to enter editor mode</em></span>
+            <figure class="halluc" id="halluc-figure">
+                <!-- src is intentionally empty — assigned by JS after window.load
+                     AND when the iframe enters the viewport. The ?v=marker query
+                     is a cache-buster so visitors who loaded the previous version
+                     of hallucination.html pull the new one with the marker tool.
+                     Bump this whenever the iframe page meaningfully changes. -->
+                <iframe class="halluc-frame" data-src="./hallucination.html?v=toolbar"
+                    title="Hallucination — bathroom"
+                    loading="lazy" allow="fullscreen"></iframe>
+                <div class="halluc-placeholder" data-state="idle" aria-hidden="true">
+                    <div class="halluc-loader">
+                        <span class="halluc-loader-bar"></span>
+                    </div>
+                    <span class="halluc-placeholder-label">Hallucination</span>
+                    <span class="halluc-placeholder-sub">a bathroom · loads when scrolled into view</span>
+                </div>
+                <button class="halluc-fullscreen" type="button" onclick="hallucFullscreen(this)">Fullscreen ⤢</button>
+                <span class="halluc-cta" aria-hidden="true">Revealing configurator…</span>
+            </figure>
+
+            <!-- APPENDIX -->
+            <div class="appendix-rule"></div>
+            <span class="appendix-label">Appendix</span>
+
+            <div class="graffito" style="font-size: 0.95em; font-style: normal;">
+                <span class="graffito-original" style="font-size: 1rem;" onclick="toggleFn('fn6')">
+                    Hodus ait nostram vitam non esse pudicam:<br>
+                    E scriptis mentem concipit ille meis<span class="fn-ref">6</span></span>
+                <span class="graffito-translation">
+                    [Hodus says that our life is not modest:<br>
+                    he understood this from my writings]<br>
+            </div>
+            <div class="fn-panel" id="fn6">— Il Panormita, <em>Hermaphroditus</em>, XVIII, 1–2</div>
+
+
+            <!-- DEAR READER -->
+            <div class="dear-reader">
+                <p>Dear reader,</p>
+
+                <p>before you pass judgement on the pages you have just read, before you dismiss them as
+                    merely indecorous or gratuitous, allow a brief appeal. What you have encountered belongs,
+                    fully and legitimately, to the domain of literature. It is not an aberration at its margins, but
+                    one of its oldest and most persistent voices. From Aristophanes to Martial, from Pacifico
+                    Massimi to Marquis de Sade, from Allen Ginsberg to Pierpaolo Pasolini—and one might
+                    easily continue—the obscene has been written, read, condemned, and preserved.</p>
+                <p>To study such material is not to indulge it uncritically, nor to celebrate it naïvely, but to
+                    understand it. This is, in part, the task of certain scholars within Classical Philology: to
+                    confront the totality of human expression transmitted through ancient texts, including what is
+                    coarse, transgressive, or socially marginal. The philologist does not avert their gaze; rather,
+                    they ask how such words came to be written, transmitted, edited, censored, or emended.</p>
+
+                <p>A crucial body of evidence in this respect is that of ancient graffiti. By ‘graffiti’ we mean
+                    informal inscriptions scratched, incised, or painted on walls, pottery, or other surfaces—often
+                    anonymous. The ancient cities preserve thousands of such texts: political slogans,
+                    declarations of love, advertisements, insults, and, not infrequently, obscenities. Alongside
+                    graffiti stands the tradition of comic theatre, where obscenity is neither accidental nor
+                    marginal, but structurally embedded. Sexual explicitness, scatology, and verbal aggression
+                    are functional.</p>
+
+                <p>You may find it useful, at this point, to compare these ancient phenomena with their
+                    contemporary counterparts. <span class="ed-anchor" data-cid="c24">The inscribed walls of Pompeii are
+                        not so distant, in function,
+                        from the public feeds of today. An ancient wall, layered with names, insults, erotic boasts,
+                        replies, and counter-replies, resembles, in many respects, the open ‘bacheca’ of platforms
+                        such as X: a shared surface where multiple voices accumulate and interact in full view of
+                        others.</span> Theatre, too, offers a revealing parallel. The ancient comic stage, with its
+                    obscenities,
+                    finds echoes in contemporary forms of performance, e.g. stand-up comedy or certain strands
+                    of online video culture, where transgression and the testing of limits remain central. </p>
+
+                <p>What persists, across these forms and across time, is not simply obscenity itself, but the
+                    <span class="ed-anchor" data-cid="c27">human need to give voice to what formal discourse
+                        excludes</span>: to write what is ‘off-stage’, yet
+                    insistently present.
+                </p>
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="lightbox" id="lightbox">
+            <button class="lightbox-close" onclick="closeLightbox()">Close ✕</button>
+            <button class="lightbox-prev" onclick="lightboxStep(-1)">← Prev</button>
+            <img id="lightbox-img" src="" alt="">
+            <div class="lightbox-caption" id="lightbox-caption"></div>
+            <button class="lightbox-next" onclick="lightboxStep(1)">Next →</button>
+        </div>
+
+    </article>
+
+    <!-- Editor's POV — corner toggle (always visible) -->
+    <button id="ed-toggle" type="button" aria-pressed="false" aria-label="Toggle editor's POV">
+        <svg class="ed-toggle-icon" viewBox="0 0 60 30" aria-hidden="true">
+            <ellipse class="lens" cx="14" cy="15" rx="10.5" ry="8.5" />
+            <ellipse class="lens" cx="46" cy="15" rx="10.5" ry="8.5" />
+            <path d="M 24.5 15 Q 30 11 35.5 15" />
+            <path d="M 4 15 Q 0 11 0 7" />
+            <path d="M 56 15 Q 60 11 60 7" />
+        </svg>
+        <span>Editor's POV</span>
+    </button>
+
+
+    <div class="shortcuts-hint"></div>
+
+    <script>
+        const colors = ['#ff3366', '#3366ff', '#33ff66', '#ff9933', '#9933ff', '#33ffff'];
+        let colorIndex = 0;
+        function changeColor() {
+            colorIndex = (colorIndex + 1) % colors.length;
+            document.documentElement.style.setProperty('--dynamic-color', colors[colorIndex]);
+        }
+        document.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('fn-ref')) changeColor();
+        });
+
+        function toggleFn(id) {
+            const panel = document.getElementById(id);
+            if (!panel) return;
+            panel.classList.toggle('open');
+        }
+
+        initKeyboardShortcuts({
+            extraKeys: {
+                'a': openNextArticle,
+                'A': openNextArticle,
+                'Escape': returnToHome,
+                'h': returnToHome,
+                'H': returnToHome,
+            }
+        });
+
+        initProgressBar();
+    </script>
+
+    <script>
+        // ── Graffiti: idle-time prefetch → draw on scroll-in → erase on scroll-out ──
+        (function () {
+            const isMob = window.innerWidth < 768;
+            const isDark = () => document.body.classList.contains('dark-mode');
+            const rIC = window.requestIdleCallback || function (cb) { return setTimeout(cb, 1); };
+            const rAF = window.requestAnimationFrame || function (cb) { return setTimeout(cb, 16); };
+
+            // Each entry: which SVG, where to attach, which element triggers it.
+            // Facial + winged share one trigger so they animate together.
+            const GRAFFITI = [
+                {
+                    id: 'non-est-hic',
+                    src: '../../multimedia/durrachiensis-media/non-est-hic.svg',
+                    anchor: 'p-tags',
+                    trigger: 'graffito-fn2',
+                    mob: 'position:absolute;right:0;top:23%;transform:translateY(-75%) translateX(0%) rotate(-4deg);overflow:visible;opacity:0.9;width:300px;pointer-events:none;',
+                    desk: 'position:absolute;right:0;top:23%;transform:translateY(-75%) translateX(-60%) rotate(-4deg);overflow:visible;opacity:0.9;width:620px;pointer-events:none;',
+                    darkStroke: true, darkFill: true,
+                },
+                {
+                    id: 'hanc-ego',
+                    src: '../../multimedia/durrachiensis-media/hanc-ego.svg',
+                    anchor: 'p-tags',
+                    trigger: 'graffito-fn3',
+                    mob: 'position:absolute;right:0;top:210%;transform:translateY(-77%) translateX(-80%);overflow:visible;opacity:0.9;width:240px;pointer-events:none;',
+                    desk: 'position:absolute;right:0;top:210%;transform:translateY(-75%) translateX(-10%);overflow:visible;opacity:0.9;width:600px;pointer-events:none;',
+                    darkStroke: true, darkFill: true,
+                },
+                {
+                    id: 'facial',
+                    src: '../../multimedia/durrachiensis-media/facial.svg',
+                    anchor: 'p-tags',
+                    trigger: 'p-tags',
+                    mob: 'position:absolute;right:0;top:120%;transform:translateY(-50%) rotate(-15deg);overflow:visible;opacity:0.9;width:140px;pointer-events:none;',
+                    desk: 'position:absolute;right:-300px;top:50%;transform:translateY(-49%);overflow:visible;opacity:0.9;width:380px;pointer-events:none;',
+                    darkStroke: true, darkFill: false,
+                },
+                {
+                    id: 'winged',
+                    src: '../../multimedia/durrachiensis-media/winged.svg',
+                    anchor: 'p-tags',
+                    trigger: 'p-tags',
+                    mob: 'position:absolute;left:0;top:-20%;transform:translateY(-50%);overflow:visible;opacity:0.9;width:140px;pointer-events:none;',
+                    desk: 'position:absolute;left:-310px;top:50%;transform:translateY(-50%);overflow:visible;opacity:0.9;width:380px;pointer-events:none;',
+                    darkStroke: true, darkFill: false,
+                },
+            ];
+
+            // Runtime state per graffito
+            GRAFFITI.forEach(g => {
+                g.svg = null;
+                g.strokes = null;
+                g.ready = false;
+                g.inDom = false;
+                g.want = false;
+                g.timers = [];
+            });
+
+            function cancelAnim(g) { g.timers.forEach(clearTimeout); g.timers = []; }
+
+            // ── Staggered idle-time prefetch ─────────────────────────────
+            function prefetchAll() {
+                GRAFFITI.forEach((g, i) => {
+                    setTimeout(() => loadGraffito(g), 80 * i);
+                });
+            }
+
+            function loadGraffito(g) {
+                const opts = 'priority' in Request.prototype ? { priority: 'low' } : undefined;
+                fetch(g.src, opts)
+                    .then(r => { if (!r.ok) throw new Error(g.id + ' ' + r.status); return r.text(); })
+                    .then(text => {
+                        rIC(() => parseAndPrep(g, text), { timeout: 1500 });
+                    })
+                    .catch(err => console.warn('graffiti prefetch:', err));
+            }
+
+            function parseAndPrep(g, text) {
+                const svg = new DOMParser().parseFromString(text, 'image/svg+xml').querySelector('svg');
+                if (!svg) return;
+                if (isDark()) applyDark(g, svg);
+                const strokes = Array.from(svg.querySelectorAll('g'));
+                for (let i = 0; i < strokes.length; i++) strokes[i].style.opacity = '0';
+                g.svg = svg;
+                g.strokes = strokes;
+                g.ready = true;
+                if (g.want) showGraffito(g);
+            }
+
+            function applyDark(g, svg) {
+                if (g.darkStroke) svg.querySelectorAll('[stroke]').forEach(el => {
+                    if (el.getAttribute('stroke') !== 'none') el.setAttribute('stroke', '#fff');
+                });
+                if (g.darkFill) svg.querySelectorAll('[fill]').forEach(el => {
+                    if (el.getAttribute('fill') !== 'none') el.setAttribute('fill', '#fff');
+                });
+                svg.style.opacity = '0.6';
+            }
+
+            // ── show: attach to DOM then draw strokes one by one ──
+            function showGraffito(g) {
+                g.want = true;
+                if (!g.ready) return;
+                cancelAnim(g);
+
+                rAF(() => {
+                    if (!g.want) return;
+                    if (!g.inDom) {
+                        const anchor = document.getElementById(g.anchor);
+                        if (!anchor) return;
+                        anchor.style.position = 'relative';
+                        anchor.style.overflow = 'visible';
+                        g.svg.style.cssText = isMob ? g.mob : g.desk;
+                        g.svg.style.overflow = 'visible';
+                        g.svg.style.pointerEvents = 'none';
+                        anchor.appendChild(g.svg);
+                        g.inDom = true;
+                    }
+                    const strokes = g.strokes;
+                    if (!strokes.length) return;
+                    for (let i = 0; i < strokes.length; i++) {
+                        const s = strokes[i];
+                        s.style.transition = 'none';
+                        s.style.opacity = '0';
+                    }
+                    rAF(() => {
+                        const stagger = Math.max(20, Math.min(80, 3200 / strokes.length));
+                        for (let i = 0; i < strokes.length; i++) {
+                            const s = strokes[i];
+                            g.timers.push(setTimeout(() => {
+                                s.style.transition = 'opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1)';
+                                s.style.opacity = '1';
+                            }, i * stagger));
+                        }
+                    });
+                });
+            }
+
+            // ── hide: erase strokes in reverse then detach from DOM ──
+            function hideGraffito(g) {
+                g.want = false;
+                if (!g.inDom || !g.ready) return;
+                cancelAnim(g);
+
+                const strokes = g.strokes.slice().reverse();
+                if (!strokes.length) { g.svg.remove(); g.inDom = false; return; }
+                const stagger = Math.max(10, Math.min(50, 2000 / strokes.length));
+                for (let i = 0; i < strokes.length; i++) {
+                    const s = strokes[i];
+                    g.timers.push(setTimeout(() => {
+                        s.style.transition = 'opacity 0.5s ease-in';
+                        s.style.opacity = '0';
+                    }, i * stagger));
+                }
+                const totalMs = (strokes.length - 1) * stagger + 500;
+                g.timers.push(setTimeout(() => {
+                    if (!g.want) { g.svg.remove(); g.inDom = false; }
+                }, totalMs));
+            }
+
+            const byTrigger = {};
+            GRAFFITI.forEach(g => { (byTrigger[g.trigger] = byTrigger[g.trigger] || []).push(g); });
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    (byTrigger[entry.target.id] || []).forEach(g =>
+                        entry.isIntersecting ? showGraffito(g) : hideGraffito(g)
+                    );
+                });
+            }, { threshold: 0.25 });
+
+            function init() {
+                Object.keys(byTrigger).forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) observer.observe(el);
+                });
+                function startPrefetch() {
+                    rIC(prefetchAll, { timeout: 3000 });
+                }
+                if (document.readyState === 'complete') startPrefetch();
+                else window.addEventListener('load', () => setTimeout(startPrefetch, 600), { once: true });
+            }
+
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+            else init();
+        })();
+
+        // Lightbox
+        const galleryFigures = Array.from(document.querySelectorAll('.gallery-grid figure'));
+        let lightboxIndex = 0;
+
+        galleryFigures.forEach((fig, i) => {
+            fig.addEventListener('click', () => openLightbox(i));
+        });
+
+        function openLightbox(i) {
+            lightboxIndex = i;
+            const fig = galleryFigures[i];
+            document.getElementById('lightbox-img').src = fig.querySelector('img').src;
+            document.getElementById('lightbox-caption').textContent = fig.querySelector('figcaption').textContent;
+            document.getElementById('lightbox').classList.add('open');
+            const spark = document.getElementById('spark-wrap');
+            if (spark) { spark.style.pointerEvents = 'none'; spark.style.opacity = '0'; }
+            const mag = document.querySelector('.magazine-title');
+            if (mag) { mag.style.pointerEvents = 'none'; mag.style.opacity = '0'; }
+        }
+
+        function closeLightbox() {
+            document.getElementById('lightbox').classList.remove('open');
+            const spark = document.getElementById('spark-wrap');
+            if (spark) { spark.style.pointerEvents = ''; spark.style.opacity = ''; }
+            const mag = document.querySelector('.magazine-title');
+            if (mag) { mag.style.pointerEvents = ''; mag.style.opacity = ''; }
+        }
+
+        function lightboxStep(dir) {
+            lightboxIndex = (lightboxIndex + dir + galleryFigures.length) % galleryFigures.length;
+            openLightbox(lightboxIndex);
+        }
+
+        document.addEventListener('keydown', e => {
+            const lb = document.getElementById('lightbox');
+            if (!lb.classList.contains('open')) return;
+            if (e.key === 'ArrowRight') lightboxStep(1);
+            if (e.key === 'ArrowLeft') lightboxStep(-1);
+            if (e.key === 'Escape') closeLightbox();
+        });
+
+        document.getElementById('lightbox').addEventListener('click', e => {
+            if (e.target === e.currentTarget) closeLightbox();
+        });
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         HALLUCINATION — deferred load + fullscreen
+         The iframe contains a Three.js point-cloud viewer that fetches
+         ~390 MB of .ply data + the Three.js bundle from unpkg. We hold
+         its src in data-src and only assign it once BOTH conditions
+         are met:
+           1. window.load has fired (everything else is on disk/cache)
+           2. the iframe is within ~1.5 viewports of the user
+         Until then, a static placeholder occupies the same space.
+         ═══════════════════════════════════════════════════════════ -->
+    <script>
+        (function () {
+            const figure = document.getElementById('halluc-figure');
+            if (!figure) return;
+            const iframe = figure.querySelector('.halluc-frame');
+            const placeholder = figure.querySelector('.halluc-placeholder');
+            if (!iframe || !iframe.dataset.src) return;
+
+            let pageLoaded = document.readyState === 'complete';
+            let inViewport = false;
+            let triggered = false;
+
+            const subLabel = placeholder && placeholder.querySelector('.halluc-placeholder-sub');
+
+            function tryLoad() {
+                if (triggered) return;
+                if (!pageLoaded || !inViewport) return;
+                triggered = true;
+
+                // Flip the placeholder into "loading" state. The CSS-only
+                // sweep bar animates on the compositor thread, so it keeps
+                // moving even if the iframe's PLY parse later stalls the
+                // renderer's main thread — the user always sees the page
+                // is doing something rather than appearing frozen.
+                if (placeholder) placeholder.setAttribute('data-state', 'loading');
+                if (subLabel) subLabel.textContent = 'loading bathroom panorama…';
+
+                const rIC = window.requestIdleCallback || function (cb) { return setTimeout(cb, 200); };
+                rIC(() => {
+                    iframe.src = iframe.dataset.src;
+                    iframe.addEventListener('load', () => {
+                        if (placeholder) {
+                            // Iframe document is parsed; its own #loading
+                            // overlay takes over from here. Brief grace
+                            // period so the handover is invisible.
+                            if (subLabel) subLabel.textContent = 'entering scene…';
+                            setTimeout(() => {
+                                placeholder.classList.add('hide');
+                                setTimeout(() => placeholder.remove(), 600);
+                            }, 200);
+                        }
+                    }, { once: true });
+                }, { timeout: 4000 });
+            }
+
+            // Condition 1 — window.load
+            if (!pageLoaded) {
+                window.addEventListener('load', () => {
+                    pageLoaded = true;
+                    tryLoad();
+                }, { once: true });
+            }
+
+            // Condition 2 — viewport proximity. rootMargin pads the
+            // detection zone so we kick off before the user scrolls
+            // the figure into view, hiding load time behind scroll.
+            const io = new IntersectionObserver((entries) => {
+                if (entries.some(e => e.isIntersecting)) {
+                    inViewport = true;
+                    io.disconnect();
+                    tryLoad();
+                }
+            }, { rootMargin: '600px 0px 600px 0px', threshold: 0 });
+            io.observe(figure);
+        })();
+
+        function hallucFullscreen(btn) {
+            const fig = btn.parentElement;
+            const iframe = fig.querySelector('.halluc-frame');
+            // If user clicks fullscreen before the deferred load has
+            // fired, force-trigger the load now so we don't fullscreen
+            // an empty iframe.
+            if (!iframe.src && iframe.dataset.src) {
+                const placeholder = fig.querySelector('.halluc-placeholder');
+                const subLabel = placeholder && placeholder.querySelector('.halluc-placeholder-sub');
+                if (placeholder) placeholder.setAttribute('data-state', 'loading');
+                if (subLabel) subLabel.textContent = 'loading bathroom panorama…';
+                iframe.src = iframe.dataset.src;
+                if (placeholder) {
+                    iframe.addEventListener('load', () => {
+                        if (subLabel) subLabel.textContent = 'entering scene…';
+                        setTimeout(() => {
+                            placeholder.classList.add('hide');
+                            setTimeout(() => placeholder.remove(), 600);
+                        }, 200);
+                    }, { once: true });
+                }
+            }
+            const target = iframe;            // fullscreen the iframe so its own UI fills the screen
+            if (document.fullscreenElement) document.exitFullscreen();
+            else if (target.requestFullscreen) target.requestFullscreen();
+            else if (target.webkitRequestFullscreen) target.webkitRequestFullscreen();
+        }
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════════════
+         EDITOR'S POV — comments data + glasses interaction
+         ═══════════════════════════════════════════════════════════ -->
+    <script>
+        (function () {
+
+            // ─────────────────────────────────────────────────────────────
+            //  TUNABLES
+            // ─────────────────────────────────────────────────────────────
+            const NOTE_WIDTH = 420;         // matches CSS .ed-margin-note width
+            const NOTE_STACK_GAP = 14;      // px between two stacked notes
+            const DESKTOP_MIN_WIDTH = 768;  // below this → mobile layout
+
+            // ─────────────────────────────────────────────────────────────
+            //  COMMENTS — keys match data-cid on the .ed-anchor spans.
+            //  Long multi-part editor comments are merged into one entry.
+            // ─────────────────────────────────────────────────────────────
+            const COMMENTS = {
+                'c0': `<p>Do we want specific (bibliography style) citations / links, so people can actually find it? It would be an exercise in pedantry I would appreciate.</p>`,
+
+                'c1': `<p>I appreciate how placing this sentence up here makes it seem as a date from a diary entry while providing the context necessary to understand the following paragraph; however, it does make the following paragraph less easy to understand. Perhaps <em>'…Early May: XIXth century…'</em> would be easier to understand.</p>
+<p>The colon, however, is not optimal as it would imply changing the structure of the two previous sentences and lose the diary-quality of it all. It would be ideal if there was a punctuation mark which could support both constructions at once. Such a mark was apparently invented by some grammar-fiend monk in the middle ages who paraded it in a fantasia on utopic grammar — but I can't remember what it was called.</p>
+<p>Let's try asking Mr. Google: 'medieval monk punctuation mark for everything and anything'. Useless, of course — silly Googlegoose. I try a few other searches: 'unique punctuation marks' produces a reddit thread on the interrobang and other new-age bullshit; Google's AI suggests names as if I were trying to <em>invent</em> one (fuck u, when I was 14 I designed my own script, why would I ask AI to do it for me); drawing the symbol and reverse-image-searching only led me to narutopedia and a detailed explanation of the Uchiha clan's 'sharingan'. Ugh — why do we not care about codices on esoteric and fantastic grammar enough for reddit and Naruto not to bury them in the internet??</p>
+<p>But maybe this is the way. Reading the names of the authors will help me recollect (darn Platonic anamnesis). Raymond Lull, Girolamo Cardano, the Voynich manuscript, Johannes… <strong>Johannes Trithemius!!</strong> 1462–1516. Let's see what he wrote.</p>
+<p>[full list of Trithemius' publications]. <em>Steganographia</em> and <em>Polygraphia</em> sound especially promising. All that's left is to find and skim them. This is up my alley — I'm an archivist, I skim old books all day. No trace of my sharingan. I get sidetracked into different editions, wondering if the printer had to sculpt a special character with the punctuation mark I am looking for and if the physical lead character still exists at the bottom of the ocean somewhere; and stumble upon a fun website where you can play with Trithemius' cryptography. Made by a guy called Alexander Boxer — visit his personal website, niche articles, think he might enjoy <em>antitesi</em>. Text my friends about him. Go make something to eat.</p>
+<p>The next day this insta DM conversation with my friend Ama, whom I've told about X: [image]</p>`,
+
+                'c4': `<p>Reminds me of the cat in Bulgakov's <em>Master and Margherita</em>. I love the image of Eduard Norden as that faustian cat.</p>`,
+
+                'c5': `<p>I love how the text flows erratically between the voice of a purely phenomenological/impersonal narrator and the multiple layers of the author's internal voice. There is no graphic or narrative distinction between these levels, as there is none for shifts in the address of each sentence. While this works very well in conveying the hallucinatory quality of the text, I would have a lot of fun editing it with some creative punctuation and spacing in order to convey such differences in layer. [you can see that here]</p>`,
+
+                'c6': `<p>'<em>Anything sharp</em>'? Even though 'pointed' refers to a more pertinent and precise subset of 'sharp', 'anything sharp' makes it more immediately clear that he intends to use a pointed tool to scratch graffiti onto the wall, as the romans did.</p>`,
+
+                'c7': `<p>'<em>I only have a pen</em>', again, more immediate.</p>`,
+
+                'c8': `<p>While very different in style, I find these opening paragraphs akin to the first pages of <em>Book 1; 1 do Samurai speak Penguin Japanese</em> from Helen DeWitt's <em>The Last Samurai</em>. I know Durrachiensis hasn't read it, so this comes as the biggest of compliments — it is one of my favourite books ever. = segway to wiki?</p>`,
+
+                'c9': `<p>'<em>Bear in mind: form is everything (not all the rules should be fucked). Pedantic and orthodox.</em>' I fully understand this feeling, but have found it difficult to express. Studying philology and classics is a constant exercise in minute and excessive pedantry. Form, intertextuality, and minuscule variations in all aspects of grammar and language are at the heart of every classicist's activity. I found this pedantry both mind-numbingly narrow and supremely satisfying. Sometimes I ironically declare that '<em>form is everything</em>'. Form obviously isn't <em>everything</em>, but I do believe some things are worth doing and enjoying for the sake of form alone. On his deathbed Buñuel wrote about how he wouldn't smoke a ciggie if it were given to him blindfolded. There is real, meaningful, emotional beauty in form itself, in the way you present content. I hate it when people describe a piece of art as 'an exercise in style' to imply it belongs to a lesser aesthetic plane than 'genuine' and 'inspired' art.</p>
+<p>At the same time, however, I often think that some artists (especially in highly technical endeavours such as classical music performance or hyperrealism painting) have nothing to say, and that their perfectly honed skills are but a sad parody of the real deal. Maybe what I love about form is that it can be an irrational and emotional exercise in intentionality. The conscious use and manipulation of form is necessarily a deliberate creative act in which every word, every note, every composition is pondered (think of Bach and Brahms, Nabokov and Dante, Visconti and Kurosawa). The mind and intention of the artist transpire in each moment of the spectator's experience of their work.</p>
+<p>I also love Durrachiensis' use of the word 'orthodoxy'. Its strong religious connotation evokes the conceptual realm of religious ritual and doctrine. Different rites within the Christian faith make for very good examples in the use and importance of form.</p>
+<p>Cit. from an essay I wrote in Cambridge (on a completely different topic): <em>'In the Basilica de el Escorial, as well as in many other catholic churches, anyone placed in the central nave facing the altar will experience a visual climax which seems to mirror the spiritual journey of ascension expected from the Christian worshipper. The presbytery is levels above the congregation, the sanctuary still higher up. Upon it, the majestic and heavily adorned golden tabernacle — in its vaguely triangular shape — leads the eye to its apex, close to the vaults of the church, where the crucifix is finally and triumphantly disclosed. It is impossible to contemplate the Messiah if not kneeling. The human and suffering Jesus dies atop a cascade of gold, vastly above the opulence of its church, reign, and subjects.'</em></p>
+<p>Given this setting, when you enter el Escorial or any such church (there are literally thousands in Italy, Spain, etc.) and hear an out-of-tune choir tentatively singing a horrible 4-chord monodic litany accompanied by a middle-aged spaniard in skinny jeans strumming on a guitar with what I cannot describe as anything but hate for his instrument, music, beauty, god and life — it is then that you are truly witnessing the moral decay of the West (much more than when you see people snorting ketamine from someone's dick in a Berlin club, by comparison a healthy continuation of a 3000-year-old Dyonisiac tradition). The abolition of form for the sake of keeping up with the times — what was brought about during the Second Vatican Council — is an example of fucking with rules which should not be fucked with. This is not anti-progressiveness; it is loss of form and of its power to transmit a message. Other Christian confessions chose differently: I've been to absolutely beautiful masses in Anglican churches with a lesbian woman as pastor, and to some of the most powerful, formally coherent celebrations I've ever attended in a Seventh Day Baptist church which was just a room with plastic chairs on the second floor of an apartment building. They are more orthodox than most catholic masses I've been to. Form is respected and used powerfully to convey their message. Orthodoxy for a classicist means not fucking with the rules which define their activity. Orthodoxy is a good thing (and the orthodox church rocks).</p>`,
+
+                'c12': `<p>Sorry Durrachiensis for the intrusion on latin translation, but I would write '<em>… it retains heat and tickles the cock…</em>'. I know you probably wrote 'the heat' to highlight the satisfying symmetry of the sentence in latin, but I think it sacrifices too much flow and isn't worth it.</p>`,
+
+                'c13': `<p>Sorry pt. 2: '<em>I have shat this (dick) out</em>'. Since 'out' is an adverb and not a preposition, it can stay at the end with no harm, maintaining the position of the drawn <em>mentula</em> as central. Even if it had been a preposition, I don't subscribe to the rule that you can't end sentences with prepositions. What convinced me was the probably apocryphal Churchill quote: '<em>That is a rule up with which I will not put!</em>'</p>
+<p>Me editing Durrachiensis' translations of latin graffiti reminds me a lot of the iconic Monty Python scene '<em>Romanes eunt domus</em>'. If you've never studied latin, that is what it feels like at first.</p>`,
+
+                'c14': `<p>Would be fun to have a graphic disambiguation between 'tags' (graffiti) and 'tags' (shopping).</p>`,
+
+                'c15': `<p>'<em>Now, recollect ancient Pompeii (if you haven't been, you should visit for the political graffiti and the 'restaurant' advertisements — tickets are now 18€)</em>'.</p>`,
+
+                'c17': `<p>adorned</p>`,
+
+                'c18': `<p>If we maintain the original graffiti in the text, it could be fun to also have these written by hand. I would enjoy the process of fabricating these: '<em>I have fucked here, 'twas great</em>', for example, could be written in XVIII century italics calligraphy. Given the multimedia part we are envisioning (3D scan of a bathroom etc.), I thought it would be physically adorn a bathroom with all of the graffiti involved and use its 3D scan for the multimedia.</p>`,
+
+                'c19': `<p>undims</p>`,
+
+                'c20': `<p>'<em>…Marinella tie (blue damasque decorations):</em>'</p>`,
+
+                'c21': `<p>Return to</p>`,
+
+                'c22': `<p>Resume</p>`,
+
+                'c24': `<p>While I agree that platforms such as X and reddit share similarities with ancient graffiti, I do believe that a better choice for a contemporary counterpart to ancient graffiti is <strong>contemporary graffiti</strong>. The practice isn't dead (thank god) and differs from online platforms in significant ways.</p>
+<p>First and most obviously, graffiti are necessarily tied to the physical materials and space in which they are written: the writer must interact (and can do so deliberately) with the architectural features and limitations of its space (toilet, doors, tiles, crumbling walls). At the same time they are not limited to a single font and formatting style as on a screen. Text size and orientation, calligraphy, doodles, drawings, etc., can all be chosen intentionally, as can the graphic devices used to interact with other people's writings. On a wall you can physically destroy, cover, or amend the text left by other writers. This is important from the perspective of conceiving the wall as a creative space.</p>
+<p>While most online platforms allow for anonymity, the identity (concealed behind a username — nothing but a pseudonym) of the writer is explicit in every single post; every contribution is 'signed' with the poster's username. This is an exasperation of authorship and of the mythology of the author's work as an extension of their persona. The case of graffiti is precisely the opposite. The authorship of each writer and of each inscription is dissolved (let's exclude tags from this) into a single collective and interactive piece, an organic reflection of the people who traverse that space. The author is dead — as I think Roland Barthes would be quite happy to say.</p>
+<p>From the perspective of the viewer, the experience of graffiti is necessarily sensorially complete rather than purely conceptual. The screen aims at ease of use and immediacy of understanding, and it does so by stripping the viewer of the discomfort of their body. When you scroll on reddit what you are engaged with is an almost purely conceptual distillation of experience. Perceiving graffiti, on the other hand, is a fully sensorial experience (smell of the loo, shit pressing on your sphincter, etc.) and a transient, accidental one. You always <em>stumble upon</em> graffiti — it's not like opening your computer, logging onto a platform, browsing a series of threads, deciding to delve into one. Even once you're reading graffiti it's almost always while you're doing something else (having a drink, taking a shit, walking around). This makes their consumption, as well as their creation, less cohesive, proprietary and performative than their online counterpart.</p>
+<p>This is the only paragraph in D.'s article which I don't find fully convincing. Like, I don't think there's anything <em>wrong</em>, but I think that there are more powerful connections to the contemporary than this one.</p>`,
+
+                'c27': `<p>Hell yeah!</p>`,
+            };
+
+            // ─────────────────────────────────────────────────────────────
+            //  ELEMENTS
+            // ─────────────────────────────────────────────────────────────
+            const articleView = document.querySelector('.article-view') || document.body;
+            const toggleBtn = document.getElementById('ed-toggle');
+            const halluc = document.querySelector('.halluc');
+
+            const isMobile = () => window.innerWidth < DESKTOP_MIN_WIDTH;
+
+            function getRelativeTop(el, ancestor) {
+                let t = 0, n = el;
+                while (n && n !== ancestor) { t += n.offsetTop; n = n.offsetParent; }
+                return t;
+            }
+            function getRelativeLeft(el, ancestor) {
+                let l = 0, n = el;
+                while (n && n !== ancestor) { l += n.offsetLeft; n = n.offsetParent; }
+                return l;
+            }
+
+            // ─────────────────────────────────────────────────────────────
+            //  NOTES — one per anchor, click anchor to open/close its note
+            // ─────────────────────────────────────────────────────────────
+            const notes = [];   // [{ anchor, note, naturalTop, noteTop }]
+
+            document.querySelectorAll('.ed-anchor').forEach(anchor => {
+                const html = COMMENTS[anchor.dataset.cid];
+                if (!html) return;
+                const note = document.createElement('aside');
+                note.className = 'ed-margin-note';
+                note.dataset.cid = anchor.dataset.cid;
+                note.innerHTML = html
+                    + '<button class="ed-note-close" type="button" aria-label="Close comment">✕</button>';
+                articleView.appendChild(note);
+                notes.push({ anchor, note, naturalTop: 0, noteTop: 0 });
+            });
+
+            function layoutNotes() {
+                if (isMobile()) {
+                    notes.forEach(({ anchor, note }) => {
+                        const block = anchor.closest('p, .graffito, .cb-block, .dear-reader p, figure') || anchor.parentElement;
+                        if (note.previousSibling !== block) {
+                            block.parentNode.insertBefore(note, block.nextSibling);
+                        }
+                        note.style.top = '';
+                        note.style.left = '';
+                        note.style.setProperty('--stack-y', '0px');
+                    });
+                    return;
+                }
+                const articleWidth = articleView.offsetWidth;
+                notes.forEach(rec => {
+                    if (rec.note.parentElement !== articleView) articleView.appendChild(rec.note);
+                    rec.naturalTop = getRelativeTop(rec.anchor, articleView);
+                    let left = getRelativeLeft(rec.anchor, articleView);
+                    if (left + NOTE_WIDTH > articleWidth - 4) left = Math.max(0, articleWidth - NOTE_WIDTH - 4);
+                    if (left < 0) left = 0;
+                    rec.noteTop = rec.naturalTop + rec.anchor.offsetHeight + 6;
+                    rec.note.style.top = rec.noteTop + 'px';
+                    rec.note.style.left = left + 'px';
+                    rec.note.style.setProperty('--stack-y', '0px');
+                });
+                stackShownNotes();
+            }
+
+            // Push down any visible note that would overlap the one above it
+            function stackShownNotes() {
+                const shown = notes
+                    .filter(({ note }) => note.classList.contains('show'))
+                    .sort((a, b) => (a.noteTop || 0) - (b.noteTop || 0));
+                let cursor = -Infinity;
+                shown.forEach(rec => {
+                    const baseTop = rec.noteTop || 0;
+                    const desiredTop = Math.max(baseTop, cursor + NOTE_STACK_GAP);
+                    rec.note.style.setProperty('--stack-y', (desiredTop - baseTop) + 'px');
+                    cursor = desiredTop + rec.note.offsetHeight;
+                });
+                notes.forEach(({ note }) => {
+                    if (!note.classList.contains('show')) note.style.setProperty('--stack-y', '0px');
+                });
+            }
+
+            // ─────────────────────────────────────────────────────────────
+            //  CLICK ANCHOR → open/close its inline comment
+            // ─────────────────────────────────────────────────────────────
+            function openNote(rec) {
+                rec.anchor.classList.add('open');
+                rec.note.classList.add('show');
+                stackShownNotes();
+            }
+            function closeNote(rec) {
+                rec.anchor.classList.remove('open');
+                rec.note.classList.remove('show');
+                stackShownNotes();
+            }
+            function closeAllNotes() { notes.forEach(closeNote); }
+
+            // POV is on whenever EITHER class is set (desktop = glasses-active, mobile = editor-pov-mobile)
+            const povActive = () =>
+                document.body.classList.contains('glasses-active') ||
+                document.body.classList.contains('editor-pov-mobile');
+
+            document.querySelectorAll('.ed-anchor').forEach(anchor => {
+                anchor.addEventListener('click', e => {
+                    if (!povActive()) return;
+                    // NOTE: deliberately NOT stopping propagation. Some anchors live inside
+                    // graffito blocks whose onclick spawns the Roman-graffiti SVGs.
+                    // We rely on closeAllNotes() ignoring clicks inside an .ed-anchor.
+                    const rec = notes.find(r => r.anchor === anchor);
+                    if (!rec) return;
+                    if (rec.anchor.classList.contains('open')) closeNote(rec);
+                    else openNote(rec);
+                });
+            });
+
+            // close-x on each note
+            articleView.addEventListener('click', e => {
+                if (e.target.classList && e.target.classList.contains('ed-note-close')) {
+                    const note = e.target.closest('.ed-margin-note');
+                    const rec = notes.find(r => r.note === note);
+                    if (rec) { e.stopPropagation(); closeNote(rec); }
+                }
+            });
+
+            // click outside any open note + anchor → close all (desktop only;
+            // mobile keeps notes open until the user explicitly closes them)
+            document.addEventListener('click', e => {
+                if (!document.body.classList.contains('glasses-active')) return;
+                if (e.target.closest('.ed-anchor, .ed-margin-note, #ed-toggle')) return;
+                closeAllNotes();
+            });
+
+            // ─────────────────────────────────────────────────────────────
+            //  TOGGLE — straight on/off, no animation
+            // ─────────────────────────────────────────────────────────────
+            toggleBtn.addEventListener('click', () => {
+                const cls = isMobile() ? 'editor-pov-mobile' : 'glasses-active';
+                const on = document.body.classList.toggle(cls);
+                toggleBtn.setAttribute('aria-pressed', String(on));
+                if (!on) closeAllNotes();
+            });
+
+            // ─────────────────────────────────────────────────────────────
+            //  EDITOR'S POV → unlock the bathroom configurator
+            //
+            //  When POV is active, an invisible catcher sits over the iframe
+            //  so we can detect a triple-click without clicks leaking into the
+            //  iframe. On the third click we postMessage the iframe to enter
+            //  editor mode (configurator UI unlocked, paint allowed everywhere)
+            //  and remove the catcher so subsequent clicks reach the iframe
+            //  for normal painting / configurator use.
+            //
+            //  When POV exits, we postMessage editor-mode off and re-arm the
+            //  catcher so the triple-click pattern works again next time.
+            // ─────────────────────────────────────────────────────────────
+            if (halluc) {
+                let catcher = null;
+                let iframeEditorOn = false;
+
+                function getIframe() {
+                    return halluc.querySelector('.halluc-frame');
+                }
+                function tellIframe(active) {
+                    const iframe = getIframe();
+                    if (iframe && iframe.contentWindow) {
+                        try { iframe.contentWindow.postMessage({ type: 'editor-mode', active }, '*'); } catch (_) {}
+                    }
+                }
+                function buildCatcher() {
+                    if (catcher) return;
+                    catcher = document.createElement('div');
+                    catcher.style.cssText = 'position:absolute;inset:0;z-index:6;cursor:pointer;';
+                    halluc.appendChild(catcher);
+
+                    let clicks = 0, clickTimer = 0;
+                    catcher.addEventListener('click', () => {
+                        clicks++;
+                        clearTimeout(clickTimer);
+                        clickTimer = setTimeout(() => { clicks = 0; }, 700);
+                        if (clicks >= 3) {
+                            clicks = 0;
+                            halluc.classList.add('lens-over');
+                            setTimeout(() => {
+                                halluc.classList.add('swapped');
+                                const hint = document.querySelector('.halluc-hint');
+                                if (hint) hint.style.opacity = '0';
+                                tellIframe(true);
+                                iframeEditorOn = true;
+                                removeCatcher();   // clicks now reach iframe
+                            }, 450);
+                        }
+                    });
+                }
+                function removeCatcher() {
+                    if (catcher) { catcher.remove(); catcher = null; }
+                }
+                function syncPOV() {
+                    const povOn = document.body.classList.contains('glasses-active');
+                    if (povOn) {
+                        if (!iframeEditorOn) buildCatcher();
+                    } else {
+                        removeCatcher();
+                        halluc.classList.remove('lens-over', 'swapped');
+                        const hint = document.querySelector('.halluc-hint');
+                        if (hint) hint.style.opacity = '';
+                        if (iframeEditorOn) {
+                            tellIframe(false);
+                            iframeEditorOn = false;
+                        }
+                    }
+                }
+                // Initial state + observer
+                syncPOV();
+                new MutationObserver(syncPOV).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+                // Re-send editor-mode state once the iframe has actually loaded
+                // (handles the case where POV was on before the iframe ran).
+                const iframeEl = getIframe();
+                if (iframeEl) iframeEl.addEventListener('load', () => {
+                    if (iframeEditorOn) tellIframe(true);
+                });
+            }
+
+            // ─────────────────────────────────────────────────────────────
+            //  RESIZE / SCROLL / IMAGES — keep layout fresh
+            // ─────────────────────────────────────────────────────────────
+            let resizeT;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeT);
+                resizeT = setTimeout(layoutNotes, 80);
+            });
+            document.querySelectorAll('img').forEach(img => {
+                if (!img.complete) img.addEventListener('load', layoutNotes, { once: true });
+            });
+
+            function init() { layoutNotes(); }
+            if (document.readyState === 'complete') init();
+            else window.addEventListener('load', init);
+        })();
+    </script>
+
+</body>
+
+</html>

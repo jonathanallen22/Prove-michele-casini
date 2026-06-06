@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Good Enough Is Better - Starosta | Antitesi Magazine</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="../../css/index_style.css">
+    <link rel="stylesheet" href="../../css/article_style.css">
+    <link rel="stylesheet" href="../../css/mobile.css">
+
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="../../css/spark_styles.css">');
+            document.write('<script>window.magazineSparkMode = true;<\/script>');
+            document.write('<script src="../../js/flying-magazine.js"><\/script>');
+        }
+    </script>
+
+    <script src="../../js/articles-and-utils.js"></script>
+
+    <style>
+        :root {
+            --dynamic-color: #1a5c78;
+        }
+
+        .pendulum-experiment {
+            margin: 2.5rem 0 0;
+            border: 1px solid var(--dynamic-color);
+            border-radius: 2px;
+            padding: 1.3rem 1.3rem 1rem;
+        }
+
+        .sim-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 0.9rem;
+        }
+
+        .sim-title {
+            font-family: var(--grotesk);
+            font-size: 0.71rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            opacity: 0.4;
+        }
+
+        .sim-legend {
+            display: flex;
+            gap: 1rem;
+            font-family: var(--grotesk);
+            font-size: 0.78rem;
+            opacity: 0.85;
+        }
+
+        .c-exact {
+            color: #2563eb;
+        }
+
+        .c-approx {
+            color: #f59e0b;
+        }
+
+        body.dark-mode .c-exact {
+            color: #60a5fa;
+        }
+
+        body.dark-mode .c-approx {
+            color: #fbbf24;
+        }
+
+        .sim-canvases {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+        }
+
+        #pendulumCanvas {
+            display: block;
+            max-width: 400px;
+            width: 100%;
+            aspect-ratio: 1;
+            touch-action: none;
+        }
+
+        #plotCanvas {
+            display: block;
+            width: 100%;
+            max-width: 700px;
+            aspect-ratio: 700 / 145;
+        }
+
+        .sim-bottom {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.9rem;
+            flex-wrap: wrap;
+        }
+
+        .sim-buttons {
+            display: flex;
+            gap: 0.45rem;
+        }
+
+        .sim-buttons button {
+            font-family: var(--grotesk);
+            font-size: 0.71rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            padding: 0.34rem 0.9rem;
+            background: transparent;
+            border: 1px solid var(--dynamic-color);
+            color: var(--dynamic-color);
+            cursor: pointer;
+            border-radius: 1px;
+            transition: background 0.13s, color 0.13s;
+        }
+
+        .sim-buttons button:hover {
+            background: var(--dynamic-color);
+            color: #fff;
+        }
+
+        body.dark-mode .sim-buttons button:hover {
+            color: #000;
+        }
+
+        .sim-delta {
+            font-family: var(--grotesk);
+            font-size: 0.78rem;
+            opacity: 0.6;
+            margin-left: auto;
+        }
+
+        .sim-info {
+            margin-top: 0.65rem;
+            padding-top: 0.65rem;
+            border-top: 1px solid;
+            border-color: rgba(0, 0, 0, 0.08);
+            font-family: var(--grotesk);
+            font-size: 0.71rem;
+            opacity: 0.38;
+            line-height: 1.65;
+        }
+
+        body.dark-mode .sim-info {
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .sim-info-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0 0.55rem;
+        }
+
+        .sim-sep {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
+    </script>
+
+    <div class="progress-bar"></div>
+
+    <nav class="nav-cluster">
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+        <a href="../../archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <article class="article-view">
+
+        <header class="article-header">
+            <h1 class="article-title">Good enough is better</h1>
+            <div class="article-meta" id="article-meta">
+                <span>Article</span>
+                <span>~8 min read</span>
+                <span>April 2026</span>
+            </div>
+            <div class="article-author" id="article-author">by Starosta</div>
+        </header>
+
+        <script>
+            (function () {
+                const filename = window.location.pathname.split('/').pop();
+                const data = (typeof articles !== 'undefined') && articles.find(a => a.filename === filename);
+                if (!data) return;
+                const meta = document.getElementById('article-meta');
+                const author = document.getElementById('article-author');
+                if (meta) meta.innerHTML = `<span>Article</span><span>~${data.readTime} read</span><span>${data.publishDate}</span>`;
+                if (author) author.textContent = 'by ' + data.author;
+            })();
+        </script>
+
+        <div class="article-content">
+
+            <p>Lorem ipsum...</p>
+
+            <!-- ════════════════════════════════════════════════════
+                 DOUBLE PENDULUM: exact (RK4) vs. small-angle approximation
+                 ICs: θ₁(0), θ₂(0) set by drag; ω₁(0)=ω₂(0)=0
+                 Analytical: θ₁(t) = q₁cos Ω₁t + q₂cos Ω₂t
+                   q₁ = (θ₁₀ + θ₂₀/√2)/2,  q₂ = (θ₁₀ − θ₂₀/√2)/2
+                   Ω₁ = ω₀√(2−√2),  Ω₂ = ω₀√(2+√2),  ω₀ = √(g/l)
+                 ════════════════════════════════════════════════════ -->
+            <div class="pendulum-experiment">
+
+                <div class="sim-header">
+                    <span class="sim-title">double pendulum</span>
+                    <div class="sim-legend">
+                        <span><span class="c-exact">●</span> exact</span>
+                        <span><span class="c-approx">●</span> small-angle</span>
+                    </div>
+                </div>
+
+                <div class="sim-canvases">
+                    <canvas id="pendulumCanvas" width="400" height="400"></canvas>
+                    <canvas id="plotCanvas" width="700" height="145"></canvas>
+                </div>
+
+                <div class="sim-bottom">
+                    <div class="sim-buttons">
+                        <button id="playBtn">play</button>
+                        <button id="resetBtn">reset</button>
+                        <button id="modeBtn">mode 1</button>
+                    </div>
+                    <span class="sim-delta">Δθ₁ = <span id="deltaDisplay">0.00</span>°</span>
+                </div>
+
+                <div class="sim-info">
+                    <div class="sim-info-row">
+                        <span>drag masses to set initial position</span>
+                        <span class="sim-sep">·</span>
+                        <span>exact: full nonlinear ODEs (RK4)</span>
+                        <span class="sim-sep">·</span>
+                        <span>approx: θ₁ = q₁cos Ω₁t + q₂cos Ω₂t,&nbsp; θ₂ = √2(q₁cos Ω₁t − q₂cos Ω₂t)</span>
+                    </div>
+                    <div class="sim-info-row">
+                        <span>Ω₁ = ω₀√(2−√2) ≈ 2.40 rad/s</span>
+                        <span class="sim-sep">·</span>
+                        <span>Ω₂ = ω₀√(2+√2) ≈ 5.79 rad/s</span>
+                        <span class="sim-sep">·</span>
+                        <span>ω₀ = √(g/ℓ),&nbsp; q₁ = (θ₁₀ + θ₂₀/√2)/2,&nbsp; q₂ = (θ₁₀ − θ₂₀/√2)/2</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+    </article>
+
+    <div class="shortcuts-hint"></div>
+
+    <script>
+        (function () {
+            'use strict';
+
+            // ── Physics constants ──────────────────────────────────
+            const G = 9.81;
+            const W0SQ = G; // l = 1 m
+            const W0 = Math.sqrt(W0SQ);
+            const OM1 = W0 * Math.sqrt(2 - Math.SQRT2); // slow normal mode  ~2.40 rad/s
+            const OM2 = W0 * Math.sqrt(2 + Math.SQRT2); // fast normal mode  ~5.79 rad/s
+
+            // ── Simulation state ───────────────────────────────────
+            const DEFAULT_IC = { t1: 30 * Math.PI / 180, t2: 0 };
+            let ic = { ...DEFAULT_IC };
+            let numState = [ic.t1, 0, ic.t2, 0]; // [θ₁, θ̇₁, θ₂, θ̇₂]
+            let simTime = 0;
+            let running = false;
+            let lastTS = null;
+            let dragging = null; // null | 'bob1' | 'bob2'
+
+            let trailNum = [], trailAna = [];
+            const TRAIL = 90;
+            let hist = { t: [], n1: [], a1: [] };
+            const MAX_H = 3000;
+
+            // ── Exact equations of motion ─────────────────────────
+            // Equal masses m, equal lengths l=1. State=[θ₁,θ̇₁,θ₂,θ̇₂].
+            function deriv([t1, w1, t2, w2]) {
+                const a = t1 - t2, den = 3 - Math.cos(2 * a);
+                const dw1 = (-3 * W0SQ * Math.sin(t1) - W0SQ * Math.sin(t1 - 2 * t2)
+                    - 2 * Math.sin(a) * (w2 * w2 + w1 * w1 * Math.cos(a))) / den;
+                const dw2 = (2 * Math.sin(a) * (2 * w1 * w1 + 2 * W0SQ * Math.cos(t1)
+                    + w2 * w2 * Math.cos(a))) / den;
+                return [w1, dw1, w2, dw2];
+            }
+
+            function rk4(s, dt) {
+                const k1 = deriv(s);
+                const k2 = deriv(s.map((v, i) => v + .5 * dt * k1[i]));
+                const k3 = deriv(s.map((v, i) => v + .5 * dt * k2[i]));
+                const k4 = deriv(s.map((v, i) => v + dt * k3[i]));
+                return s.map((v, i) => v + (dt / 6) * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]));
+            }
+
+            // ── Analytical small-oscillation solution ──────────────
+            // For arbitrary IC θ₁(0)=ic.t1, θ₂(0)=ic.t2, velocities=0:
+            //   q₁=(θ₁₀+θ₂₀/√2)/2,  q₂=(θ₁₀−θ₂₀/√2)/2
+            //   θ₁(t) = q₁cos Ω₁t + q₂cos Ω₂t
+            //   θ₂(t) = √2·(q₁cos Ω₁t − q₂cos Ω₂t)
+            function analytical(t) {
+                const q1 = (ic.t1 + ic.t2 / Math.SQRT2) / 2;
+                const q2 = (ic.t1 - ic.t2 / Math.SQRT2) / 2;
+                const c1 = Math.cos(OM1 * t), c2 = Math.cos(OM2 * t);
+                return [q1 * c1 + q2 * c2, Math.SQRT2 * (q1 * c1 - q2 * c2)];
+            }
+
+            // ── Canvas references ──────────────────────────────────
+            const pC = document.getElementById('pendulumCanvas');
+            const plC = document.getElementById('plotCanvas');
+            const pX = pC.getContext('2d');
+            const plX = plC.getContext('2d');
+
+            // Colors: light / dark mode
+            const CE = '#2563eb', CA = '#f59e0b';
+            const CED = '#60a5fa', CAD = '#fbbf24';
+
+            const dark = () => document.body.classList.contains('dark-mode');
+            const ce = () => dark() ? CED : CE;
+            const ca = () => dark() ? CAD : CA;
+            const fg = a => dark() ? `rgba(243,243,243,${a})` : `rgba(0,0,0,${a})`;
+
+            // ── Layout geometry ────────────────────────────────────
+            // All coordinates are in canvas-attribute pixels (400×400).
+            const SC = 400 * 0.36; // pixels per meter  = 144px
+            const OX = 200, OY = 56; // pivot position
+
+            function bobXY(t1, t2) {
+                const x1 = OX + SC * Math.sin(t1), y1 = OY + SC * Math.cos(t1);
+                const x2 = x1 + SC * Math.sin(t2), y2 = y1 + SC * Math.cos(t2);
+                return { x1, y1, x2, y2 };
+            }
+
+            // ── Draw pendulum canvas ───────────────────────────────
+            function drawPendulum() {
+                pX.clearRect(0, 0, 400, 400);
+
+                const [a1, a2] = analytical(simTime);
+                const nb = bobXY(numState[0], numState[2]);
+                const ab = bobXY(a1, a2);
+
+                // Trails (tip of second rod)
+                drawTrail(trailAna, ca(), 0.40);
+                drawTrail(trailNum, ce(), 0.50);
+
+                // Approx pendulum (behind), exact (front)
+                drawRig(ab, ca(), 0.52, 4, 5.5);
+                drawRig(nb, ce(), 1.00, 5.5, 7.5);
+
+                // Pivot dot
+                pX.beginPath(); pX.arc(OX, OY, 3, 0, 2 * Math.PI);
+                pX.fillStyle = fg(0.5); pX.fill();
+
+                // Drag hints: shown when at rest, highlight draggable bobs
+                if (!running && simTime < 0.001) {
+                    drawDragHints(nb);
+                }
+            }
+
+            function drawRig({ x1, y1, x2, y2 }, color, alpha, r1, r2) {
+                pX.save();
+                pX.globalAlpha = alpha;
+                pX.strokeStyle = color; pX.lineWidth = 1.5; pX.lineCap = 'round';
+                pX.beginPath(); pX.moveTo(OX, OY); pX.lineTo(x1, y1); pX.stroke();
+                pX.beginPath(); pX.moveTo(x1, y1); pX.lineTo(x2, y2); pX.stroke();
+                pX.fillStyle = color;
+                pX.beginPath(); pX.arc(x1, y1, r1, 0, 2 * Math.PI); pX.fill();
+                pX.beginPath(); pX.arc(x2, y2, r2, 0, 2 * Math.PI); pX.fill();
+                pX.restore();
+            }
+
+            function drawTrail(trail, color, maxAlpha) {
+                const n = trail.length;
+                for (let i = 1; i < n; i++) {
+                    const { x2, y2 } = bobXY(trail[i][0], trail[i][1]);
+                    pX.globalAlpha = (i / n) * maxAlpha;
+                    pX.fillStyle = color;
+                    pX.beginPath(); pX.arc(x2, y2, 1.8, 0, 2 * Math.PI); pX.fill();
+                }
+                pX.globalAlpha = 1;
+            }
+
+            function drawDragHints({ x1, y1, x2, y2 }) {
+                // Dashed ring around each bob
+                pX.save();
+                pX.setLineDash([3, 3]);
+                pX.strokeStyle = fg(0.18);
+                pX.lineWidth = 1;
+                pX.beginPath(); pX.arc(x1, y1, 13, 0, 2 * Math.PI); pX.stroke();
+                pX.beginPath(); pX.arc(x2, y2, 15, 0, 2 * Math.PI); pX.stroke();
+                pX.setLineDash([]);
+
+                // "drag" labels — place them to avoid overlapping the bob
+                pX.font = '10px Inter, sans-serif';
+                pX.fillStyle = fg(0.28);
+                hint(x1, y1, 'drag', 18);
+                hint(x2, y2, 'drag', 20);
+                pX.restore();
+            }
+
+            function hint(bx, by, text, offset) {
+                // Place label above if near bottom, else above
+                const yAbove = by - offset - 3;
+                pX.textAlign = 'center';
+                pX.textBaseline = 'bottom';
+                pX.fillText(text, bx, yAbove);
+            }
+
+            // ── Draw plot canvas ───────────────────────────────────
+            function drawPlot() {
+                const W = 700, H = 145;
+                plX.clearRect(0, 0, W, H);
+
+                const pad = { l: 36, r: 10, t: 10, b: 28 };
+                const pw = W - pad.l - pad.r, ph = H - pad.t - pad.b;
+
+                const tNow = hist.t.length ? hist.t[hist.t.length - 1] : 0;
+                const WIN = 15;
+                const tMin = Math.max(0, tNow - WIN);
+
+                // y-axis range: generous around initial angles
+                const span = (Math.abs(ic.t1) + Math.abs(ic.t2) + 0.1) * 180 / Math.PI;
+                const maxDeg = Math.max(18, span * 1.3);
+
+                const mx = t => pad.l + (t - tMin) / WIN * pw;
+                const my = v => pad.t + (1 - (v + maxDeg) / (2 * maxDeg)) * ph;
+
+                // Grid
+                plX.lineWidth = 0.7;
+                [maxDeg, maxDeg / 2, 0, -maxDeg / 2, -maxDeg].forEach(v => {
+                    plX.strokeStyle = v === 0 ? fg(0.13) : fg(0.05);
+                    plX.beginPath(); plX.moveTo(pad.l, my(v)); plX.lineTo(W - pad.r, my(v)); plX.stroke();
+                });
+                for (let t = Math.ceil(tMin / 5) * 5; t <= tMin + WIN; t += 5) {
+                    plX.strokeStyle = fg(0.05);
+                    plX.beginPath(); plX.moveTo(mx(t), pad.t); plX.lineTo(mx(t), H - pad.b); plX.stroke();
+                }
+
+                // Plot lines
+                function line(data, color, dashed) {
+                    if (data.length < 2) return;
+                    plX.beginPath();
+                    plX.strokeStyle = color; plX.lineWidth = 1.5;
+                    if (dashed) plX.setLineDash([4, 3]);
+                    let go = false;
+                    for (let i = 0; i < hist.t.length; i++) {
+                        if (hist.t[i] < tMin) continue;
+                        const x = mx(hist.t[i]), y = my(data[i]);
+                        go ? plX.lineTo(x, y) : (plX.moveTo(x, y), go = true);
+                    }
+                    plX.stroke(); plX.setLineDash([]);
+                }
+                line(hist.a1, ca(), true);
+                line(hist.n1, ce(), false);
+
+                // Axis labels
+                plX.font = '10px Inter, sans-serif';
+                plX.fillStyle = fg(0.3);
+                plX.textAlign = 'right'; plX.textBaseline = 'middle';
+                plX.fillText(Math.round(maxDeg) + '°', pad.l - 4, my(maxDeg));
+                plX.fillText('0', pad.l - 4, my(0));
+                plX.fillText('-' + Math.round(maxDeg) + '°', pad.l - 4, my(-maxDeg));
+
+                if (tNow > 0.3) {
+                    plX.textAlign = 'right'; plX.textBaseline = 'top';
+                    plX.fillText(tNow.toFixed(1) + 's', Math.min(mx(tNow), W - pad.r), H - pad.b + 4);
+                }
+
+                plX.save();
+                plX.translate(10, H / 2); plX.rotate(-Math.PI / 2);
+                plX.textAlign = 'center'; plX.textBaseline = 'middle';
+                plX.fillText('θ₁', 0, 0);
+                plX.restore();
+            }
+
+            function drawAll() {
+                drawPendulum();
+                drawPlot();
+                // Update Δθ₁ readout
+                const [a1] = analytical(simTime);
+                const delta = Math.abs(numState[0] - a1) * 180 / Math.PI;
+                deltaDisplay.textContent = delta.toFixed(2);
+            }
+
+            // ── Reset ──────────────────────────────────────────────
+            function reset() {
+                numState = [ic.t1, 0, ic.t2, 0]; // current IC, zero velocity
+                simTime = 0; running = false; lastTS = null;
+                trailNum = []; trailAna = [];
+                hist = { t: [], n1: [], a1: [] };
+                playBtn.textContent = 'play';
+                drawAll();
+            }
+
+            // ── Animation loop ─────────────────────────────────────
+            function frame(ts) {
+                if (!running) return;
+                if (lastTS === null) lastTS = ts;
+                const elapsed = Math.min((ts - lastTS) / 1000, 0.05);
+                lastTS = ts;
+
+                const N = 10, dt = elapsed / N;
+                for (let i = 0; i < N; i++) { numState = rk4(numState, dt); simTime += dt; }
+
+                const [a1, a2] = analytical(simTime);
+
+                trailNum.push([numState[0], numState[2]]);
+                trailAna.push([a1, a2]);
+                if (trailNum.length > TRAIL) { trailNum.shift(); trailAna.shift(); }
+
+                hist.t.push(simTime);
+                hist.n1.push(numState[0] * 180 / Math.PI);
+                hist.a1.push(a1 * 180 / Math.PI);
+                if (hist.t.length > MAX_H) { hist.t.shift(); hist.n1.shift(); hist.a1.shift(); }
+
+                drawAll();
+                requestAnimationFrame(frame);
+            }
+
+            // ── Drag interaction ───────────────────────────────────
+            // Converts a mouse/touch event's client coords → canvas attribute coords
+            function cxy(clientX, clientY) {
+                const r = pC.getBoundingClientRect();
+                return {
+                    x: (clientX - r.left) * (400 / r.width),
+                    y: (clientY - r.top) * (400 / r.height)
+                };
+            }
+
+            function near(ax, ay, bx, by, r) { return Math.hypot(ax - bx, ay - by) < r; }
+
+            function startDrag(cx, cy) {
+                const { x1, y1, x2, y2 } = bobXY(numState[0], numState[2]);
+                // Check bob2 first (visually on top)
+                if (near(cx, cy, x2, y2, 22)) dragging = 'bob2';
+                else if (near(cx, cy, x1, y1, 22)) dragging = 'bob1';
+                if (!dragging) return false;
+                // Pause and reset to current position as new IC
+                running = false; playBtn.textContent = 'play';
+                simTime = 0; lastTS = null;
+                trailNum = []; trailAna = [];
+                hist = { t: [], n1: [], a1: [] };
+                return true;
+            }
+
+            function moveDrag(cx, cy) {
+                if (!dragging) return;
+                if (dragging === 'bob1') {
+                    numState[0] = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, Math.atan2(cx - OX, cy - OY)));
+                    numState[1] = 0;
+                } else {
+                    const { x1, y1 } = bobXY(numState[0], numState[2]);
+                    numState[2] = Math.atan2(cx - x1, cy - y1);
+                    numState[3] = 0;
+                }
+                ic = { t1: numState[0], t2: numState[2] }; // update IC
+                drawAll();
+            }
+
+            // Mouse
+            pC.addEventListener('mousedown', e => {
+                const { x, y } = cxy(e.clientX, e.clientY);
+                if (startDrag(x, y)) { pC.style.cursor = 'grabbing'; e.preventDefault(); }
+            });
+
+            window.addEventListener('mousemove', e => {
+                if (dragging) {
+                    const { x, y } = cxy(e.clientX, e.clientY);
+                    moveDrag(x, y);
+                } else {
+                    // Hover cursor
+                    const { x, y } = cxy(e.clientX, e.clientY);
+                    const r = pC.getBoundingClientRect();
+                    const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+                    if (inside) {
+                        const { x1, y1, x2, y2 } = bobXY(numState[0], numState[2]);
+                        pC.style.cursor = (near(x, y, x1, y1, 22) || near(x, y, x2, y2, 22)) ? 'grab' : 'default';
+                    }
+                }
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (dragging) { dragging = null; pC.style.cursor = 'default'; }
+            });
+
+            // Touch
+            pC.addEventListener('touchstart', e => {
+                const t = e.touches[0];
+                const { x, y } = cxy(t.clientX, t.clientY);
+                if (startDrag(x, y)) e.preventDefault();
+            }, { passive: false });
+
+            pC.addEventListener('touchmove', e => {
+                if (!dragging) return;
+                const { x, y } = cxy(e.touches[0].clientX, e.touches[0].clientY);
+                moveDrag(x, y);
+                e.preventDefault();
+            }, { passive: false });
+
+            pC.addEventListener('touchend', () => { dragging = null; });
+
+            // ── Buttons ────────────────────────────────────────────
+            const playBtn = document.getElementById('playBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const modeBtn = document.getElementById('modeBtn');
+            const deltaDisplay = document.getElementById('deltaDisplay');
+
+            playBtn.addEventListener('click', () => {
+                if (running) {
+                    running = false; playBtn.textContent = 'play';
+                } else {
+                    running = true; playBtn.textContent = 'pause';
+                    lastTS = null; requestAnimationFrame(frame);
+                }
+            });
+
+            resetBtn.addEventListener('click', reset);
+
+            // ── Normal mode presets ────────────────────────────────
+            // Mode 1 (slow, in-phase):  θ₂ = +√2·θ₁  →  q₂=0, pure Ω₁
+            // Mode 2 (fast, anti-phase): θ₂ = −√2·θ₁  →  q₁=0, pure Ω₂
+            const MODE_A = 20 * Math.PI / 180; // 10° amplitude
+            let nextMode = 1;
+
+            modeBtn.addEventListener('click', () => {
+                if (nextMode === 1) {
+                    ic = { t1: MODE_A, t2: MODE_A * Math.SQRT2 };
+                    modeBtn.textContent = 'mode 2';
+                    nextMode = 2;
+                } else {
+                    ic = { t1: MODE_A, t2: -MODE_A * Math.SQRT2 };
+                    modeBtn.textContent = 'mode 1';
+                    nextMode = 1;
+                }
+                numState = [ic.t1, 0, ic.t2, 0];
+                simTime = 0; running = false; lastTS = null;
+                trailNum = []; trailAna = [];
+                hist = { t: [], n1: [], a1: [] };
+                playBtn.textContent = 'play';
+                drawAll();
+            });
+
+            // ── Init ───────────────────────────────────────────────
+            reset();
+        })();
+    </script>
+
+    <script>
+        const colors = ['#1a5c78', '#2a5298', '#1a7866', '#4a3060', '#5c3a1a', '#1a4a6b'];
+        let ci = 0;
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.pendulum-experiment')) {
+                ci = (ci + 1) % colors.length;
+                document.documentElement.style.setProperty('--dynamic-color', colors[ci]);
+            }
+        });
+
+        initKeyboardShortcuts({
+            extraKeys: {
+                'a': openNextArticle, 'A': openNextArticle,
+                'Escape': returnToHome, 'h': returnToHome, 'H': returnToHome,
+            }
+        });
+    </script>
+
+</body>
+
+</html>

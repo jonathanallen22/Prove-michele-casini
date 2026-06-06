@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colophon - Antitesi Magazine</title>
+    <!-- Device detection: FlyingMagazine & Three.js import for desktop only -->
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<script type="importmap">\n{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/examples/jsm/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}\n<\/script>');
+        }
+    </script>
+    <script>
+        window.magazineSparkMode = false;
+    </script>
+    <script src="js/articles-and-utils.js"></script>
+    <link rel="stylesheet" href="css/index_style.css">
+    <link rel="stylesheet" href="css/mobile.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        /* Antitesi Magazine Integration Styles */
+        :root {
+            --black: #000;
+            --white: #fff;
+            --gray: #f3f3f3;
+            --accent: #ff3366;
+            --serif: 'Crimson Pro', serif;
+            --grotesk: 'Inter', sans-serif;
+            --display: 'Fraunces', serif;
+            --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+            --dynamic-color: #ff3366;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--white);
+            color: var(--black);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            font-family: var(--serif);
+            line-height: 1.6;
+            cursor: none;
+            transition: background-color 0.6s var(--ease), color 0.6s var(--ease);
+        }
+
+        /* Dark Mode Support */
+        body.dark-mode {
+            background: var(--black);
+            color: var(--white);
+        }
+
+        body.no-transition,
+        body.no-transition * {
+            transition: none !important;
+        }
+
+
+        /* Musical Scale Zones - Vertical Columns */
+        .scale-container {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: flex;
+            z-index: 1;
+        }
+
+        .scale-zone {
+            flex: 1;
+            height: 100%;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            transition: all 0.3s var(--ease);
+            border-right: 1px solid transparent;
+            position: relative;
+        }
+
+        .scale-zone:last-child {
+            border-right: none;
+        }
+
+        .scale-zone.active {
+            background: rgba(255, 51, 102, 0.08);
+        }
+
+        body.dark-mode .scale-zone.active {
+            background: rgba(255, 51, 102, 0.15);
+        }
+
+
+
+        /* Custom Cursor */
+        .cursor {
+            position: fixed;
+            width: 16px;
+            height: 16px;
+            background: var(--black);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 1000;
+            transition: background-color 0.6s var(--ease);
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+
+        body.dark-mode .cursor {
+            background: var(--white);
+            box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Rib Cage Container */
+        .rib-cage {
+            position: relative;
+            width: 400px;
+            height: 500px;
+            z-index: 50;
+            opacity: 0.8;
+        }
+
+        /* Ribs */
+        .rib {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: var(--black);
+            border-radius: 1px;
+            transform-origin: center;
+            animation: breathe 4s infinite ease-in-out alternate;
+            transition: background-color 0.6s var(--ease);
+        }
+
+        body.dark-mode .rib {
+            background: var(--white);
+        }
+
+        /* Rib Positions */
+        .rib:nth-child(1) {
+            top: 10%;
+            transform: rotate(12deg);
+        }
+
+        .rib:nth-child(2) {
+            top: 18%;
+            transform: rotate(10deg);
+        }
+
+        .rib:nth-child(3) {
+            top: 26%;
+            transform: rotate(8deg);
+        }
+
+        .rib:nth-child(4) {
+            top: 34%;
+            transform: rotate(6deg);
+        }
+
+        .rib:nth-child(5) {
+            top: 42%;
+            transform: rotate(4deg);
+        }
+
+        .rib:nth-child(6) {
+            top: 50%;
+            transform: rotate(0deg);
+        }
+
+        .rib:nth-child(7) {
+            top: 58%;
+            transform: rotate(-4deg);
+        }
+
+        .rib:nth-child(8) {
+            top: 66%;
+            transform: rotate(-6deg);
+        }
+
+        .rib:nth-child(9) {
+            top: 74%;
+            transform: rotate(-8deg);
+        }
+
+        .rib:nth-child(10) {
+            top: 82%;
+            transform: rotate(-10deg);
+        }
+
+        .rib:nth-child(11) {
+            top: 90%;
+            transform: rotate(-12deg);
+        }
+
+        /* Breathing Animation */
+        @keyframes breathe {
+            0% {
+                transform: scaleX(1) scaleY(1);
+            }
+
+            50% {
+                transform: scaleX(1.05) scaleY(1.08);
+            }
+
+            100% {
+                transform: scaleX(1) scaleY(1);
+            }
+        }
+
+        /* Words Floating on Ribs */
+        .word {
+            position: absolute;
+            animation: float-breathe 4s infinite alternate ease-in-out;
+            font-family: var(--grotesk);
+            font-size: 0.9rem;
+            color: var(--black);
+            transition: color 0.6s var(--ease);
+            opacity: 0.7;
+            letter-spacing: 0.05em;
+        }
+
+        body.dark-mode .word {
+            color: var(--white);
+        }
+
+        @keyframes float-breathe {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(3px, -5px);
+            }
+
+            100% {
+                transform: translate(0, 0);
+            }
+        }
+
+
+
+        /* Filter Frequency Display */
+        .filter-display {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            opacity: 0;
+            transition: opacity 0.3s var(--ease);
+            color: var(--dynamic-color);
+            z-index: 100;
+        }
+
+        .filter-display.visible {
+            opacity: 0.5;
+        }
+
+        @media (max-width: 767px) {
+            .rib-cage {
+                width: 260px;
+                height: 380px;
+            }
+
+            body {
+                cursor: auto;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode', 'no-transition');
+            requestAnimationFrame(() => document.body.classList.remove('no-transition'));
+        }
+    </script>
+
+    <!-- Custom Cursor -->
+    <div class="cursor" id="cursor"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-cluster">
+        <a href="index.html">Home</a>
+        <a href="explore.html">Explore</a>
+        <a href="about.html">About</a>
+        <a href="archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <script>initMobileNav();</script>
+
+    <!-- Musical Scale Zones -->
+    <div class="scale-container" id="scaleContainer"></div>
+
+    <!-- Rib Cage with Breathing Animation -->
+    <div class="rib-cage">
+        <!-- Ribs -->
+        <div class="rib"></div>
+        <div class="rib"></div>
+        <div class="rib"></div>
+        <div class="rib"></div>
+        <div class="rib"></div>
+        <div class="rib"></div>
+        <div class="rib"></div>
+        <div class="rib"></div>
+        <div class="rib"></div>
+        <div class="rib"></div>
+        <div class="rib"></div>
+
+        <!-- Words along the ribs -->
+        <div class="word" style="top:12%; left:10%;"></div>
+        <div class="word" style="top:20%; left:25%;">M.</div>
+        <div class="word" style="top:28%; left:15%;"></div>
+        <div class="word" style="top:36%; left:35%;">O.</div>
+        <div class="word" style="top:44%; left:20%;"></div>
+        <div class="word" style="top:52%; left:40%;"></div>
+        <div class="word" style="top:60%; left:25%;"></div>
+        <div class="word" style="top:68%; left:35%;"></div>
+        <div class="word" style="top:76%; left:20%;"></div>
+        <div class="word" style="top:84%; left:30%;"></div>
+        <div class="word" style="top:92%; left:15%;"></div>
+        <div class="word" style="top:96%; left:35%;"></div>
+    </div>
+
+    <!-- Filter Frequency Display -->
+    <div class="filter-display" id="filterDisplay">Filter: 1000Hz</div>
+
+    <!-- Keyboard Shortcuts Hint -->
+    <div class="shortcuts-hint"></div>
+
+
+    <script>
+        // Musical scales
+        const modalScales = [
+            { name: 'Ionian', intervals: [0, 2, 4, 5, 7, 9, 11] },
+            { name: 'Dorian', intervals: [0, 2, 3, 5, 7, 9, 10] },
+            { name: 'Phrygian', intervals: [0, 1, 3, 5, 7, 8, 10] },
+            { name: 'Lydian', intervals: [0, 2, 4, 6, 7, 9, 11] },
+            { name: 'Mixolydian', intervals: [0, 2, 4, 5, 7, 9, 10] },
+            { name: 'Aeolian', intervals: [0, 2, 3, 5, 7, 8, 10] },
+            { name: 'Locrian', intervals: [0, 1, 3, 5, 6, 8, 10] }
+        ];
+
+        // Global audio variables
+        let audioContext;
+        let instruments = [];
+        let masterLimiter;
+        let currentScale = 0;
+        let filterFrequency = 1000;
+        let isPlaying = false;
+        let currentBar = 0;
+        let barDuration = 4000;
+        let pendingScaleChange = null;
+        let globalTranspose = -4;
+
+        // Dynamic Color System
+        const colors = ['#ff3366', '#3366ff', '#33ff66', '#ff9933', '#9933ff', '#33ffff'];
+        let colorIndex = 0;
+
+        function changeColor() {
+            colorIndex = (colorIndex + 1) % colors.length;
+            document.documentElement.style.setProperty('--dynamic-color', colors[colorIndex]);
+        }
+
+        function createMasterLimiter(audioContext) {
+            const compressor = audioContext.createDynamicsCompressor();
+            const preGain = audioContext.createGain();
+            const postGain = audioContext.createGain();
+            const masterVolume = audioContext.createGain();
+
+            preGain.gain.value = 2.0;
+
+            compressor.threshold.value = -6;
+            compressor.knee.value = 20;
+            compressor.ratio.value = 8;
+            compressor.attack.value = 0.001;
+            compressor.release.value = 0.15;
+
+            postGain.gain.value = 1.8;
+            masterVolume.gain.value = 1.5;
+
+            preGain.connect(compressor);
+            compressor.connect(postGain);
+            postGain.connect(masterVolume);
+            masterVolume.connect(audioContext.destination);
+
+            return {
+                input: preGain,
+                output: postGain,
+                compressor: compressor,
+                masterVolume: masterVolume
+            };
+        }
+
+        // Enhanced instrument class
+        class EnhancedInstrument {
+            constructor(audioContext, type, baseFreq, role, masterLimiter) {
+                this.audioContext = audioContext;
+                this.type = type;
+                this.baseFreq = baseFreq;
+                this.role = role;
+                this.masterLimiter = masterLimiter;
+
+                this.gainNode = audioContext.createGain();
+                this.filterNode = audioContext.createBiquadFilter();
+
+                this.waveShaperNode = audioContext.createWaveShaper();
+                this.waveShaperNode.curve = this.makeDistortionCurve(0);
+                this.waveShaperNode.oversample = '2x';
+
+                if (role === 'bass') {
+                    this.bassEQ = audioContext.createBiquadFilter();
+                    this.bassEQ.type = 'peaking';
+                    this.bassEQ.frequency.value = 80;
+                    this.bassEQ.Q.value = 0.7;
+                    this.bassEQ.gain.value = 6;
+
+                    this.subEQ = audioContext.createBiquadFilter();
+                    this.subEQ.type = 'highpass';
+                    this.subEQ.frequency.value = 40;
+                    this.subEQ.Q.value = 0.7;
+                }
+
+                this.gainNode.gain.value = role === 'bass' ? 0.3 : 0.12;
+                this.filterNode.type = 'lowpass';
+                this.filterNode.frequency.value = 1000;
+                this.filterNode.Q.value = 2;
+
+                if (role === 'bass') {
+                    this.gainNode.connect(this.subEQ);
+                    this.subEQ.connect(this.bassEQ);
+                    this.bassEQ.connect(this.filterNode);
+                } else {
+                    this.gainNode.connect(this.filterNode);
+                }
+
+                this.filterNode.connect(this.waveShaperNode);
+                this.waveShaperNode.connect(this.masterLimiter.input);
+                this.isSequencing = false;
+                this.intervalId = null;
+            }
+
+            updateFilter(frequency) {
+                this.filterNode.frequency.value = frequency;
+            }
+
+            makeDistortionCurve(amount) {
+                const samples = 44100;
+                const curve = new Float32Array(samples);
+                const deg = Math.PI / 180;
+
+                for (let i = 0; i < samples; i++) {
+                    const x = (i * 2) / samples - 1;
+                    curve[i] = ((3 + amount) * x * 20 * deg) / (Math.PI + amount * Math.abs(x));
+                }
+
+                return curve;
+            }
+
+            updateDistortion(amount) {
+                this.waveShaperNode.curve = this.makeDistortionCurve(amount);
+            }
+
+            startPattern(scale) {
+                this.stopPattern();
+                this.isSequencing = true;
+
+                const intervals = scale.intervals;
+                let step = 0;
+                let timing, pattern;
+
+                switch (this.role) {
+                    case 'bass':
+                        timing = 500;
+                        pattern = [intervals[0], intervals[0], intervals[4] % 12, intervals[0]];
+                        break;
+                    case 'harmony':
+                        timing = 1000;
+                        pattern = [[intervals[0], intervals[2], intervals[4]]];
+                        break;
+                    case 'melody':
+                        timing = 250;
+                        pattern = [...intervals, intervals[0], intervals[0], intervals[2], intervals[4]];
+                        break;
+                    case 'arp':
+                        timing = 125;
+                        pattern = [intervals[0], intervals[2], intervals[4], intervals[6] || intervals[0] + 12];
+                        break;
+                }
+
+                const playStep = () => {
+                    if (!this.isSequencing) return;
+
+                    let note = this.role === 'melody'
+                        ? pattern[Math.floor(Math.random() * pattern.length)]
+                        : pattern[step % pattern.length];
+
+                    if (Array.isArray(note)) {
+                        note.forEach(n => this.playNote(n, 0.8, 0.3));
+                    } else {
+                        const octaveOffset = this.role === 'melody' ? 12 : 0;
+                        const duration = this.role === 'bass' ? 0.3 : 0.5;
+                        const velocity = this.role === 'bass' ? 0.6 : 0.4;
+                        this.playNote(note + octaveOffset, duration, velocity);
+                    }
+
+                    step++;
+                };
+
+                playStep();
+                this.intervalId = setInterval(playStep, timing);
+            }
+
+            playNote(interval, duration, velocity) {
+                const transposedInterval = interval + globalTranspose;
+                const freq = this.baseFreq * Math.pow(2, transposedInterval / 12);
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+
+                if (this.role === 'bass') {
+                    osc.type = 'triangle';
+                    gain.gain.setValueAtTime(0, this.audioContext.currentTime);
+                    gain.gain.linearRampToValueAtTime(velocity * 0.4, this.audioContext.currentTime + 0.01);
+                    gain.gain.exponentialRampToValueAtTime(velocity * 0.1, this.audioContext.currentTime + 0.1);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                } else {
+                    osc.type = this.type;
+                    gain.gain.setValueAtTime(velocity * 0.25, this.audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                }
+
+                osc.frequency.value = freq;
+                osc.connect(gain);
+                gain.connect(this.gainNode);
+
+                osc.start();
+                osc.stop(this.audioContext.currentTime + duration + 0.1);
+            }
+
+            stopPattern() {
+                this.isSequencing = false;
+                if (this.intervalId) {
+                    clearInterval(this.intervalId);
+                    this.intervalId = null;
+                }
+            }
+        }
+
+        // Initialize scale zones
+        function initializeScaleZones() {
+            const container = document.getElementById('scaleContainer');
+            container.innerHTML = '';
+            modalScales.forEach(() => {
+                const zone = document.createElement('div');
+                zone.className = 'scale-zone';
+                container.appendChild(zone);
+            });
+        }
+
+        // Initialize audio system
+        async function initializeAudio() {
+            try {
+                audioContext = new AudioContext();
+                masterLimiter = createMasterLimiter(audioContext);
+
+                instruments = [
+                    new EnhancedInstrument(audioContext, 'triangle', 110, 'bass', masterLimiter),
+                    new EnhancedInstrument(audioContext, 'triangle', 220, 'harmony', masterLimiter),
+                    new EnhancedInstrument(audioContext, 'sine', 440, 'melody', masterLimiter),
+                    new EnhancedInstrument(audioContext, 'sine', 660, 'arp', masterLimiter)
+                ];
+
+                startBarTimer();
+                return true;
+            } catch (error) {
+                console.error('Failed to initialize audio:', error);
+                return false;
+            }
+        }
+
+        // Start bar timing system
+        function startBarTimer() {
+            setInterval(() => {
+                currentBar++;
+                if (pendingScaleChange !== null) {
+                    currentScale = pendingScaleChange;
+                    pendingScaleChange = null;
+                    updateScaleVisual();
+                }
+                playNewBar();
+            }, barDuration / 4);
+            playNewBar();
+        }
+
+        function playNewBar() {
+            if (!isPlaying || instruments.length === 0) return;
+            instruments.forEach(instrument => instrument.startPattern(modalScales[currentScale]));
+        }
+
+        // Mouse tracking with musical control
+        function updateFromMouse(x, y) {
+            const cursor = document.getElementById('cursor');
+            cursor.style.left = `${x - 8}px`;
+            cursor.style.top = `${y - 8}px`;
+
+            const newScale = Math.floor((x / window.innerWidth) * modalScales.length);
+            if (newScale !== currentScale && newScale >= 0 && newScale < modalScales.length) {
+                pendingScaleChange = Math.max(0, Math.min(modalScales.length - 1, newScale));
+            }
+
+            const normalizedY = Math.abs(window.innerHeight - y) / window.innerHeight;
+            filterFrequency = Math.pow(80, normalizedY) * 64;
+            updateFilter();
+            updateFilterDisplay();
+
+            const distortionAmount = (1 - normalizedY);
+            if (instruments.length > 0) {
+                instruments.forEach(instrument => {
+                    instrument.updateFilter(filterFrequency);
+                    instrument.updateDistortion(distortionAmount);
+                });
+            }
+        }
+
+        function updateScaleVisual() {
+            document.querySelectorAll('.scale-zone').forEach((zone, index) => {
+                zone.classList.remove('active');
+                if (index === currentScale) zone.classList.add('active');
+            });
+        }
+
+        function updateFilter() {
+            if (instruments.length > 0) {
+                instruments.forEach(instrument => instrument.updateFilter(filterFrequency));
+            }
+        }
+
+        function updateFilterDisplay() {
+            const display = document.getElementById('filterDisplay');
+            display.textContent = `Filter: ${Math.round(filterFrequency)}Hz`;
+            display.classList.add('visible');
+
+            clearTimeout(updateFilterDisplay.timeout);
+            updateFilterDisplay.timeout = setTimeout(() => {
+                display.classList.remove('visible');
+            }, 2000);
+        }
+
+        // Event Listeners
+        document.addEventListener('mousemove', (e) => {
+            updateFromMouse(e.clientX, e.clientY);
+        });
+
+        document.addEventListener('click', async (e) => {
+            if (!e.target.closest('.nav-cluster')) {
+                changeColor();
+                if (!isPlaying) {
+                    const success = await initializeAudio();
+                    if (success) {
+                        isPlaying = true;
+                        updateScaleVisual();
+                    }
+                } else {
+                    // already playing — just update from position
+                }
+            }
+        });
+
+        window.addEventListener('load', () => {
+            initializeScaleZones();
+            updateFromMouse(window.innerWidth / 2, window.innerHeight / 2);
+        });
+
+        window.addEventListener('resize', () => {
+            initializeScaleZones();
+        });
+
+        // Keyboard shortcuts
+        let konamiCode = [];
+        const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (document.fullscreenElement || document.webkitFullscreenElement) return;
+                returnToHome();
+            }
+
+            if (e.key === 'h' || e.key === 'H') returnToHome();
+
+            konamiCode.push(e.key);
+            if (konamiCode.length > konamiSequence.length) {
+                konamiCode.shift();
+                return;
+            }
+
+            if (konamiCode.join(',') === konamiSequence.join(',')) {
+                document.querySelectorAll('.rib, .word').forEach(el => {
+                    el.style.animationDuration = '1s';
+                });
+
+                const rapidColor = setInterval(changeColor, 200);
+
+                setTimeout(() => {
+                    document.querySelectorAll('.rib, .word').forEach(el => {
+                        el.style.animationDuration = '4s';
+                    });
+                    clearInterval(rapidColor);
+                }, 60000);
+
+                konamiCode = [];
+            }
+        });
+
+        // Touch support for mobile
+        document.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            updateFromMouse(touch.clientX, touch.clientY);
+        }, { passive: false });
+
+        document.addEventListener('touchstart', async (e) => {
+            if (!isPlaying) {
+                const success = await initializeAudio();
+                if (success) {
+                    isPlaying = true;
+                    updateScaleVisual();
+                }
+            }
+            changeColor();
+        });
+    </script>
+
+    <!-- Perry Lee -->
+    <script>
+        if (isDesktop) {
+            document.write('<div id="viewer"></div>');
+            document.write('<script type="module" src="js/perry-lee.js"><\/script>');
+        }
+    </script>
+
+</body>
+
+</html>

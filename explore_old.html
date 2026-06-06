@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore - Antitesi Magazine</title>
+    <!-- Device detection: FlyingMagazine for desktop only -->
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="css/spark_styles.css">');
+            document.write('<script>window.magazineSparkMode = true;<\/script>');
+            document.write('<script src="js/flying-magazine.js"><\/script>');
+        }
+    </script>
+
+    <script src="js/articles-and-utils.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [["$", "$"], ["\\(", "\\)"]],
+                displayMath: [["$$", "$$"], ["\\[", "\\]"]]
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="css/index_style.css">
+    <link rel="stylesheet" href="css/mobile.css">
+
+    <style>
+        /* ─────────────────────────────────────────
+        ARTICLE ITEMS
+        ───────────────────────────────────────── */
+        .article-item {
+            padding: 0.75rem 0.6rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            transition: background 0.15s, padding-left 0.2s;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .article-item:last-child {
+            border-bottom: none;
+        }
+
+        body.dark-mode .article-item {
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .article-item:hover {
+            background: var(--gray, #f7f7f7);
+            padding-left: 1rem;
+        }
+
+        body.dark-mode .article-item:hover {
+            background: #111;
+        }
+
+        .article-item h4 {
+            font-size: 0.88rem;
+            margin-bottom: 0.15rem;
+            font-weight: 600;
+            font-family: 'Crimson Pro', serif;
+            letter-spacing: 0.01em;
+        }
+
+        .article-item p {
+            font-size: 0.82rem;
+            line-height: 1.4;
+            opacity: 0.55;
+            font-family: 'Crimson Pro', serif;
+        }
+
+        /* ─────────────────────────────────────────
+        DRAW SECTION
+        ───────────────────────────────────────── */
+        .draw-section {
+            max-width: 820px;
+            margin: 0 auto 0;
+            width: 100%;
+        }
+
+
+        .draw-section canvas.drawing-canvas {
+            display: block;
+            width: 100% !important;
+            max-width: 100% !important;
+            height: auto !important;
+            aspect-ratio: 14 / 7;
+            cursor: crosshair;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            box-sizing: border-box;
+        }
+
+        body.dark-mode .draw-section canvas.drawing-canvas {
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .canvas-hint {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.6rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            opacity: 0.12;
+            transition: opacity 0.3s;
+        }
+
+        .draw-section.drawing .canvas-hint {
+            opacity: 0;
+        }
+
+        .draw-bottom-row {
+            margin-top: 0.4rem;
+        }
+
+        @keyframes psychedelic-shift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        .psychedelic-line {
+            background: linear-gradient(90deg,
+                    #ff0080, #ff4500, #ffd700, #00ff88,
+                    #00bfff, #8a2be2, #ff1493, #ff0080);
+            background-size: 300% 300%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: psychedelic-shift 2.2s ease infinite;
+        }
+
+        .drawing-instructions {
+            font-family: var(--grotesk);
+            font-size: 0.875rem;
+            opacity: 0.5;
+            margin-top: 1rem;
+            letter-spacing: 0.05em;
+        }
+
+        .article-recommendation {
+            margin-top: 1.8rem;
+            padding: 1.5rem;
+            border: 1px solid var(--dynamic-color);
+            background: var(--gray);
+            font-family: var(--grotesk);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            opacity: 0;
+            transition: opacity 0.3s var(--ease), border-color 0.6s var(--ease);
+            text-align: center;
+        }
+
+
+        /* ── Draw a line ── */
+        .draw-canvas-wrap {
+            position: relative;
+            padding-top: 1.8rem;
+        }
+
+        .draw-canvas-title {
+            position: absolute;
+            background: #fff;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: 'Fraunces', serif;
+            font-size: 2.8rem;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.025em;
+            white-space: nowrap;
+            z-index: 2;
+            padding: 0 0.6rem;
+        }
+
+        body.dark-mode .draw-canvas-title {
+            background: var(--bg, #000000);
+        }
+
+        .draw-instructions-only {
+            font-size: 0.58rem;
+            opacity: 0.22;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-family: 'Inter', sans-serif;
+            margin-top: 0.5rem;
+            text-align: right;
+        }
+
+        body.dark-mode .draw-instructions-only {
+            opacity: 0.45;
+        }
+
+        #tile-1 .tool-panel {
+            border: none;
+            box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.0);
+        }
+
+        #tile-4 .tool-panel {
+            border-bottom: 1px solid currentColor !important;
+            overflow: visible;
+        }
+
+        #tile-4 .tool-panel-inner {
+            overflow: visible;
+        }
+
+        @media (max-width: 767px) {
+
+            .draw-section {
+                margin: 0rem auto 0;
+                width: 100%;
+            }
+
+            .draw-section canvas.drawing-canvas {
+                aspect-ratio: 2.5 / 3;
+            }
+
+            .draw-canvas-wrap {
+                padding-top: 1rem;
+                max-width: 400px;
+            }
+
+            .draw-canvas-title {
+                transform: translate(-50%, -30%);
+                font-size: 2.3rem;
+            }
+
+            .draw-instructions-only {
+                font-size: 0.47rem;
+                letter-spacing: 0.1em;
+                text-transform: uppercase;
+                font-family: 'Inter', sans-serif;
+                margin-top: 0.5rem;
+                text-align: right;
+            }
+
+            .article-recommendation {
+                margin-top: 1.4rem;
+                padding: 0.8rem;
+                border: 1px solid var(--dynamic-color);
+                background: var(--gray);
+                font-family: var(--grotesk);
+                font-size: 0.80rem;
+                line-height: 1.6;
+                opacity: 0;
+                transition: opacity 0.3s var(--ease), border-color 0.6s var(--ease);
+                text-align: center;
+            }
+
+
+        }
+
+        /* ─────────────────────────────────────────
+        TOOLBAR
+        ───────────────────────────────────────── */
+        .toolbar-section {
+            max-width: 820px;
+            margin: 2.5rem -5% 4rem; /*attention: depends on the width surplus (e.g. 120% -> -5%) */
+            width: 120%;
+        }
+
+        .toolbar-bar {
+            display: flex;
+            gap: 0;
+            border-top: 1px solid currentColor;
+            border-bottom: 1px solid currentColor;
+            overflow: visible;
+            position: relative;
+        }
+
+        .tool-tile {
+            flex: 1;
+            position: relative;
+            border-right: 1px solid rgba(0, 0, 0, 0.1);
+            box-sizing: border-box;
+            cursor: pointer;
+            overflow: visible;
+            transition: background 0.15s;
+        }
+
+        body.dark-mode .tool-tile {
+            border-right-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .tool-tile:last-child {
+            border-right: none;
+        }
+
+        .tool-tile:hover {
+            background: rgba(0, 0, 0, 0.025);
+        }
+
+        body.dark-mode .tool-tile:hover {
+            background: rgba(255, 255, 255, 0.025);
+        }
+
+        .tool-tile.pinned {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        body.dark-mode .tool-tile.pinned {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tool-tile::before {
+            content: '';
+            position: absolute;
+            top: -1px;
+            left: 0;
+            right: 0;
+            height: 1.5px;
+            background: currentColor;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .tool-tile:hover::before,
+        .tool-tile.pinned::before {
+            transform: scaleX(1);
+        }
+
+        .tool-tile-label {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            padding: 0.7rem 0.75rem 0.65rem;
+            gap: 0.2rem;
+            transition: opacity 0.15s;
+            user-select: none;
+        }
+
+        .tool-tile:hover .tool-tile-label {
+            opacity: 0.5;
+        }
+
+        .tool-tile.pinned .tool-tile-label {
+            opacity: 0.5;
+        }
+
+        .tool-tile-num {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.48rem;
+            opacity: 0.28;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+        }
+
+        .tool-tile-name {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 500;
+            white-space: nowrap;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .tool-panel {
+            position: absolute;
+            bottom: 100%;
+            left: -1px;
+            width: 360px;
+            background: #fff;
+            border: 1px solid currentColor;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+                opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translateY(8px) skewX(-1.5deg);
+            transform-origin: bottom left;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 200;
+        }
+
+        body.dark-mode .tool-panel {
+            background: #0c0c0c;
+        }
+
+        .tool-tile:hover .tool-panel,
+        .tool-tile.pinned .tool-panel {
+            max-height: 560px;
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) skewX(0deg);
+        }
+
+        .tool-panel-inner {
+            padding: 1.1rem 1rem 1.4rem;
+            font-family: 'Crimson Pro', serif;
+            font-size: 0.92rem;
+            line-height: 1.55;
+        }
+
+        .tool-panel-inner::before {
+            content: attr(data-label);
+            display: block;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.52rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            opacity: 0.3;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        }
+
+        body.dark-mode .tool-panel-inner::before {
+            border-bottom-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .tool-panel.scrollable .tool-panel-inner {
+            max-height: 340px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+        }
+
+        .tool-panel.scrollable .tool-panel-inner::-webkit-scrollbar {
+            width: 2px;
+        }
+
+        .tool-panel.scrollable .tool-panel-inner::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .tool-tile.pinned .tool-tile-close {
+            display: flex;
+        }
+
+        .tool-tile-close {
+            display: none;
+            position: absolute;
+            top: 0.35rem;
+            right: 0.45rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.55rem;
+            opacity: 0.25;
+            letter-spacing: 0.05em;
+            align-items: center;
+            gap: 0.2rem;
+        }
+
+        /* ── SPOTIFY PANEL ─────────────────────────────── */
+        #tile-1 .tool-panel-inner {
+            padding: 0;
+        }
+
+        #tile-1 .tool-panel-inner::before {
+            display: none;
+        }
+
+        .spotify-panel {
+            position: relative;
+            width: 100%;
+            padding: 0.6rem;
+            box-sizing: border-box;
+        }
+
+        .spotify-panel iframe {
+            display: block;
+            width: 100%;
+            height: 420px;
+            border: none;
+            filter: saturate(0.12) brightness(1.08);
+            border-radius: 12px;
+        }
+
+        /* ── MAP / OUR DESK PANEL ──────────────────────────── */
+        #tile-5 .tool-panel {
+            padding: 0;
+            cursor: pointer;
+        }
+
+        #tile-5 .tool-panel-inner {
+            padding: 0;
+            position: relative;
+        }
+
+        #tile-5 .tool-panel-inner::before {
+            display: none;
+        }
+
+        .map-panel-wrap {
+            position: relative;
+            width: 100%;
+        }
+
+        .map-panel-wrap iframe {
+            display: block;
+            width: 100%;
+            height: 200px;
+            border: none;
+            border-radius: 0;
+            pointer-events: none; /* so the overlay intercepts the click */
+            scale: 2;
+            opacity: 0.5;
+        }
+
+        .map-panel-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 10;
+            cursor: pointer;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-end;
+            padding: 0.6rem 0.8rem;
+        }
+
+        .map-panel-overlay span {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.55rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.5);
+            background: rgba(10,14,39,0.6);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            backdrop-filter: blur(4px);
+        }
+
+        @media (max-width: 767px) {
+            .toolbar-section {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    <div class="progress-bar"></div>
+
+    <nav class="nav-cluster">
+        <a href="index.html">Home</a>
+        <a href="about.html">About</a>
+        <a href="archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <section class="standard-page">
+
+        <div class="draw-section">
+            <div class="draw-canvas-wrap">
+                <div class="draw-canvas-title">Draw a&nbsp;<span class="psychedelic-line">line</span></div>
+                <div class="drawing-canvas-container">
+                    <canvas class="drawing-canvas" id="drawingCanvas" width="1600" height="700"></canvas>
+                </div>
+            </div>
+
+            <div class="draw-bottom-row">
+                <div class="draw-instructions-only">
+                    smooth curves → narrative &nbsp;·&nbsp; sharp angles → analytical
+                    tight cluster → specific  &nbsp;·&nbsp; wide spread → general
+                </div>
+            </div>
+
+            <div class="article-recommendation" id="articleRec">
+                <span id="recText"></span>
+            </div>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="toolbar-section">
+            <div class="toolbar-bar" id="toolbarBar">
+                <!-- tiles injected by JS -->
+            </div>
+        </div>
+
+    </section>
+
+    <div class="shortcuts-hint"></div>
+
+
+    <script>
+        // Dark mode
+        window.addEventListener('load', () => {
+            buildToolbar();
+        });
+
+        // ── Drawing Canvas ────────────────────────────
+        const drawCanvas = document.getElementById('drawingCanvas');
+        const drawCtx = drawCanvas.getContext('2d');
+        let isDrawing = false, lastPoint = null, points = [], drawingProgress = 0;
+
+        function getHSLColor(p) { return `hsl(${(p * 360) % 360}, 80%, 55%)`; }
+
+        function drawGrid() {
+            const w = drawCanvas.width, h = drawCanvas.height;
+            const isDark = document.body.classList.contains('dark-mode');
+            drawCtx.fillStyle = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.045)';
+            for (let x = 80; x < w; x += 80) {
+                for (let y = 80; y < h; y += 80) {
+                    drawCtx.beginPath();
+                    drawCtx.arc(x, y, 1.5, 0, Math.PI * 2);
+                    drawCtx.fill();
+                }
+            }
+        }
+        drawGrid();
+
+
+        function getCanvasPoint(clientX, clientY) {
+            const rect = drawCanvas.getBoundingClientRect();
+            return {
+                x: (clientX - rect.left) * (drawCanvas.width / rect.width),
+                y: (clientY - rect.top) * (drawCanvas.height / rect.height)
+            };
+        }
+
+        function analyzeGeometry(pts) {
+            const baseline = { sharpness: 0, spread: 0 };
+            if (pts.length < 5) return baseline;
+
+            // Path length, bounding box, segment lengths — single pass.
+            let totalLen = 0;
+            const segs = [];
+            let minX = pts[0].x, maxX = pts[0].x, minY = pts[0].y, maxY = pts[0].y;
+            for (let i = 1; i < pts.length; i++) {
+                const d = Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
+                segs.push(d);
+                totalLen += d;
+                if (pts[i].x < minX) minX = pts[i].x;
+                else if (pts[i].x > maxX) maxX = pts[i].x;
+                if (pts[i].y < minY) minY = pts[i].y;
+                else if (pts[i].y > maxY) maxY = pts[i].y;
+            }
+            if (totalLen < 40) return baseline;
+
+            // Spread (generality). Fraction of the canvas the drawing reaches along its wider extent. A horizontal line spanning the width
+            const w = maxX - minX, h = maxY - minY;
+            const spread = Math.min(1, Math.max(w / drawCanvas.width, h / drawCanvas.height));
+
+            // Arc-length resample to N points. N adapts so each step is
+            // ~5 pixels — avoids noise
+            const N = Math.min(200, Math.max(30, Math.floor(totalLen / 5)));
+            const step = totalLen / (N - 1);
+            const rs = [pts[0]];
+            let acc = 0, j = 1;
+            for (let i = 1; i < N - 1; i++) {
+                const target = i * step;
+                while (j < pts.length && acc + segs[j-1] < target) {
+                    acc += segs[j-1];
+                    j++;
+                }
+                if (j >= pts.length) break;
+                const t = (target - acc) / segs[j-1];
+                rs.push({
+                    x: pts[j-1].x + t * (pts[j].x - pts[j-1].x),
+                    y: pts[j-1].y + t * (pts[j].y - pts[j-1].y)
+                });
+            }
+            rs.push(pts[pts.length - 1]);
+
+            // Median-of-3 smoothing. Single-pixel jitter is absorbed (the
+            // wobble is never the middle value of its 3-point neighbourhood);
+            // a real corner survives (its apex stays the median of the three).
+            const sm = rs.map((p, i) => {
+                if (i === 0 || i === rs.length - 1) return p;
+                const a = rs[i-1], b = rs[i], c = rs[i+1];
+                const xs = [a.x, b.x, c.x].sort((u, v) => u - v);
+                const ys = [a.y, b.y, c.y].sort((u, v) => u - v);
+                return { x: xs[1], y: ys[1] };
+            });
+
+            // Sharpness - measuring turn concentration
+            //
+            // At each resampled point, measure the windowed turning angle.
+            // Then weight each angle by angle^P with P slightly above 1 (by trial and error)
+            //
+            //     sharpness = (top-Q weighted fraction  −  Q) / (1 − Q)
+            //
+            // Where Q is the fraction of windows we inspect (top 10%).
+            // 
+            const W = 4;
+            const P = 1.3;
+            const angles = [];
+            for (let i = W; i < sm.length - W; i++) {
+                const pPrev = sm[i-W], pCurr = sm[i], pNext = sm[i+W];
+                const ax = pCurr.x - pPrev.x, ay = pCurr.y - pPrev.y;
+                const bx = pNext.x - pCurr.x, by = pNext.y - pCurr.y;
+                const mag = Math.hypot(ax, ay) * Math.hypot(bx, by);
+                if (mag < 1e-10) continue;
+                const c = Math.max(-1, Math.min(1, (ax*bx + ay*by) / mag));
+                angles.push(Math.acos(c));
+            }
+            if (angles.length < 5) return { sharpness: 0, spread };
+
+            const weighted = angles.map(a => Math.pow(a, P));
+            const total = weighted.reduce((s, v) => s + v, 0);
+            if (total < 1e-10) return { sharpness: 0, spread };
+
+            const sorted = [...weighted].sort((a, b) => b - a);
+            const K = Math.max(1, Math.round(weighted.length * 0.1));
+            const topSum = sorted.slice(0, K).reduce((s, v) => s + v, 0);
+            const Q = K / weighted.length;
+            const concentration = topSum / total;
+            const sharpness = Math.max(0, Math.min(1, (concentration - Q) / (1 - Q)));
+
+            return { sharpness, spread };
+        }
+        
+        function analyzeDrawing() {
+            if (typeof articles === 'undefined' || !articles.length) return;
+            const geom = analyzeGeometry(points);
+
+            // Minimize Euclidean distance utilizing a functional reduce approach
+            const best = articles.reduce((prev, curr) => {
+                const distPrev = Math.hypot(prev.sharpness - geom.sharpness, (prev.spread || 0) - geom.spread);
+                const distCurr = Math.hypot(curr.sharpness - geom.sharpness, (curr.spread || 0) - geom.spread);
+                return distCurr < distPrev ? curr : prev;
+            });
+
+            // Map continuous outputs to boolean stylistic logic for text generation
+            const isSharp = geom.sharpness > 0.5;
+            const isSpread = geom.spread > 0.5;
+
+            const sharpType = isSharp ? "sharp curves" : "smooth curves";
+            const sharpStyle = isSharp ? "analytical, conceptual thinking" : "narrative, flowing ideas";
+            const spreadType = isSpread ? "wide spread" : "tight cluster";
+            const spreadStyle = isSpread ? "broad generality" : "focused specificity";
+
+            document.getElementById('recText').innerHTML =
+                `Your ${sharpType} suggest a preference for ${spreadStyle}, ${sharpStyle}. <strong>Recommended for you:</strong><br><a href="${articlePath(best)}" style="color:inherit;text-decoration:underline;">"${best.title}"</a> — ${best.recommendationDesc || ''}`;
+            document.getElementById('articleRec').classList.add('visible');
+        }
+
+        drawCanvas.addEventListener('mousedown', e => {
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            drawGrid();
+            document.getElementById('articleRec').classList.remove('visible');
+            drawCanvas.closest('.draw-section').classList.add('drawing');
+            isDrawing = true; drawingProgress = 0;
+            lastPoint = getCanvasPoint(e.clientX, e.clientY);
+            points = [lastPoint];
+        });
+        drawCanvas.addEventListener('mousemove', e => {
+            if (!isDrawing) return;
+            const p = getCanvasPoint(e.clientX, e.clientY);
+            drawingProgress += 0.02;
+            drawCtx.strokeStyle = getHSLColor(drawingProgress);
+            drawCtx.lineWidth = 3; drawCtx.lineCap = 'round';
+            drawCtx.beginPath();
+            drawCtx.moveTo(lastPoint.x, lastPoint.y);
+            drawCtx.lineTo(p.x, p.y);
+            drawCtx.stroke();
+            points.push(p); lastPoint = p;
+        });
+        drawCanvas.addEventListener('mouseup', () => {
+            if (isDrawing && points.length > 5) analyzeDrawing();
+            isDrawing = false;
+            drawCanvas.closest('.draw-section').classList.remove('drawing');
+        });
+        drawCanvas.addEventListener('touchstart', e => {
+            e.preventDefault();
+            drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+            drawGrid();
+            document.getElementById('articleRec').classList.remove('visible');
+            drawCanvas.closest('.draw-section').classList.add('drawing');
+            isDrawing = true; drawingProgress = 0;
+            lastPoint = getCanvasPoint(e.touches[0].clientX, e.touches[0].clientY);
+            points = [lastPoint];
+        });
+        drawCanvas.addEventListener('touchmove', e => {
+            e.preventDefault();
+            if (!isDrawing) return;
+            const p = getCanvasPoint(e.touches[0].clientX, e.touches[0].clientY);
+            drawingProgress += 0.02;
+            drawCtx.strokeStyle = getHSLColor(drawingProgress);
+            drawCtx.lineWidth = 3; drawCtx.lineCap = 'round';
+            drawCtx.beginPath();
+            drawCtx.moveTo(lastPoint.x, lastPoint.y);
+            drawCtx.lineTo(p.x, p.y);
+            drawCtx.stroke();
+            points.push(p); lastPoint = p;
+        });
+        drawCanvas.addEventListener('touchend', () => {
+            if (isDrawing && points.length > 5) analyzeDrawing();
+            isDrawing = false;
+            drawCanvas.closest('.draw-section').classList.remove('drawing');
+        });
+
+        // ── Toolbar ───────────────────────────────────
+        function buildToolbar() {
+            const bar = document.getElementById('toolbarBar');
+            if (!bar) return;
+
+            const articlesHtml = () => {
+                if (typeof articles === 'undefined' || !articles.length)
+                    return '<p style="opacity:0.4;font-size:0.85rem;">Nessun articolo caricato.</p>';
+                return articles.map(a => `
+                <a href="${articlePath(a)}" class="article-item">
+                    <h4>${a.title}
+                        <span style="font-weight:400;opacity:0.45;font-size:0.72rem;">
+                            ${a.publishDate || ''} · ${a.readTime || ''}
+                        </span>
+                    </h4>
+                    <p>${a.description || ''}</p>
+                </a>`).join('');
+            };
+
+            const tiles = [
+                {
+                    num: '01', name: 'Essays',
+                    scrollable: true,
+                    content: () => articlesHtml()
+                },
+                {
+                    num: '02', name: 'Playlist',
+                    content: () => `<div style="max-width:360px;"><iframe style="border-radius:0;width:100%;height:152px;display:block;border:none;"
+                    src="https://open.spotify.com/embed/playlist/1UQ7pG01imfZRid6JVeEhS?utm_source=generator"
+                    frameBorder="0" allowfullscreen
+                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                    loading="lazy"></iframe></div>`
+                },
+                {
+                    num: '03', name: 'Algorithm',
+                    content: () => `
+                    <p style="font-size:0.95rem; text-align:center;">
+                    \\[ \\underset{a \\in \\{\\text{articles}\\}}{\\operatorname{argmin}} \\sqrt{(S_d - S_a)^2 + (G_d - G_a)^2} \\]
+                    </p>
+                    <p style="font-size:0.8rem;opacity:0.6;margin-top:0.5rem;">
+                    Where S is Sharpness and G is Spread (Generality). Our recommendation logic matches drawn geometries to narrative coordinates in real-time.
+                    </p>`
+                },
+
+                {
+                    num: '04', name: 'Citation',
+                    content: () => `<p id="randomCitation"
+                    style="font-style:italic;font-size:1rem;line-height:1.6;opacity:0.85;">
+                    "Language is a virus from outer space." — William S. Burroughs
+                    </p>`
+                },
+                {
+                    num: '05', name: 'Methodology',
+                    content: () => `<p style="font-size:0.88rem;line-height:1.6;opacity:0.7;">
+                    Our research combines archival depth with computational methods.
+                    Every claim is traceable. Every image is contextualized.
+                    </p>`
+                },
+                {
+                    num: '06', name: 'Our Desk',
+                    content: () => `
+                    <div class="map-panel-wrap">
+                        <iframe src="map/map.html?embed" loading="lazy" tabindex="-1"></iframe>
+                        <div class="map-panel-overlay" onclick="window.location.href='map/map.html'">
+                            <span>Open our desk →</span>
+                        </div>
+                    </div>`
+                },
+            ];
+
+            bar.innerHTML = tiles.map((t, i) => `
+            <div class="tool-tile" id="tile-${i}"
+                 onmouseenter="clearTimeout(window._tileTimer)"
+                 onmouseleave="window._tileTimer = setTimeout(() => {
+                     document.querySelectorAll('.tool-tile.pinned').forEach(t=>t.classList.remove('pinned'));
+                 }, 250)">
+                <div class="tool-panel ${t.scrollable ? 'scrollable' : ''}"
+                     onmouseenter="clearTimeout(window._tileTimer)"
+                     onmouseleave="window._tileTimer = setTimeout(() => {
+                         document.querySelectorAll('.tool-tile.pinned').forEach(t=>t.classList.remove('pinned'));
+                     }, 250)">
+                    <div class="tool-panel-inner" data-label="${t.name}">${t.content()}</div>
+                </div>
+                <div class="tool-tile-label">
+                    <span class="tool-tile-num">${t.num}</span>
+                    <span class="tool-tile-name">${t.name}</span>
+                </div>
+            </div>`).join('');
+
+            const cit = document.getElementById('randomCitation');
+            if (cit && typeof getRandomCitation === 'function')
+                cit.textContent = getRandomCitation();
+
+            if (window.MathJax) MathJax.typesetPromise();
+        }
+
+        function getRandomCitation() {
+            let all = [];
+            if (typeof articles !== 'undefined') {
+                articles.forEach(a => { if (a.citations) all = all.concat(a.citations); });
+            }
+            if (!all.length) return '"Language is a virus from outer space." — William S. Burroughs';
+            const [author, quote] = all[Math.floor(Math.random() * all.length)].split('/');
+            return `"${quote}" — ${author}`;
+        }
+
+        initProgressBar();
+        if (isDesktop) {
+            initKeyboardShortcuts({
+                extraKeys: {
+                    'a': openNextArticle,
+                    'A': openNextArticle,
+                    'Escape': returnToHome,
+                    'h': returnToHome,
+                    'H': returnToHome,
+                }
+            });
+        }
+    </script>
+</body>
+
+</html>

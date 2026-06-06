@@ -1,0 +1,21 @@
+<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="om1" cx="40%" cy="40%" r="60%">
+      <stop offset="0" stop-color="#e0bc62"/>
+      <stop offset="0.55" stop-color="#a8782a"/>
+      <stop offset="1" stop-color="#5a3e0a"/>
+    </radialGradient>
+  </defs>
+  <g transform="translate(60 60)">
+    <path d="M -6,18 Q -12,30 -20,46 Q -22,48 -19,42 Q -12,30 -4,20" stroke="#5a4818" stroke-width="1.6" fill="none" opacity="0.65"/>
+    <path d="M -22,-12 Q -28,0 -22,18 Q -8,28 10,26 Q 26,22 28,5 Q 26,-12 14,-20 Q -2,-24 -12,-20 Q -22,-16 -22,-12 Z" fill="url(#om1)"/>
+    <path d="M -18,-8 Q -22,2 -18,14 Q -4,20 8,18 Q 20,14 22,3 Q 20,-10 10,-14 Q -2,-16 -8,-14 Q -18,-11 -18,-8 Z" fill="#d4a04a" opacity="0.55"/>
+    <path d="M -12,-2 Q -16,4 -12,12 Q -2,16 8,14 Q 16,10 16,2 Q 14,-6 8,-9 Q -2,-9 -12,-2 Z" fill="#e8b860" opacity="0.45"/>
+    <ellipse cx="-2" cy="0" rx="7" ry="5" fill="#3e2a06"/>
+    <ellipse cx="-4" cy="-2" rx="3.5" ry="2.5" fill="#1e1402" opacity="0.75"/>
+    <g fill="#0e0800" opacity="0.7">
+      <circle cx="-4" cy="-1" r="0.8"/><circle cx="-1" cy="0" r="0.8"/><circle cx="-3" cy="2" r="0.7"/>
+    </g>
+    <ellipse cx="-12" cy="-10" rx="3.5" ry="1.8" fill="#e8b860" opacity="0.45" transform="rotate(-30 -12 -10)"/>
+  </g>
+</svg>

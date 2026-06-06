@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Archive - Antitesi Magazine</title>
+    <script src="../js/articles-and-utils.js"></script>
+    <script src="research-mode.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/index_style.css">
+    <link rel="stylesheet" href="../css/mobile.css">
+    <style>
+        /* ── Research mode overlay (shared with desktop, lives here too) ── */
+        .research-mode-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.98);
+            z-index: 150;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.6s var(--ease);
+        }
+
+        body.dark-mode .research-mode-overlay {
+            background: rgba(0, 0, 0, 0.95);
+        }
+
+        .research-mode-overlay.active {
+            opacity: 0.8;
+            pointer-events: all;
+        }
+
+        .keyword-graph-canvas {
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .keyword-selection-panel {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid var(--dynamic-color);
+            border-radius: 4px;
+            padding: 1rem;
+            min-width: 200px;
+            max-width: 300px;
+            z-index: 200;
+            font-family: var(--grotesk);
+            font-size: 0.85rem;
+            backdrop-filter: blur(8px);
+        }
+
+        body.dark-mode .keyword-selection-panel {
+            background: rgba(0, 0, 0, 0.92);
+            color: var(--white);
+        }
+
+        .panel-header {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+
+        .panel-article {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s var(--ease);
+        }
+
+        body.dark-mode .panel-article {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-article:last-child {
+            border-bottom: none;
+        }
+
+        .panel-article:hover {
+            background: var(--dynamic-color);
+            color: var(--white);
+            padding-left: 0.5rem;
+        }
+
+        .panel-close {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.75rem;
+            cursor: pointer;
+            font-size: 1.2rem;
+            opacity: 0.6;
+            line-height: 1;
+        }
+
+        .panel-close:hover {
+            opacity: 1;
+        }
+
+        /* ── Mobile Wheel ─────────────────────────────────────────── */
+        #mobile-wheel {
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: calc(56px + env(safe-area-inset-bottom));
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Each item snaps to center */
+        .wheel-item {
+            scroll-snap-align: center;
+            scroll-snap-stop: always;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem 2.2rem;
+            box-sizing: border-box;
+            min-height: 100%;
+            transition: opacity 0.35s ease;
+            cursor: default;
+        }
+
+        /* Inactive: just the title, dimmed */
+        .wheel-item .wheel-meta,
+        .wheel-item .wheel-excerpt,
+        .wheel-item .wheel-keywords,
+        .wheel-item .wheel-cta {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.4s ease, opacity 0.35s ease;
+        }
+
+        /* Active: everything visible */
+        .wheel-item.active .wheel-meta,
+        .wheel-item.active .wheel-excerpt,
+        .wheel-item.active .wheel-keywords,
+        .wheel-item.active .wheel-cta {
+            max-height: 300px;
+            opacity: 1;
+        }
+
+        .wheel-item:not(.active) {
+            opacity: 0.28;
+        }
+
+        .wheel-item.active {
+            opacity: 1;
+            cursor: default;
+        }
+
+        /* Ghost spacers so first/last items can center */
+        .wheel-spacer {
+            flex-shrink: 0;
+            min-height: 50%;
+            scroll-snap-align: none;
+        }
+
+        .wheel-title {
+            font-family: var(--display);
+            font-size: clamp(2.6rem, 11vw, 4.2rem);
+            line-height: 0.95;
+            letter-spacing: -0.03em;
+            margin-bottom: 0;
+            transition: margin-bottom 0.35s ease;
+        }
+
+        .wheel-item.active .wheel-title {
+            margin-bottom: 1.1rem;
+        }
+
+        .wheel-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.4rem 0.7rem;
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            opacity: 0.5;
+            margin-bottom: 1.4rem;
+        }
+
+        .wheel-sep {
+            opacity: 0.35;
+        }
+
+        .wheel-excerpt {
+            font-family: var(--serif);
+            font-size: 1rem;
+            line-height: 1.6;
+            font-style: italic;
+            opacity: 0.78;
+            margin-bottom: 1.4rem;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .wheel-keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-bottom: 1.6rem;
+        }
+
+        .wheel-keyword {
+            font-family: var(--grotesk);
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            border: 1px solid currentColor;
+            padding: 0.18rem 0.5rem;
+            opacity: 0.35;
+        }
+
+        .wheel-cta {
+            display: inline-block;
+            font-family: var(--grotesk);
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            border-bottom: 1px solid currentColor;
+            padding-bottom: 0.1rem;
+            opacity: 0.55;
+            text-decoration: none;
+            color: inherit;
+            width: fit-content;
+        }
+
+        /* Progress bar — right edge */
+        #wheel-progress {
+            display: block;
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 2px;
+            bottom: calc(56px + env(safe-area-inset-bottom));
+            background: rgba(128, 128, 128, 0.1);
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        #wheel-progress-fill {
+            width: 100%;
+            background: var(--dynamic-color, #000);
+            transition: height 0.3s ease, background-color 0.6s var(--ease);
+            height: 0%;
+        }
+
+        /* Mobile controls bar — sort + research */
+        #wheel-controls {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1rem;
+            z-index: 30;
+            font-family: var(--grotesk);
+            font-size: 0.6rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.0);
+        }
+
+        body.dark-mode #wheel-controls {
+            background: rgba(0, 0, 0, 0.0);
+        }
+
+        .wheel-ctrl-btn {
+            background: none;
+            border: 1px solid currentColor;
+            color: inherit;
+            padding: 0.3rem 0.7rem;
+            font-family: inherit;
+            font-size: inherit;
+            letter-spacing: inherit;
+            text-transform: inherit;
+            opacity: 0.28;
+            cursor: pointer;
+            transition: opacity 0.2s, background 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        .wheel-ctrl-btn.active,
+        .wheel-ctrl-btn:active {
+            opacity: 1;
+            background: var(--dynamic-color);
+            color: var(--white);
+            border-color: var(--dynamic-color);
+        }
+
+        .wheel-ctrl-sep {
+            opacity: 0.15;
+            font-size: 0.7rem;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true')
+            document.body.classList.add('dark-mode');
+    </script>
+
+    <!-- Navigation -->
+    <nav class="nav-cluster">
+        <a href="../index.html">Home</a>
+        <a href="../explore.html">Explore</a>
+        <a href="../about.html">About</a>
+    </nav>
+
+    <!-- Research Mode Overlay -->
+    <div class="research-mode-overlay" id="researchModeOverlay">
+        <canvas class="keyword-graph-canvas" id="keywordGraphCanvas"></canvas>
+    </div>
+
+    <!-- Mobile Wheel -->
+    <div id="mobile-wheel"></div>
+    <div id="wheel-progress">
+        <div id="wheel-progress-fill"></div>
+    </div>
+    <div id="wheel-controls"></div>
+
+    <script>
+        function parseDate(dateString) {
+            if (dateString === 'random') return new Date(2024, Math.floor(Math.random() * 12), Math.floor(Math.random() * 28));
+            const months = {
+                'january': 0, 'february': 1, 'march': 2, 'april': 3,
+                'may': 4, 'june': 5, 'july': 6, 'august': 7,
+                'september': 8, 'october': 9, 'november': 10, 'december': 11
+            };
+            const parts = dateString.toLowerCase().split(' ');
+            return new Date(parseInt(parts[1]) || 2025, months[parts[0]] || 0, 1);
+        }
+
+        // ── Mobile Wheel ─────────────────────────────────────────────
+        (function initMobileWheel() {
+            const wheel = document.getElementById('mobile-wheel');
+            const progressFill = document.getElementById('wheel-progress-fill');
+            const controlsBar = document.getElementById('wheel-controls');
+            if (!wheel || typeof articles === 'undefined') return;
+
+            let sortMode = 'timeline'; // 'timeline' | 'author'
+            let observer = null;
+
+            // ── Controls bar ────────────────────────────────────────
+            controlsBar.innerHTML = `
+                <button class="wheel-ctrl-btn active" id="wctrl-time">By Time</button>
+                <button class="wheel-ctrl-btn" id="wctrl-author">By Author</button>
+                <span class="wheel-ctrl-sep">|</span>
+                <button class="wheel-ctrl-btn" id="wctrl-research">Research</button>
+            `;
+
+            document.getElementById('wctrl-time').addEventListener('click', () => {
+                if (sortMode === 'timeline') return;
+                sortMode = 'timeline';
+                document.getElementById('wctrl-time').classList.add('active');
+                document.getElementById('wctrl-author').classList.remove('active');
+                buildWheel();
+            });
+            document.getElementById('wctrl-author').addEventListener('click', () => {
+                if (sortMode === 'author') return;
+                sortMode = 'author';
+                document.getElementById('wctrl-author').classList.add('active');
+                document.getElementById('wctrl-time').classList.remove('active');
+                buildWheel();
+            });
+            document.getElementById('wctrl-research').addEventListener('click', () => {
+                const btn = document.getElementById('wctrl-research');
+                if (ResearchMode.isActive()) {
+                    ResearchMode.exit();
+                    btn.classList.remove('active');
+                } else {
+                    ResearchMode.enter();
+                    btn.classList.add('active');
+                }
+            });
+
+            // ── Build / rebuild wheel ────────────────────────────────
+            function getSorted() {
+                return [...articles].sort((a, b) => {
+                    if (sortMode === 'timeline')
+                        return parseDate(b.publishDate) - parseDate(a.publishDate);
+                    return a.author.localeCompare(b.author);
+                });
+            }
+
+            function buildWheel() {
+                if (observer) observer.disconnect();
+                wheel.innerHTML = '';
+
+                const sorted = getSorted();
+                const total = sorted.length;
+
+                const topSpacer = document.createElement('div');
+                topSpacer.className = 'wheel-spacer';
+                wheel.appendChild(topSpacer);
+
+                const items = [];
+
+                sorted.forEach((article, i) => {
+                    const path = articlePath(article);
+                    const el = document.createElement('div');
+                    el.className = 'wheel-item' + (i === 0 ? ' active' : '');
+                    el.innerHTML = `
+                        <h2 class="wheel-title">${article.title}</h2>
+                        <div class="wheel-meta">
+                            <span>${article.author}</span>
+                            <span class="wheel-sep">·</span>
+                            <span>${article.publishDate}</span>
+                            <span class="wheel-sep">·</span>
+                            <span>${article.readTime}</span>
+                        </div>
+                        <p class="wheel-excerpt">${article.description}</p>
+                        <div class="wheel-keywords">
+                            ${article.keywords.slice(0, 4).map(k => `<span class="wheel-keyword">${k}</span>`).join('')}
+                        </div>
+                        <a class="wheel-cta" href="${path}">Read →</a>
+                    `;
+                    wheel.appendChild(el);
+                    items.push(el);
+                });
+
+                const bottomSpacer = document.createElement('div');
+                bottomSpacer.className = 'wheel-spacer';
+                wheel.appendChild(bottomSpacer);
+
+                wheel.scrollTop = 0;
+
+                observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.intersectionRatio >= 0.6) {
+                            items.forEach(el => el.classList.remove('active'));
+                            entry.target.classList.add('active');
+                            const idx = items.indexOf(entry.target);
+                            if (idx >= 0) {
+                                progressFill.style.height = total > 1
+                                    ? `${(idx / (total - 1)) * 100}%`
+                                    : '100%';
+                            }
+                        }
+                    });
+                }, { root: wheel, threshold: 0.6 });
+
+                items.forEach(el => observer.observe(el));
+            }
+
+            buildWheel();
+        })();
+
+        // Research Mode wiring
+        ResearchMode.init({
+            onArticleSelected: (targetArticle) => {
+                const wheelItems = document.querySelectorAll('.wheel-item');
+                wheelItems.forEach(el => {
+                    const titleEl = el.querySelector('.wheel-title');
+                    if (titleEl && titleEl.textContent.trim() === targetArticle.title) {
+                        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

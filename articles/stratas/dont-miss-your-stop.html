@@ -1,0 +1,3311 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Don't miss your stop — Antitesi Magazine</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Press+Start+2P&display=swap"
+        rel="stylesheet">
+    <!-- Shared css -->
+    <link rel="stylesheet" href="../../css/article_style.css">
+    <link rel="stylesheet" href="../../css/index_style.css">
+    <link rel="stylesheet" href="../../css/mobile.css">
+    <script src="../../js/articles-and-utils.js"></script>
+
+    <!-- Flying magazine for desktop -->
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="../../css/spark_styles.css">');
+            document.write('<script>window.magazineSparkMode = true;<\/script>');
+            document.write('<script src="../../js/flying-magazine.js"><\/script>');
+        }
+    </script>
+    <!-- Equation rendering -->
+    <script>
+        MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' },
+            startup: {
+                ready() {
+                    MathJax.startup.defaultReady();
+                    MathJax.startup.promise.then(() => {
+                        document.querySelector('.article-title').classList.add('mathjax-ready');
+                    });
+                }
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+    <!-- Three.js import map for mariposa 3D scene -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #000;
+            --white: #fff;
+            --gray: #f3f3f3;
+            --accent: #c8394a;
+            --dynamic-color: #c8394a;
+            --serif: 'Crimson Pro', serif;
+            --grotesk: 'Inter', sans-serif;
+            --display: 'Fraunces', serif;
+            --mono: 'JetBrains Mono', monospace;
+            --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+        }
+
+        /* TITLE REVEALING ONLY WHEN LOADED */
+        .article-title {
+            visibility: hidden;
+        }
+
+        .article-title.mathjax-ready {
+            visibility: visible;
+        }
+
+        .section-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: clamp(1.1rem, 2.4vw, 1.7rem);
+            line-height: 1.4;
+            margin: 2.5rem 0 2rem;
+            padding-top: 0.5rem;
+            letter-spacing: 0;
+            color: #fff;
+        }
+
+
+        /* ═══════════════════════════════════════
+           EQUATION DISPLAY
+           ═══════════════════════════════════════ */
+        .equation-showcase {
+            text-align: center;
+            margin: 3rem 0;
+            padding: 3rem 2rem;
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            background: var(--gray);
+        }
+
+        body.dark-mode .equation-showcase {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .equation-showcase .equation-label {
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            opacity: 0.3;
+            margin-bottom: 1.5rem;
+        }
+
+        .equation-showcase .equation {
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            color: var(--black);
+        }
+
+        body.dark-mode .equation-showcase .equation {
+            color: var(--gray);
+        }
+
+        .equation-showcase .equation-caption {
+            font-family: var(--grotesk);
+            font-size: 0.85rem;
+            opacity: 0.4;
+            margin-top: 1.5rem;
+            line-height: 1.5;
+        }
+
+        /* ═══════════════════════════════════════
+           DIRAC INTERACTIVE
+           ═══════════════════════════════════════ */
+        .dirac-interactive {
+            margin: 4rem 0;
+            position: relative;
+        }
+
+        .dirac-lab {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--white);
+        }
+
+        body.dark-mode .dirac-lab {
+            border-color: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .dirac-lab-header {
+            padding: 1.2rem 2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s var(--ease);
+        }
+
+        .dirac-lab-header:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        body.dark-mode .dirac-lab-header:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        /* ── Collapsible interactive labs ── */
+        .lab-toggle {
+            margin-left: auto;
+            flex-shrink: 0;
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            opacity: 0.4;
+            transition: transform 0.3s var(--ease), opacity 0.2s var(--ease);
+            display: inline-block;
+        }
+
+        .dirac-lab-header:hover .lab-toggle,
+        .escher-lab-header:hover .lab-toggle {
+            opacity: 0.8;
+        }
+
+        .dirac-lab.collapsed .lab-toggle,
+        .escher-lab.collapsed .lab-toggle {
+            transform: rotate(-90deg);
+        }
+
+        .dirac-lab.collapsed .dirac-lab-header,
+        .escher-lab.collapsed .escher-lab-header {
+            border-bottom-color: transparent;
+        }
+
+        .dirac-lab.collapsed>*:not(.dirac-lab-header),
+        .escher-lab.collapsed>*:not(.escher-lab-header) {
+            display: none !important;
+        }
+
+        .dirac-lab-header .lab-dot,
+        .escher-lab-header .lab-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .dirac-lab.collapsed .lab-dot,
+        .escher-lab.collapsed .lab-dot {
+            background: #ff5566;
+            box-shadow: 0 0 6px #ff5566, 0 0 12px rgba(255, 85, 102, 0.6);
+            animation: lab-dot-pulse 1.6s ease-in-out infinite;
+        }
+
+        @keyframes lab-dot-pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 4px #ff5566, 0 0 10px rgba(255, 85, 102, 0.6),
+                    0 0 0 0 rgba(255, 85, 102, 0.55);
+            }
+
+            50% {
+                box-shadow: 0 0 8px #ff5566, 0 0 16px rgba(255, 85, 102, 0.85),
+                    0 0 0 8px rgba(255, 85, 102, 0);
+            }
+        }
+
+        .dirac-lab-header .lab-title,
+        .escher-lab-header .lab-title {
+            font-family: var(--grotesk);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.5;
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+        }
+
+        /* ── Marquee (subway-sign style) when collapsed ── */
+        .marquee-track {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .marquee-item {
+            display: inline-block;
+            padding-right: 3rem;
+        }
+
+        /* When expanded, hide the duplicate copy and show the title statically */
+        .marquee-item.duplicate {
+            display: none;
+        }
+
+        /* When collapsed: turn the header into an LED sign panel */
+        .dirac-lab.collapsed .dirac-lab-header,
+        .escher-lab.collapsed .escher-lab-header {
+            background: #0a0a10;
+            background-image:
+                /* horizontal scanlines */
+                repeating-linear-gradient(to bottom,
+                    rgba(255, 255, 255, 0.04) 0,
+                    rgba(255, 255, 255, 0.04) 1px,
+                    transparent 1px,
+                    transparent 3px),
+                /* vertical pixel grid */
+                repeating-linear-gradient(to right,
+                    rgba(255, 255, 255, 0.025) 0,
+                    rgba(255, 255, 255, 0.025) 1px,
+                    transparent 1px,
+                    transparent 3px);
+            box-shadow:
+                inset 0 0 14px rgba(0, 0, 0, 0.85),
+                inset 0 0 2px rgba(255, 85, 102, 0.25);
+            padding: 0.95rem 1.4rem;
+        }
+
+        .dirac-lab.collapsed .dirac-lab-header:hover,
+        .escher-lab.collapsed .escher-lab-header:hover {
+            background-color: #0d0d18;
+        }
+
+        /* When collapsed: enable seamless marquee with pixelated glow */
+        .dirac-lab.collapsed .lab-title,
+        .escher-lab.collapsed .lab-title {
+            opacity: 1;
+            color: #ff5566;
+            font-family: 'Press Start 2P', monospace !important;
+            font-size: 0.78rem;
+            letter-spacing: 0.05em;
+            line-height: 1.6;
+            text-shadow:
+                0 0 2px rgba(255, 179, 187, 0.7),
+                0 0 5px rgba(255, 85, 102, 0.55);
+            -webkit-mask-image: linear-gradient(to right, transparent 0, black 6%, black 94%, transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, black 6%, black 94%, transparent 100%);
+        }
+
+        .dirac-lab.collapsed .lab-toggle,
+        .escher-lab.collapsed .lab-toggle {
+            color: #ff5566;
+            opacity: 0.9;
+            text-shadow: 0 0 3px rgba(255, 85, 102, 0.5);
+        }
+
+        .dirac-lab.collapsed .marquee-track,
+        .escher-lab.collapsed .marquee-track {
+            display: inline-flex;
+            animation: lab-marquee 22s linear infinite;
+            will-change: transform;
+        }
+
+        .dirac-lab.collapsed .marquee-item.duplicate,
+        .escher-lab.collapsed .marquee-item.duplicate {
+            display: inline-block;
+        }
+
+        .dirac-lab-header:hover .marquee-track,
+        .escher-lab-header:hover .marquee-track {
+            animation-play-state: paused;
+        }
+
+        @keyframes lab-marquee {
+            from {
+                transform: translateX(0);
+            }
+
+            to {
+                transform: translateX(-50%);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+
+            .dirac-lab.collapsed .marquee-track,
+            .escher-lab.collapsed .marquee-track {
+                animation: none;
+            }
+
+            .dirac-lab.collapsed .lab-dot,
+            .escher-lab.collapsed .lab-dot {
+                animation: none;
+            }
+        }
+
+        .dirac-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 420px;
+            cursor: pointer;
+            background: #0a0a0f;
+        }
+
+        .dirac-canvas-wrap canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .dirac-explanation {
+            padding: 1.2rem 2rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            font-family: var(--grotesk);
+            font-size: 0.8rem;
+            line-height: 1.6;
+            opacity: 0.6;
+            background: var(--gray);
+            min-height: 68px;
+        }
+
+        body.dark-mode .dirac-explanation {
+            background: rgba(255, 255, 255, 0.02);
+            border-top-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .dirac-explanation strong {
+            color: var(--black);
+            opacity: 1;
+        }
+
+        body.dark-mode .dirac-explanation strong {
+            color: var(--gray);
+        }
+
+        .dirac-explanation .legend {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-right: 12px;
+        }
+
+        .dirac-explanation .legend-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .dirac-controls {
+            padding: 1rem 2rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        body.dark-mode .dirac-controls {
+            border-top-color: rgba(255, 255, 255, 0.06);
+        }
+
+        .dirac-btn {
+            font-family: var(--grotesk);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            padding: 0.5rem 1rem;
+            border: 1px solid rgba(0, 0, 0, 0.15);
+            border-radius: 6px;
+            background: transparent;
+            color: var(--black);
+            cursor: pointer;
+            transition: all 0.3s var(--ease);
+        }
+
+        body.dark-mode .dirac-btn {
+            color: var(--gray);
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        .dirac-btn:hover,
+        .dirac-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: var(--white);
+        }
+
+        .dirac-info {
+            margin-left: auto;
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            opacity: 0.35;
+        }
+
+        /* ═══════════════════════════════════════
+           ESCHER INTERACTIVE
+           ═══════════════════════════════════════ */
+        .escher-interactive {
+            margin: 4rem 0;
+            position: relative;
+        }
+
+        .escher-lab {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--white);
+        }
+
+        body.dark-mode .escher-lab {
+            border-color: rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        body.dark-mode .escher-lab-header {
+            border-bottom-color: rgba(255, 255, 255, 0.06);
+        }
+
+        body.dark-mode .escher-source-bar {
+            border-bottom-color: rgba(255, 255, 255, 0.06);
+        }
+
+        body.dark-mode .escher-upload-mini {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        body.dark-mode .escher-preset {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .escher-pipeline {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        body.dark-mode .escher-panel {
+            background: var(--black);
+        }
+
+        body.dark-mode .escher-vector-wrap {
+            background: rgba(255, 255, 255, 0.02);
+            border-top-color: rgba(255, 255, 255, 0.06);
+        }
+
+        body.dark-mode .escher-vector-wrap canvas {
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        body.dark-mode .escher-vector-info strong {
+            color: var(--gray);
+        }
+
+        .escher-lab-header {
+            padding: 1.2rem 2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s var(--ease);
+        }
+
+        .escher-lab-header:hover {
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        body.dark-mode .escher-lab-header:hover {
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .escher-source-bar {
+            padding: 1.2rem 2rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .escher-upload-mini {
+            width: 46px;
+            height: 46px;
+            border-radius: 6px;
+            border: 2px dashed rgba(0, 0, 0, 0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s var(--ease);
+            font-family: var(--grotesk);
+            font-size: 1.2rem;
+            opacity: 0.4;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .escher-upload-mini:hover {
+            border-color: var(--accent);
+            opacity: 0.8;
+        }
+
+        .escher-upload-mini img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .escher-presets {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .escher-preset {
+            width: 46px;
+            height: 46px;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s var(--ease);
+            opacity: 0.5;
+        }
+
+        .escher-preset:hover,
+        .escher-preset.active {
+            opacity: 1;
+            border-color: var(--accent);
+            transform: scale(1.1);
+        }
+
+        .escher-preset canvas,
+        .escher-preset img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .escher-source-hint {
+            font-family: var(--grotesk);
+            font-size: 0.65rem;
+            opacity: 0.25;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-left: auto;
+        }
+
+        .escher-pipeline {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+            background: rgba(0, 0, 0, 0.04);
+        }
+
+        .escher-panel {
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 1rem 0.8rem 0.8rem;
+        }
+
+        .escher-panel-label {
+            font-family: var(--grotesk);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            opacity: 0.3;
+            margin-bottom: 0.5rem;
+            align-self: flex-start;
+        }
+
+        .escher-panel canvas {
+            width: 100%;
+            max-width: 340px;
+            aspect-ratio: 1;
+            border-radius: 4px;
+            background: #0a0a0a;
+        }
+
+        .escher-panel-formula {
+            font-family: var(--mono);
+            font-size: 0.68rem;
+            opacity: 0.4;
+            margin-top: 0.6rem;
+            text-align: center;
+            line-height: 1.5;
+            min-height: 1.6em;
+        }
+
+        .escher-vector-wrap {
+            padding: 1.2rem 2rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            background: var(--gray);
+        }
+
+        .escher-vector-wrap canvas {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            cursor: crosshair;
+            flex-shrink: 0;
+        }
+
+        .escher-vector-info {
+            font-family: var(--grotesk);
+            font-size: 0.78rem;
+            opacity: 0.5;
+            line-height: 1.6;
+        }
+
+        .escher-vector-info strong {
+            color: var(--black);
+            opacity: 1;
+        }
+
+        .escher-vector-info .vec-val {
+            font-family: var(--mono);
+            font-size: 0.72rem;
+            color: var(--accent);
+        }
+
+        /* ═══════════════════════════════════════
+           CITATION
+           ═══════════════════════════════════════ */
+        .citation {
+            font-style: italic;
+            color: #999;
+            border-left: 3px solid var(--accent);
+            padding-left: 2rem;
+            margin: 2rem 0;
+            font-size: 1.1rem;
+        }
+
+        /* Escher note callout (lives inside .escher-lab so it collapses with the pipeline) */
+        .escher-note {
+            margin: 0;
+            padding: 1.5rem 2rem;
+            border: none;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            border-left: 3px solid var(--accent);
+            border-radius: 0;
+            background: var(--gray);
+            font-family: var(--grotesk);
+            font-size: 0.9rem;
+            line-height: 1.7;
+        }
+
+        body.dark-mode .escher-note {
+            background: rgba(255, 255, 255, 0.03);
+            border-top-color: rgba(255, 255, 255, 0.06);
+            border-left-color: var(--accent);
+        }
+
+        .escher-note strong {
+            font-weight: 600;
+        }
+
+        .escher-note em {
+            font-style: italic;
+        }
+
+        /* ── Escher image gallery (Print Gallery + visual guide) ── */
+        .escher-gallery {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .escher-gallery figure {
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--gray);
+        }
+
+        body.dark-mode .escher-gallery figure {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .escher-gallery-imgwrap {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 0;
+            padding: 1rem;
+            background: #fff;
+        }
+
+        body.dark-mode .escher-gallery-imgwrap {
+            background: #0a0a0a;
+        }
+
+        .escher-gallery img {
+            display: block;
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .escher-gallery figcaption {
+            padding: 0.85rem 1.1rem;
+            font-family: var(--grotesk);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            opacity: 0.55;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            line-height: 1.5;
+        }
+
+        body.dark-mode .escher-gallery figcaption {
+            border-top-color: rgba(255, 255, 255, 0.06);
+        }
+
+        @media (max-width: 700px) {
+            .escher-gallery {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        /* Escher image fullscreen hint */
+        .escher-gallery-imgwrap {
+            position: relative;
+            cursor: zoom-in;
+        }
+
+        .escher-gallery-imgwrap::after {
+            content: '⛶';
+            position: absolute;
+            bottom: 0.5rem;
+            right: 0.6rem;
+            font-size: 1.1rem;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            color: #fff;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .escher-gallery-imgwrap:hover::after {
+            opacity: 0.85;
+        }
+
+        /* Image lightbox */
+        .img-lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.92);
+            z-index: 9000;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+        }
+
+        .img-lightbox.open {
+            display: flex;
+        }
+
+        .img-lightbox img {
+            max-width: 92vw;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 6px;
+            box-shadow: 0 8px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        .img-lightbox-close {
+            position: absolute;
+            top: 1.2rem;
+            right: 1.4rem;
+            color: #fff;
+            font-size: 2rem;
+            cursor: pointer;
+            opacity: 0.7;
+            line-height: 1;
+            background: none;
+            border: none;
+            transition: opacity 0.2s;
+        }
+
+        .img-lightbox-close:hover {
+            opacity: 1;
+        }
+
+        /* ═══════════════════════════════════════
+           3D MARIPOSA SCENE
+           ═══════════════════════════════════════ */
+        .mariposa-section {
+            margin: 4rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            background: #87ceeb;
+        }
+
+        body.dark-mode .mariposa-section {
+            border-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .mariposa-section.fullscreen {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            margin: 0;
+            border-radius: 0;
+            border: none;
+        }
+
+        #mariposaCanvas {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            display: block;
+            cursor: grab;
+        }
+
+        #mariposaCanvas:active {
+            cursor: grabbing;
+        }
+
+        .mariposa-section.fullscreen #mariposaCanvas {
+            aspect-ratio: auto;
+            height: 100%;
+        }
+
+        .mariposa-controls {
+            position: absolute;
+            bottom: 0.4rem;
+            left: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            z-index: 10;
+        }
+
+        .mariposa-help-tooltip .mobile-only {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .mariposa-controls {
+                display: none;
+            }
+
+            .mariposa-controls.visible {
+                display: flex;
+            }
+
+            .mariposa-help-tooltip .desktop-only {
+                display: none;
+            }
+
+            .mariposa-help-tooltip .mobile-only {
+                display: inline;
+            }
+        }
+
+        .mariposa-controls button {
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.4rem 0.75rem;
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            letter-spacing: 0.06em;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            transition: background 0.2s;
+        }
+
+        .mariposa-controls button:hover {
+            background: rgba(0, 0, 0, 0.65);
+        }
+
+        .mariposa-controls button.active {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .mariposa-help-btn {
+            position: absolute;
+            top: 0.8rem;
+            left: 0.8rem;
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 1.6rem;
+            height: 1.6rem;
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+            transition: background 0.2s;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mariposa-help-btn:hover {
+            background: rgba(0, 0, 0, 0.65);
+        }
+
+        .mariposa-help-tooltip {
+            display: none;
+            position: absolute;
+            top: 0.8rem;
+            left: 3rem;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            color: #fff;
+            font-family: var(--grotesk);
+            font-size: 0.65rem;
+            line-height: 1.7;
+            padding: 0.6rem 0.9rem;
+            border-radius: 6px;
+            z-index: 12;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .mariposa-help-tooltip.visible {
+            display: block;
+        }
+
+        /* Equation labels */
+        .mariposa-label {
+            position: absolute;
+            pointer-events: none;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.6rem;
+            line-height: 1.4;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(4px);
+            padding: 0.35rem 0.55rem;
+            border-radius: 4px;
+            white-space: pre;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 5;
+        }
+
+        .mariposa-label.visible {
+            opacity: 1;
+        }
+
+        /* XYZ gizmo canvas */
+        #gizmoCanvas {
+            position: absolute;
+            bottom: 3.6rem;
+            right: 1rem;
+            width: 80px;
+            height: 80px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 5;
+        }
+
+        #gizmoCanvas.visible {
+            opacity: 1;
+        }
+
+        /* ═══════════════════════════════════════
+           HERO SELECTION (POKEMON-STYLE)
+           ═══════════════════════════════════════ */
+        .hero-selection {
+            margin: 5rem 0 3rem;
+            text-align: center;
+        }
+
+        .hero-prompt {
+            font-family: 'Press Start 2P', monospace !important;
+            font-size: clamp(0.75rem, 2.5vw, 1.15rem);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 3rem;
+            color: var(--black);
+            text-shadow: 2px 2px 0 rgba(200, 57, 74, 0.12);
+            line-height: 1.8;
+        }
+
+        .hero-prompt::after {
+            content: '\25BC';
+            display: block;
+            font-size: 0.55em;
+            margin-top: 1.2rem;
+            animation: hero-blink 1.2s ease-in-out infinite;
+            opacity: 0.35;
+        }
+
+        @keyframes hero-blink {
+
+            0%,
+            100% {
+                opacity: 0.35;
+            }
+
+            50% {
+                opacity: 0;
+            }
+        }
+
+        body.dark-mode .hero-prompt {
+            color: var(--gray);
+            text-shadow: 2px 2px 0 rgba(200, 57, 74, 0.25);
+        }
+
+        .hero-grid {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .hero-card {
+            width: 290px;
+            cursor: pointer;
+            transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.3s ease;
+            position: relative;
+            padding: 1rem 0.5rem 1rem;
+            border: none;
+            border-radius: 0;
+            background: transparent;
+        }
+
+        .hero-card:hover {
+            transform: translateY(-8px) scale(1.3) !important;
+            filter: drop-shadow(0 16px 28px rgba(200, 57, 74, 0.3));
+            transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+                filter 0.3s ease;
+        }
+
+        .hero-card.selected {
+            transform: translateY(-6px) scale(1.03);
+            filter: drop-shadow(0 8px 20px rgba(200, 57, 74, 0.35));
+        }
+
+        .hero-card img {
+            width: 100%;
+            height: auto;
+            display: block;
+            margin-bottom: 1rem;
+        }
+
+        .hero-name {
+            font-family: 'Press Start 2P', monospace !important;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            opacity: 0.6;
+            transition: all 0.3s var(--ease);
+        }
+
+        .hero-card:hover .hero-name,
+        .hero-card.selected .hero-name {
+            opacity: 1;
+            color: var(--accent);
+        }
+
+        body.dark-mode .hero-card {
+            background: transparent;
+        }
+
+        /* Section panels — hidden until hero is selected */
+        .section-panel {
+            display: none;
+        }
+
+        .section-panel.active {
+            display: block;
+            animation: panelReveal 0.5s var(--ease);
+        }
+
+        /* Conclusion — hidden until at least one hero has been picked */
+        .article-conclusion {
+            display: none;
+        }
+
+        .article-conclusion.revealed {
+            display: block;
+            animation: panelReveal 0.6s var(--ease);
+        }
+
+        @keyframes panelReveal {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .back-to-heroes {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1rem auto 0rem;
+            width: 4.2rem;
+            height: 4.2rem;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 50%;
+            background: transparent;
+            font-size: 2rem;
+            opacity: 0.3;
+            cursor: pointer;
+            color: inherit;
+            transition: opacity 0.2s var(--ease), border-color 0.2s var(--ease), color 0.2s var(--ease);
+        }
+
+        body.dark-mode .back-to-heroes {
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        .back-to-heroes:hover {
+            opacity: 1;
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* ═══════════════════════════════════════
+           RESPONSIVE
+           ═══════════════════════════════════════ */
+        @media (max-width: 768px) {
+            .article-header {
+                overflow: hidden;
+            }
+
+            .article-title {
+                font-size: 1.8rem;
+            }
+
+            /* MathJax SVG container */
+            .article-title mjx-container[jax="SVG"] {
+                overflow-x: auto;
+                max-width: 100%;
+                display: block;
+            }
+
+            .dirac-canvas-wrap {
+                height: 320px;
+            }
+
+            .dirac-controls {
+                justify-content: center;
+            }
+
+            .dirac-info {
+                margin-left: 0;
+                width: 100%;
+                text-align: center;
+            }
+
+            .escher-pipeline {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .escher-panel {
+                padding: 0.7rem 0.5rem 0.6rem;
+            }
+
+            .escher-panel canvas {
+                max-width: 100%;
+            }
+
+            .escher-panel-formula {
+                font-size: 0.6rem;
+                line-height: 1.4;
+            }
+
+            .escher-vector-wrap {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .escher-source-hint {
+                margin-left: 0;
+                margin-top: 0.5rem;
+            }
+
+            .hero-selection {
+                margin: 1.5rem 0 5rem;
+            }
+
+            .hero-prompt {
+                margin-top: 3rem;
+                margin-bottom: 0.8rem;
+                /* tighten space between prompt text and the grid */
+                font-size: clamp(0.75rem, 4vw, 1.8rem);
+            }
+
+            .hero-card img {
+                margin-bottom: 0.1rem;
+            }
+
+            .hero-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                grid-template-rows: auto auto;
+                gap: 0;
+                max-width: 320px;
+                margin: 0 auto;
+                scale: 1.25;
+            }
+
+            .hero-card:nth-child(1) {
+                grid-column: 1;
+                grid-row: 1;
+                justify-self: end;
+                width: 140px;
+                padding: 0.1em 0.1rem;
+            }
+
+            .hero-card:nth-child(2) {
+                grid-column: 2;
+                grid-row: 1;
+                justify-self: start;
+                width: 140px;
+                padding: 0.1rem 0.1rem;
+            }
+
+            .hero-card:nth-child(3) {
+                grid-column: 1 / 3;
+                grid-row: 2;
+                justify-self: center;
+                width: 140px;
+                padding: 0.1rem 0.1rem;
+                margin-top: -1.5rem;
+                /* pull em up */
+            }
+
+            .hero-card:hover,
+            .hero-card.selected,
+            .hero-card:active {
+                transform: none !important;
+                filter: none !important;
+                transition: none !important;
+            }
+
+
+            /* Lab headers: prevent title overflow on mobile */
+            .dirac-lab-header,
+            .escher-lab-header {
+                padding: 0.9rem 1rem;
+                gap: 0.6rem;
+            }
+
+            .dirac-lab-header .lab-title,
+            .escher-lab-header .lab-title {
+                overflow: hidden;
+                min-width: 0;
+                /* critical: lets flex child shrink below content size */
+                font-size: 0.50rem !important;
+            }
+
+            /* Collapsed LED sign: smaller pixel font on mobile */
+            .dirac-lab.collapsed .lab-title,
+            .escher-lab.collapsed .lab-title {
+                font-size: 0.45rem !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+    <div class="progress-bar"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-cluster">
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+        <a href="../../archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <!-- ═══════════════════════════════════════
+         ARTICLE
+         ═══════════════════════════════════════ -->
+    <article class="article-view">
+        <header class="article-header">
+            <h1 class="article-title">
+                Don't miss your stop
+            </h1>
+            <div class="article-meta" id="article-meta">
+                <span></span>
+                <span></span> <!-- here goes metadata, edited from articles-and-utils.js-->
+                <span></span>
+            </div>
+            <div class="article-author" id="article-author">by Lenny Stratas</div>
+        </header>
+
+        <script>
+            (function () {
+                const filename = window.location.pathname.split('/').pop();
+                const data = (typeof articles !== 'undefined') && articles.find(a => a.filename === filename);
+                if (!data) return;
+                const meta = document.getElementById('article-meta');
+                const author = document.getElementById('article-author');
+                if (meta) meta.innerHTML = `<span>Article</span><span>~${data.readTime} "read"</span><span>${data.publishDate}</span>`;
+                if (author) author.textContent = 'by ' + data.author;
+            })();
+        </script>
+
+        <div class="article-content">
+
+            <p>Second Wednesday of March, ten minutes to nine AM. The 107 bus is packed and the closer it gets to Ciudad
+                Universitaria, the closer
+                the average age gets to mine. Andr&eacute;s Calamaro is playing in my earphones and I kill time with a
+                simple game: guessing who, among my
+                fellow passengers, is going to the School of Architecture, Design and Urban Planning (FADU) and
+                who&rsquo;s going to the School of Exact
+                Sciences (Exactas) &mdash; two campuses of the University of Buenos Aires, only separated by a single
+                street.</p>
+
+            <p>The girl with bangs, the long skirt, and the tote bag: definitely FADU.
+                Dude in baggy jeans, chains, and an Arturo Fuego&reg; t-shirt too.
+                Worn-out backpack, sneakers, and skinny light washed jeans: Exactas.
+                Eight out of ten times I get it right. There&rsquo;s something which
+                gives it away: apparently aesthetics, leather boots, and accessories belong to art and design, while
+                science is left only with the practical
+                and useful. As if beauty had an owner.</p>
+
+            <p>I hop off at Exactas, but sometimes I dream about staying those extra 200 meters to FADU. Growing up,
+                even though I always had terrible drawing skills,
+                music and crafts always fascinated me. In high school, every time there was an oral presentation,
+                I&rsquo;d spend more time curating the aesthetics of
+                the PowerPoint than I did on the content itself. After briefly considering studying law (luckily that
+                phase only lasted a few months), I decided to study physics.
+                Deep down I knew that hard sciences were my thing, but, at the same time, there was something holding me
+                back. I was 18, I wanted to be cool, and I had
+                this feeling that was going to be incompatible with a career in hard science.</p>
+
+            <p>During the first months at uni everything seemed to confirm it. Everything was calculus and rigor:
+                &ldquo;prove this&rdquo;, &ldquo;justify that.&rdquo;
+                My friends at FADU were designing projects with models and posters, and I was painfully aware that
+                nobody wanted to hear about the new type
+                of integral I&rsquo;d just learned to solve. A few months into my degree, however, with this constant
+                buzz in my ear, I began to notice something.
+                Almost everything I had to work on during classes could be solved in two ways:</p>
+
+            <p>by brute force, grinding through endless calculations, dragging terms and filling pages with algebra</p>
+
+            <p>With creativity, finding an elegant solution through symmetries and changes of variables.</p>
+
+            <p>This second way wasn&rsquo;t just shorter; it was more beautiful. There was
+                something aesthetically satisfying about exactly finding the best possible path, like when a melody
+                resolves to the perfect chord. In 1918 Emmy
+                Noether proved that where there is a symmetry, there is something that is conserved. Not decoration nor
+                coincidence: it was
+                information, content. Elegance was telling you something about the structure of the problem if not about
+                the world itself.</p>
+
+            <!-- ═══════════════════════════════════════
+                 HERO SELECTION
+                 ═══════════════════════════════════════ -->
+            <div class="hero-selection">
+                <div class="hero-prompt">Choose your character</div>
+                <div class="hero-grid">
+                    <div class="hero-card" data-section="dirac">
+                        <img src="../../multimedia/stratas-media/Dirac.png" alt="Dirac">
+                    </div>
+                    <div class="hero-card" data-section="escher">
+                        <img src="../../multimedia/stratas-media/Escher.png" alt="Escher">
+                    </div>
+                    <div class="hero-card" data-section="lenny">
+                        <img src="../../multimedia/stratas-media/Lenny.png" alt="Lenny">
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════
+                 SECTION I: DIRAC
+                 ═══════════════════════════════════════ -->
+            <div class="section-panel" id="section-dirac">
+                <h2 class="section-title">You&rsquo;ve chosen Dirac!</h2>
+
+                <p class="citation">Let&rsquo;s see how the beauty of an equation led a physicist to discover
+                    antimatter.</p>
+
+                <p>It&rsquo;s 1928 and Paul Dirac is a 25-year-old British physicist so science-centered
+                    that he will publish a paper during his honeymoon. The main quest is this: How to marry
+                    quantum mechanics (the physics of the smallest things) with Einstein&rsquo;s special
+                    relativity (the physics of things traveling close to the speed of light).</p>
+
+                <p>These two theories worked perfectly on their own but contradicted each other when combined.
+                    The result of that obsession was a dazzling formula:</p>
+
+                <div class="equation-showcase">
+                    <div class="equation-label">The Dirac Equation, 1928</div>
+                    <div class="equation">
+                        $\left(i\gamma^\mu \partial_\mu - \frac{mc}{\hbar}\right)\psi = 0$
+                    </div>
+                    <div class="equation-caption">
+                        Quantum mechanics + special relativity in a single line
+                    </div>
+                </div>
+
+                <p>Within a single line, everything fits together: quantum
+                    mechanics lives in the wave function $\psi$, relativity in the matrices
+                    $\gamma^\mu$, and the fundamental constants of the universe: the speed of
+                    light, the electron mass, Planck&rsquo;s constant, woven together with such effortless elegance.</p>
+
+                <p>It&rsquo;s like a haiku of nature: it says everything essential without a single unnecessary
+                    syllable. Two seemingly
+                    incompatible theories, reconciled in a single mathematical gesture. But getting back at it&mdash;
+                </p>
+
+                <p>The equation yielded two types of solutions: one described the electron perfectly, along with
+                    everything known about it. The other implied the existence of something with no
+                    physical sense and for which there wasn&rsquo;t a shred of evidence. The electron&rsquo;s evil twin,
+                    with positive charge and negative energy.</p>
+
+                <!-- Dirac Interactive Lab -->
+                <div class="dirac-interactive">
+                    <div class="dirac-lab collapsed">
+                        <div class="dirac-lab-header">
+                            <div class="lab-dot"></div>
+                            <span class="lab-title">
+                                <span class="marquee-track">
+                                    <span class="marquee-item">Interactive lab &mdash; Pair creation
+                                        &amp; annihilation &nbsp;&bull;&nbsp; Tap to open
+                                        &nbsp;&bull;&nbsp;&nbsp;</span>
+                                    <span class="marquee-item duplicate" aria-hidden="true">Interactive
+                                        lab &mdash; Pair creation &amp; annihilation
+                                        &nbsp;&bull;&nbsp; Tap to open &nbsp;&bull;&nbsp;&nbsp;</span>
+                                </span>
+                            </span>
+                            <span class="lab-toggle">&#x25BC;</span>
+                        </div>
+                        <div class="dirac-canvas-wrap" id="diracCanvasWrap">
+                            <canvas id="diracCanvas"></canvas>
+                        </div>
+                        <div class="dirac-explanation" id="diracExplanation"></div>
+                        <div class="dirac-controls">
+                            <span class="dirac-info" id="diracInfo">Click a photon (&gamma;) to create a pair</span>
+                        </div>
+                    </div>
+                </div>
+
+                <p>Any reasonable person would have thrown the equation into the trash &mdash;the negative solution, at
+                    least. If the model
+                    predicts something that doesn&rsquo;t exist, the model is wrong, right? But Dirac
+                    did something at the limits of madness: he defended his theory almost exclusively
+                    on the basis of its beauty.</p>
+
+                <p>His argument was, in essence, aesthetic: an equation
+                    so symmetric, so compact, so elegant, had to be describing something real. It was
+                    easier to believe that God is an artist than to accept that he got there through
+                    some miraculous mistake. And he was right.</p>
+
+                <p>Four years later, in 1932, Carl
+                    Anderson detected a particle in cosmic rays exactly like the one predicted by the
+                    equation: the positron, the antiparticle of the electron. The beauty of a formula
+                    had guided an enamored physicist toward the discovery of antimatter &mdash;the
+                    hidden half of the universe that nobody suspected existed.</p>
+
+                <p>I came across this story on a Thursday in July, during the winter break after my
+                    first semester. I saw online that there would be an open talk titled &ldquo;Beauty
+                    as a Scientific Criterion.&rdquo; I had never gone to a talk like this before,
+                    afraid I wouldn&rsquo;t understand a single word, but this topic was particularly
+                    appealing to me; and at least I knew every word in the title, so I went. The
+                    auditorium was surprisingly full. The speaker, a man with a Spanish accent and his
+                    hair tied back in a ponytail, was a well-known science communicator: Jos&eacute; Edelstein.
+                    He began talking about symmetries, Lie groups&mdash;words which sounded like a
+                    foreign language to me. He even explained the Dirac equation in all its formalism, and
+                    I stared at the symbols on the board like someone looking at hieroglyphs. I
+                    understood, perhaps, five percent. But when he put down the chalk, turned around,
+                    and told this story, all the thoughts floating in my head suddenly fell into place
+                    at once.</p>
+
+                <p>I walked out of the main auditorium into the fresh river air and waited for the bus
+                    to go home. This time I wasn&rsquo;t worrying about how I or the FADU students
+                    were dressed. I had understood that physics is inherently beautiful.</p>
+                <button class="back-to-heroes"
+                    onclick="document.querySelector('.hero-selection').scrollIntoView({behavior:'smooth', block:'center'})">
+                    &uarr;
+                </button>
+                <div class="section-divider"></div>
+            </div><!-- /section-panel dirac -->
+
+            <!-- ═══════════════════════════════════════
+                 SECTION II: ESCHER
+                 ═══════════════════════════════════════ -->
+            <div class="section-panel" id="section-escher">
+                <h2 class="section-title">You&rsquo;ve chosen Escher!</h2>
+
+                <p class="citation">Let&rsquo;s see how an artist with no mathematical training
+                    unknowingly worked at the boundaries of mathematics.</p>
+
+                <p>It&rsquo;s 1956. M.&nbsp;C. Escher is working on <em>Print Gallery</em>.
+                    A young man stands in a gallery, looking at a painting of a Mediterranean port. But the port
+                    expands, bends, wraps around the gallery&mdash;and ends up containing the man himself.
+                    An impossible loop, a snake eating it&rsquo;s own tail. At the center, where everything
+                    should close, there&rsquo;s a blank white patch with Escher&rsquo;s signature. He tried
+                    to fill it, and couldn&rsquo;t make it work.</p>
+
+                <div class="escher-gallery">
+                    <figure>
+                        <div class="escher-gallery-imgwrap">
+                            <img src="../../multimedia/stratas-media/Galeria de Grabados.jpg"
+                                alt="M.C. Escher — Print Gallery (1956)">
+                        </div>
+                        <figcaption>M.C. Escher &mdash; <em>Print Gallery</em>, 1956.</figcaption>
+                    </figure>
+                    <figure>
+                        <div class="escher-gallery-imgwrap">
+                            <img src="../../multimedia/stratas-media/Guia visual.png"
+                                alt="Visual guide to the conformal grid of Print Gallery — 3Blue1Brown">
+                        </div>
+                        <figcaption>Visual guide by 3Blue1Brown</figcaption>
+                    </figure>
+                </div>
+
+                <p>Almost 50 years later, in 2003, two Dutch mathematicians decided to investigate the
+                    grid which Escher had used as a base. They discovered something extraordinary:
+                    although the plane is brutally twisted, if you zoom in, every small square of the
+                    grid remains perfect, its lines cross at 90 degrees. Escher had achieved a
+                    global deformation without breaking the local structure.</p>
+
+                <p>To solve the mystery of the white patch, the mathematicians had to reverse-engineer
+                    it. They discovered that for the loop to work, the base image had to be contained
+                    within itself (like the Droste effect, where a picture contains a smaller version
+                    of itself). To turn that flat image into Escher&rsquo;s loop, they applied a
+                    three-step process:</p>
+
+                <p><strong>Unrolling the space:</strong> They used a
+                    mathematical function (the complex logarithm) which takes the image and
+                    &ldquo;flattens&rdquo; it into an infinite tapestry. Here, the action of zooming into the
+                    original painting is transformed into moving sideways across the tapestry.</p>
+
+                <p><strong>Shifting the image:</strong> They rotated that infinite tapestry a little. Just
+                    enough to &ldquo;connect&rdquo; the large version of the image with its smaller
+                    version.</p>
+
+                <p><strong>Rolling it back up:</strong> They applied the
+                    inverse function of the logarithm (the exponential) to warp that modified tapestry
+                    and roll it back up into a spiral.</p>
+
+                <p class="citation">What happens if you take the logarithm of an image?</p>
+
+                <!-- Escher Interactive Lab: 4-stage pipeline -->
+                <div class="escher-interactive">
+                    <div class="escher-lab collapsed">
+                        <div class="escher-lab-header">
+                            <div class="lab-dot"></div>
+                            <span class="lab-title">
+                                <span class="marquee-track">
+                                    <span class="marquee-item">Interactive lab &mdash; The Droste
+                                        effect pipeline &nbsp;&bull;&nbsp; Tap to open
+                                        &nbsp;&bull;&nbsp;&nbsp;</span>
+                                    <span class="marquee-item duplicate" aria-hidden="true">Interactive
+                                        lab &mdash; The Droste effect pipeline &nbsp;&bull;&nbsp; Tap
+                                        to open &nbsp;&bull;&nbsp;&nbsp;</span>
+                                </span>
+                            </span>
+                            <span class="lab-toggle">&#x25BC;</span>
+                        </div>
+
+                        <div class="escher-source-bar">
+                            <div class="escher-upload-mini" id="escherUpload" title="Upload your own image">+</div>
+                            <input type="file" id="escherFileInput" accept="image/*" style="display:none;">
+                            <div class="escher-presets" id="escherPresets"></div>
+                            <span class="escher-source-hint">Click + or a preset &bull; drag &amp; drop supported</span>
+                        </div>
+
+                        <div class="escher-pipeline">
+                            <div class="escher-panel">
+                                <div class="escher-panel-label">1 &mdash; Original</div>
+                                <canvas id="escherP1"></canvas>
+                                <div class="escher-panel-formula">z = x + iy</div>
+                            </div>
+                            <div class="escher-panel">
+                                <div class="escher-panel-label">2 &mdash; Logarithm</div>
+                                <canvas id="escherP2"></canvas>
+                                <div class="escher-panel-formula" id="formulaP2">w = ln(z) = ln|z| + i&middot;arg(z)
+                                </div>
+                            </div>
+                            <div class="escher-panel">
+                                <div class="escher-panel-label">3 &mdash; Rotate &amp; stretch</div>
+                                <canvas id="escherP3"></canvas>
+                                <div class="escher-panel-formula" id="formulaP3">w' = (a + bi) &middot; w</div>
+                            </div>
+                            <div class="escher-panel">
+                                <div class="escher-panel-label">4 &mdash; Exponential</div>
+                                <canvas id="escherP4"></canvas>
+                                <div class="escher-panel-formula" id="formulaP4">z' = e<sup>w'</sup></div>
+                            </div>
+                        </div>
+
+                        <div class="escher-vector-wrap">
+                            <canvas id="vectorCanvas" width="150" height="150"></canvas>
+                            <div class="escher-vector-info">
+                                Drag the arrow to set the complex multiplier <strong>(a + bi)</strong>.<br>
+                                Magnitude = stretch &bull; angle = rotation.<br>
+                                <span class="vec-val" id="vecLabel">a = 1.00 &nbsp; b = 0.00 &nbsp; |z| = 1.00 &nbsp;
+                                    &theta; = 0&deg;</span>
+                            </div>
+                        </div>
+
+                        <div class="escher-note">
+                            <strong>Why you can't just "do a Droste."</strong>
+                            For the effect to actually work, the image must be <em>self-contained</em>: after
+                            the full cycle z&nbsp;&rarr;&nbsp;ln&nbsp;&rarr;&nbsp;multiply&nbsp;&rarr;&nbsp;exp, the
+                            result must
+                            map
+                            back onto itself seamlessly. That means finding the <em>exact</em> complex constant
+                            <strong>c&nbsp;=&nbsp;a&nbsp;+&nbsp;bi</strong> that makes the spiral tile perfectly &mdash;
+                            a constraint so tight it is virtually impossible to satisfy by trial and error.
+                            De Smit &amp; Lenstra needed months of computation to find the right value for
+                            Escher's <em>Print Gallery</em>. And Escher? He had no computers, no complex analysis,
+                            no logarithmic pipeline. <strong>He did it by hand, by eye, by pure geometric
+                                intuition.</strong>
+                            You have all the tech in the world at your fingertips &mdash; and you still can't
+                            quite nail it. He did it with a pencil.
+                        </div>
+                    </div>
+                </div>
+
+                <p>With the geometry domesticated in the flat tapestry, they managed to fill in the
+                    missing area coherently &mdash; artist Jacqueline Hofstra redrew the details by
+                    hand onto the flat grid &mdash; and when they &ldquo;rolled up&rdquo; the image
+                    again by applying the final exponential, the miracle happened. The white patch
+                    area filled in with the entire image once more, rotated by about 157 degrees and
+                    reduced by a factor of 22. And inside that copy another, and another, and another.
+                    The painting contained itself like a perfect fractal. Escher&rsquo;s white patch
+                    was, literally, an infinity which didn&rsquo;t fit on the paper. It wasn&rsquo;t
+                    that Escher didn&rsquo;t know how to fill the center of the page. He would have
+                    had to draw the infinity.</p>
+
+                <p>What makes this even more fascinating is that Escher had no mathematical training.
+                    He knew nothing of complex analysis, holomorphic transformations, or the complex
+                    exponential. He built that conformally deformed grid guided exclusively by his eye. His
+                    obsession was purely aesthetic: the buildings at small scale shouldn&rsquo;t
+                    look distorted, the human eye must accept the deformation without protest.
+                    Without knowing it, these aesthetic criteria led him to implement, with total
+                    precision, the mathematics which describe the structure of his own work.</p>
+
+                <p>I came across this story through a happy coincidence. While writing this article, I
+                    was looking for a case where science had been used in service of art. One night I
+                    got together for dinner with my friends, and after telling them about my idea for
+                    the piece, Oliverio &mdash; a physicist like me &mdash; said: &ldquo;Have you seen
+                    the video 3Blue1Brown put out yesterday? It&rsquo;s amazing.&rdquo; One of my
+                    favorite science communicators, who usually uploads videos related to beauty in
+                    mathematics, had just published one about mathematics in art &mdash; exactly what
+                    I needed.</p>
+
+                <p>While the video clearly explains all the concepts needed to understand the Smit and
+                    Lenstra paper, the main takeaway (or at least what I took away) is understanding
+                    that Escher&rsquo;s artistic sensibility &mdash; to which he owes his fame &mdash;
+                    is nothing more and nothing less than an extremely sharp mathematical intuition transposed on paper.
+                </p>
+
+                <p>Escher didn&rsquo;t discover the mathematics of his work; the mathematics
+                    discovered him, fifty years later. And that left me thinking: if an artist can
+                    arrive at the same truths as a mathematician without knowing a single formula,
+                    then perhaps math is not invented but discovered. Perhaps beauty and science are not two
+                    different paths, but the same path walked from opposite shores.</p>
+                <button class="back-to-heroes"
+                    onclick="document.querySelector('.hero-selection').scrollIntoView({behavior:'smooth', block:'center'})">
+                    &uarr;
+                </button>
+                <div class="section-divider"></div>
+
+            </div><!-- /section-panel escher -->
+
+            <!-- ═══════════════════════════════════════
+                 SECTION III: LENNY
+                 ═══════════════════════════════════════ -->
+            <div class="section-panel" id="section-lenny">
+                <h2 class="section-title">You&rsquo;ve chosen Lenny!</h2>
+
+                <p class="citation">Let&rsquo;s see how the need to learn how to code led a young man
+                    to make art.</p>
+
+                <p>In my second year, during Calculus II classes, when we had to graph
+                    three-dimensional surfaces in GeoGebra to better understand an integral or a
+                    vector field, Victoria and I would get distracted and sit
+                    staring at the screen of my tablet, playing with the surface parameters just to
+                    see what would happen. We&rsquo;d change a coefficient, a frequency, an exponent,
+                    and suddenly shapes would appear on the screen that had no practical use but left
+                    us speechless. Surfaces folded like petals, coiled like snails, or burst into
+                    unexpected symmetries.</p>
+
+                <p>Studying physics, you quickly realize that knowing how to code isn&rsquo;t a luxury,
+                    it&rsquo;s more like a survival tool. The problem is that no one teaches you how to code
+                    in any structured way. They throw you in the water and wish you good luck. So, instead of
+                    reading manuals or taking online courses, I set myself the challenge of learning Python in
+                    the only way which could keep me interested: making art.</p>
+
+                <p>The idea came directly from (if not during) those mornings in calculus class, from the
+                    wonder those surfaces produced in us. It occurred to me that this could be exploited to
+                    generate beautiful things on purpose.</p>
+
+                <p>I started from the lowest possible level: generating images and animations using
+                    only parametric equations in Matplotlib, Python&rsquo;s most basic graphics
+                    library. No 3D models, no computer-aided design, no cheating &mdash;except for a
+                    little AI to help me with the code. Just <code>np.arrays</code> and equations.</p>
+
+                <p>The interactive scene which accompanies this history is exactly that: the result of that
+                    experimentation,
+                    translated to JavaScript. What you see here is not hand-modeled through any design program.
+                    It&rsquo;s a purely numerical landscape. Each element in the scene is generated by the equation
+                    shown in its label.</p>
+
+                <div class="mariposa-section" id="mariposaSection">
+                    <canvas id="mariposaCanvas"></canvas>
+                    <canvas id="gizmoCanvas"></canvas>
+                    <div class="mariposa-controls">
+                        <button id="btnPlayPause" title="Play / Pause">▶ Play</button>
+                        <button id="btnLabels" title="Show equations">Eq</button>
+                        <button id="btnFullscreen" title="Fullscreen">⛶</button>
+                    </div>
+                    <button id="btnHelp" class="mariposa-help-btn" title="Controls">?</button>
+                    <div class="mariposa-help-tooltip" id="helpTooltip">
+                        <span class="desktop-only">
+                            Right Button Drag &mdash; rotate camera<br>
+                            Left Button Drag &mdash; translate camera<br>
+                            Scroll &mdash; zoom in/out<br>
+                        </span>
+                        <span class="mobile-only">
+                            One finger drag &mdash; rotate camera<br>
+                            Two finger drag &mdash; translate camera<br>
+                            Pinch &mdash; zoom in/out<br>
+                        </span>
+                        ▶ &mdash; play/pause butterfly<br>
+                        Eq &mdash; show equations &amp; axes<br>
+                        ⛶ &mdash; fullscreen
+                    </div>
+                </div>
+
+                <p>The treetops are born from modulating an ellipse with cosines, using very few
+                    points to exploit the way Matplotlib (here three.js) continuously graphs discrete data and thus
+                    give the &ldquo;chaotic&rdquo; touch of leaves. The exotic flowers are
+                    combinations of exponentials and harmonics in polar coordinates, using thousands
+                    of points to ensure their smoothness. The butterfly &mdash; its body, its wings,
+                    its head &mdash; is formed by three-dimensional parametric functions. Even its
+                    flapping and trajectory are dictated by equations of motion, curves in space that
+                    decide how it turns, how it glides, how it rises.</p>
+
+                <p>My digital art has evolved since those early days, and my workflow has naturally expanded into
+                    dedicated environments like TouchDesigner. Even so, I try to stay true to my original essence:
+                    every piece must be born from something I learned in my degree. Whether it&rsquo;s a concept,
+                    a system of differential equations, or a transformation I saw in class and thought
+                    was too beautiful to never leave the blackboard, any such thing may become the foundation of my
+                    piece.
+                    It&rsquo;s my way of not letting
+                    knowledge become purely utilitarian&mdash;a way to bring the inner beauty of science to light.</p>
+            </div><!-- /section-panel lenny -->
+
+            <div class="article-conclusion" id="article-conclusion">
+                <p>I think of that teenager who was afraid of losing his sensitivity when entering
+                    a hard science, who thought equations would slowly wear down the part of him which
+                    cares about beauty. Luckily, today I can tell him the exact opposite. Science
+                    doesn&rsquo;t dry you out; it gives you a new language to express yourself and
+                    your thoughts, a more precise way of naming things you used to feel only vaguely.
+                    Understanding how things work usually ruins the magic, unless you start to see the
+                    magic in how things work, and then you will never stop being amazed.</p>
+
+                <p>If I hadn&rsquo;t started studying physics, if I hadn&rsquo;t been pushed to learn
+                    to code, I would never have started upon this journey in digital art in which open doors to
+                    different universes keep appearing. I would have never understood that beauty
+                    isn&rsquo;t just dressing well or decorating a PowerPoint, and that science
+                    isn&rsquo;t just solving pendulums and integrals. They are not separate tools, but
+                    two mirrors placed directly opposite one another. They face each other in a silent,
+                    endless conversation, creating a corridor of reflections that stretches into infinity.
+                    The magic isn&rsquo;t in one or the other, but in the dialogue happening in the space
+                    between them, where every reflection reveals a version of the world you couldn&rsquo;t
+                    see from just one side.</p>
+            </div>
+        </div>
+
+        <div class="article-references">
+            <h3>References</h3>
+            <a href="https://www.reddit.com/r/AskPhysics/comments/10oczjr/explain_like_im_five_noethers_theorem/"
+                target="_blank">&rarr; Noether's Theorem Explained &mdash; Reddit r/AskPhysics </a>
+            <a href="https://www.damtp.cam.ac.uk/user/tong/qft/four.pdf" target="_blank">&rarr; The Dirac Equation
+                &mdash; University of Cambridge </a>
+            <a href="https://pub.math.leidenuniv.nl/~smitbde/papers/2003-de_smit-lenstra-escher.pdf"
+                target="_blank">&rarr; Smit-Lenstra, Artful Mathematics: The Heritage of M. C. Escher
+                &mdash; Leiden University</a>
+            <a href="https://www.youtube.com/watch?v=ldxFjLJ3rVY" target="_blank">&rarr; 3Blue1Brown &mdash; How
+                Escher's Print Gallery works &mdash; YouTube</a>
+            <a href="https://virtualmathmuseum.org/Surface/gallery_o.html" target="_blank">&rarr; Famous Surface Gallery
+                &mdash; Virtual Math Museum </a>
+        </div>
+
+    </article>
+
+    <div class="shortcuts-hint"></div>
+
+    <!-- Image lightbox -->
+    <div class="img-lightbox" id="imgLightbox">
+        <button class="img-lightbox-close" id="imgLightboxClose">&times;</button>
+        <img id="imgLightboxImg" src="" alt="">
+    </div>
+
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         SCRIPTS
+         ═══════════════════════════════════════════════════════════════ -->
+    <script>
+        // ── Escher image lightbox ──
+        (function () {
+            const lightbox = document.getElementById('imgLightbox');
+            const lbImg = document.getElementById('imgLightboxImg');
+            const lbClose = document.getElementById('imgLightboxClose');
+
+            document.querySelectorAll('.escher-gallery-imgwrap').forEach(wrap => {
+                wrap.addEventListener('click', () => {
+                    const img = wrap.querySelector('img');
+                    if (!img) return;
+                    lbImg.src = img.src;
+                    lbImg.alt = img.alt;
+                    lightbox.classList.add('open');
+                    document.body.style.overflow = 'hidden';
+                });
+            });
+
+            function close() {
+                lightbox.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+            lbClose.addEventListener('click', close);
+            lightbox.addEventListener('click', e => { if (e.target === lightbox) close(); });
+            document.addEventListener('keydown', e => { if (e.key === 'Escape') close(); });
+        })();
+
+        initKeyboardShortcuts({
+            extraKeys: {
+                'a': openNextArticle,
+                'A': openNextArticle,
+                'Escape': returnToHome,
+                'h': returnToHome,
+                'H': returnToHome,
+            }
+        });
+
+
+        // ═══════════════════════════════════════
+        // HERO SELECTION
+        // ═══════════════════════════════════════
+        document.querySelectorAll('.hero-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const sectionId = 'section-' + card.dataset.section;
+                const panel = document.getElementById(sectionId);
+                const wasSelected = card.classList.contains('selected');
+
+                // deselect all
+                document.querySelectorAll('.hero-card').forEach(c => c.classList.remove('selected'));
+                document.querySelectorAll('.section-panel').forEach(p => p.classList.remove('active'));
+
+                if (!wasSelected) {
+                    card.classList.add('selected');
+                    panel.classList.add('active');
+                    // Reveal the conclusion once any hero has been chosen
+                    const conclusion = document.getElementById('article-conclusion');
+                    if (conclusion) conclusion.classList.add('revealed');
+                    // Trigger resize so hidden canvases pick up real dimensions
+                    requestAnimationFrame(() => {
+                        window.dispatchEvent(new Event('resize'));
+                        setTimeout(() => {
+                            // Scroll just enough to bring the hero cards + chosen title into view,
+                            // without a huge jump that hides the title behind the top edge.
+                            const heroSel = document.querySelector('.hero-selection');
+                            const anchor = heroSel || panel;
+                            const anchorTop = anchor.getBoundingClientRect().top + window.scrollY;
+                            // Scroll a little past the hero cards so the new title enters view,
+                            // but not far enough to hide the cards entirely.
+                            const extra = window.innerWidth < 768 ? 400 : 400;
+                            const offset = window.innerWidth < 768 ? 20 : 40;
+                            window.scrollTo({ top: Math.max(0, anchorTop - offset + extra), behavior: 'smooth' });
+                        }, 60);
+                    });
+                }
+            });
+        });
+
+        // ═══════════════════════════════════════
+        // COLLAPSIBLE INTERACTIVE LABS
+        // ═══════════════════════════════════════
+        document.querySelectorAll('.dirac-lab-header, .escher-lab-header').forEach(header => {
+            header.addEventListener('click', () => {
+                const lab = header.parentElement;
+                const wasCollapsed = lab.classList.contains('collapsed');
+                lab.classList.toggle('collapsed');
+                const isNowCollapsed = lab.classList.contains('collapsed');
+
+                const isDirac = lab.classList.contains('dirac-lab');
+                const baseText = isDirac
+                    ? 'Interactive lab &mdash; Pair creation &amp; annihilation'
+                    : 'Interactive lab &mdash; The Droste effect pipeline';
+                const suffix = isNowCollapsed ? ' &nbsp;&bull;&nbsp; Tap to open &nbsp;&bull;&nbsp;&nbsp;' : '';
+
+                const [original, duplicate] = header.querySelectorAll('.marquee-item');
+                original.innerHTML = baseText + suffix;
+                if (duplicate) duplicate.innerHTML = baseText + suffix;
+
+                if (wasCollapsed) {
+                    requestAnimationFrame(() => window.dispatchEvent(new Event('resize')));
+                }
+            });
+        });
+        // ═══════════════════════════════════════
+        // DIRAC INTERACTIVE
+        // Opuestos se atraen, iguales se repelen.
+        // ═══════════════════════════════════════
+        (function initDirac() {
+            const canvas = document.getElementById('diracCanvas');
+            const wrap = document.getElementById('diracCanvasWrap');
+            const ctx = canvas.getContext('2d');
+            const info = document.getElementById('diracInfo');
+            const expl = document.getElementById('diracExplanation');
+            let W, H, dpr;
+
+            // ── Constantes Modificadas ──
+            const kC = 600;     // Constante de Coulomb base
+            const Q_MAG = 2;       // MULTIPLICADOR DE CARGA (Fuerzas más intensas)
+            const EPS = 4;
+            const EPS2 = EPS * EPS;
+            const dt = 0.32;
+            const ANNIH_R = 14;
+            const D_INIT = 36;      // Más separación inicial porque los fotones son grandes
+            const PH_SPEED = 2.5;
+            const V_INIT = 8.0;     // MOMENTO INICIAL MUY ALTO
+
+            const ECOL = '#4fc3f7';   // Electrón (celeste)
+            const PCOL = '#ff6b9d';   // Positrón (rosa)
+            const GCOL = '#ffd54f';   // Fotón (amarillo)
+
+            let matter = [];
+            let photons = [];
+            let flashes = [];
+
+            // ── Explanation ──
+
+            expl.innerHTML =
+
+                `<strong>E&sup2; = (pc)&sup2; + (mc&sup2;)&sup2;</strong> &mdash; the Dirac dispersion relation has two branches: `
+
+                + `positive energy (electrons, e&minus;) and negative energy, reinterpreted as antimatter (positrons, e&plus;). `
+
+                + `A photon with E &ge; 2mc&sup2; = 1.022 MeV can create a pair: <strong>&gamma; &rarr; e&minus; + e&plus;</strong>. `
+
+                + `When they meet again: <strong>e&minus; + e&plus; &rarr; &gamma;</strong>. `
+
+                + `<br>`
+                + `<br>`
+
+                + `<span class="legend"><span class="legend-dot" style="background:${GCOL}"></span> &gamma;</span>`
+
+                + `<span class="legend"><span class="legend-dot" style="background:${ECOL}"></span> e&minus;</span>`
+
+                + `<span class="legend"><span class="legend-dot" style="background:${PCOL}"></span> e&plus;</span>`
+
+                + ` &mdash; <em>Click a photon to create a pair.</em>`;
+
+            // ── Redimensionar ──
+            function resize() {
+                dpr = window.devicePixelRatio || 1;
+                W = wrap.clientWidth; H = wrap.clientHeight;
+                canvas.width = W * dpr; canvas.height = H * dpr;
+                ctx.scale(dpr, dpr);
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            // ── Computar aceleraciones (Fuerza de Coulomb CORRECTA) ──
+            function computeAccel() {
+                for (const p of matter) { p.ax = 0; p.ay = 0; }
+                for (let i = 0; i < matter.length; i++) {
+                    for (let j = i + 1; j < matter.length; j++) {
+                        const a = matter[i], b = matter[j];
+                        const dx = b.x - a.x, dy = b.y - a.y;
+                        const r2 = dx * dx + dy * dy;
+                        const denom = Math.pow(r2 + EPS2, 1.5);
+
+                        // CORRECCIÓN FÍSICA: Con el signo "-", opuestos (-1 * 1 = -1) dan una "f" positiva,
+                        // lo que empuja a "a" hacia "b" (ATRACCIÓN). Iguales dan "f" negativa (REPULSIÓN).
+                        const f = -kC * (a.q * Q_MAG) * (b.q * Q_MAG) / denom;
+
+                        a.ax += f * dx; a.ay += f * dy;
+                        b.ax -= f * dx; b.ay -= f * dy;
+                    }
+                }
+            }
+
+            // ── Integración numérica estable (Sub-stepping) ──
+            function step() {
+                const SUBSTEPS = 5;
+                const s_dt = dt / SUBSTEPS;
+
+                for (let s = 0; s < SUBSTEPS; s++) {
+                    for (const p of matter) {
+                        p.x += p.vx * s_dt + 0.5 * p.ax * s_dt * s_dt;
+                        p.y += p.vy * s_dt + 0.5 * p.ay * s_dt * s_dt;
+                        p.vx += 0.5 * p.ax * s_dt;
+                        p.vy += 0.5 * p.ay * s_dt;
+                    }
+                    computeAccel();
+                    for (const p of matter) {
+                        p.vx += 0.5 * p.ax * s_dt;
+                        p.vy += 0.5 * p.ay * s_dt;
+                    }
+                    // Rebotes de la materia con amortiguación leve
+                    for (const p of matter) {
+                        if (p.x < 8) { p.x = 8; p.vx = Math.abs(p.vx) * 0.95; }
+                        if (p.x > W - 8) { p.x = W - 8; p.vx = -Math.abs(p.vx) * 0.95; }
+                        if (p.y < 8) { p.y = 8; p.vy = Math.abs(p.vy) * 0.95; }
+                        if (p.y > H - 8) { p.y = H - 8; p.vy = -Math.abs(p.vy) * 0.95; }
+                    }
+                }
+                // Movimiento rectilíneo de fotones
+                for (const ph of photons) {
+                    ph.x += ph.vx; ph.y += ph.vy;
+                    if (ph.x < 8 || ph.x > W - 8) ph.vx *= -1;
+                    if (ph.y < 8 || ph.y > H - 8) ph.vy *= -1;
+                    ph.x = Math.max(8, Math.min(W - 8, ph.x));
+                    ph.y = Math.max(8, Math.min(H - 8, ph.y));
+                    ph.osc += 0.08;
+                }
+                // Actualizar estelas
+                for (const p of matter) { p.trail.push({ x: p.x, y: p.y }); if (p.trail.length > 22) p.trail.shift(); }
+                for (const ph of photons) { ph.trail.push({ x: ph.x, y: ph.y }); if (ph.trail.length > 14) ph.trail.shift(); }
+            }
+
+            // ── Creación de Par ──
+            function createPair(phIdx) {
+                const ph = photons[phIdx];
+                const angle = Math.random() * Math.PI * 2;
+                const halfD = D_INIT / 2;
+                const ex = ph.x + Math.cos(angle) * halfD;
+                const ey = ph.y + Math.sin(angle) * halfD;
+                const px = ph.x - Math.cos(angle) * halfD;
+                const py = ph.y - Math.sin(angle) * halfD;
+
+                photons.splice(phIdx, 1);
+                matter.push(
+                    { x: ex, y: ey, vx: Math.cos(angle) * V_INIT, vy: Math.sin(angle) * V_INIT, ax: 0, ay: 0, q: -1, trail: [] },
+                    { x: px, y: py, vx: -Math.cos(angle) * V_INIT, vy: -Math.sin(angle) * V_INIT, ax: 0, ay: 0, q: 1, trail: [] }
+                );
+                computeAccel();
+                flashes.push({ x: ph.x, y: ph.y, r: 0, alpha: 0.8, color: GCOL });
+                updateInfo();
+            }
+
+            // ── Aniquilación ──
+            function checkAnnihilation() {
+                let bestI = -1, bestJ = -1, bestR = ANNIH_R;
+                for (let i = 0; i < matter.length; i++) {
+                    for (let j = i + 1; j < matter.length; j++) {
+                        if (matter[i].q * matter[j].q >= 0) continue; // Misma carga se ignora
+                        const r = Math.hypot(matter[i].x - matter[j].x, matter[i].y - matter[j].y);
+                        if (r < bestR) { bestR = r; bestI = i; bestJ = j; }
+                    }
+                }
+                if (bestI < 0) return;
+
+                const mx = (matter[bestI].x + matter[bestJ].x) / 2;
+                const my = (matter[bestI].y + matter[bestJ].y) / 2;
+
+                const hi = Math.max(bestI, bestJ), lo = Math.min(bestI, bestJ);
+                matter.splice(hi, 1);
+                matter.splice(lo, 1);
+
+                const ang = Math.random() * Math.PI * 2;
+                photons.push({
+                    x: mx, y: my,
+                    vx: Math.cos(ang) * PH_SPEED,
+                    vy: Math.sin(ang) * PH_SPEED,
+                    osc: Math.random() * 6.28,
+                    trail: []
+                });
+                flashes.push({ x: mx, y: my, r: 0, alpha: 1, color: GCOL });
+                computeAccel();
+                updateInfo();
+            }
+
+            // ── Inicialización ──
+            function init() {
+                matter = []; photons = []; flashes = [];
+                for (let i = 0; i < 6; i++) {
+                    const ang = Math.random() * Math.PI * 2;
+                    photons.push({
+                        x: W * 0.12 + Math.random() * W * 0.76,
+                        y: H * 0.12 + Math.random() * H * 0.76,
+                        vx: Math.cos(ang) * PH_SPEED,
+                        vy: Math.sin(ang) * PH_SPEED,
+                        osc: Math.random() * 6.28,
+                        trail: []
+                    });
+                }
+                updateInfo();
+            }
+
+            function updateInfo() {
+                const ng = photons.length;
+                const ne = matter.filter(p => p.q < 0).length;
+                const np = matter.filter(p => p.q > 0).length;
+                info.textContent = `\u03B3 (Photons): ${ng}   |   e\u207B: ${ne}   |   e\u207A: ${np}`;
+            }
+
+            // ── Dibujado ──
+            function drawTrail(trail, color) {
+                if (trail.length < 2) return;
+                ctx.beginPath();
+                ctx.moveTo(trail[0].x, trail[0].y);
+                for (let i = 1; i < trail.length; i++) ctx.lineTo(trail[i].x, trail[i].y);
+                ctx.strokeStyle = color + '44';
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+            }
+
+            function drawPhoton(ph) {
+                drawTrail(ph.trail, GCOL);
+
+                const g = ctx.createRadialGradient(ph.x, ph.y, 0, ph.x, ph.y, 22);
+                g.addColorStop(0, GCOL + '66'); g.addColorStop(1, 'transparent');
+                ctx.fillStyle = g;
+                ctx.beginPath(); ctx.arc(ph.x, ph.y, 22, 0, Math.PI * 2); ctx.fill();
+
+                const r = 8 + Math.sin(ph.osc * 2) * 1.5;
+
+                ctx.fillStyle = GCOL;
+                ctx.beginPath(); ctx.arc(ph.x, ph.y, Math.max(1, r), 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#000'; ctx.font = 'bold 12px Inter, sans-serif';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText('\u03B3', ph.x, ph.y);
+            }
+
+            function drawMatter(p) {
+                const col = p.q < 0 ? ECOL : PCOL;
+                drawTrail(p.trail, col);
+                const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 16);
+                g.addColorStop(0, col + '44'); g.addColorStop(1, 'transparent');
+                ctx.fillStyle = g;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 16, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = col;
+                ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#000'; ctx.font = 'bold 9px Inter, sans-serif';
+                ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                ctx.fillText(p.q < 0 ? 'e\u207B' : 'e\u207A', p.x, p.y);
+            }
+
+            function drawFlashes() {
+                for (let i = flashes.length - 1; i >= 0; i--) {
+                    const f = flashes[i];
+                    f.r += 3.5; f.alpha -= 0.05;
+                    if (f.alpha <= 0) { flashes.splice(i, 1); continue; }
+                    const hex = Math.floor(f.alpha * 255).toString(16).padStart(2, '0');
+                    ctx.strokeStyle = f.color + hex;
+                    ctx.lineWidth = 3;
+                    ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.stroke();
+                }
+            }
+
+            function drawEnergyBar() {
+                const barW = 200, barH = 6;
+                const bx = W - barW - 14, by = 16;
+
+                const numPhotons = photons.length;
+                const numMatter = matter.length;
+                const total = numPhotons + numMatter;
+
+                if (total === 0) return;
+
+                const pF = numPhotons / total;
+                const mF = numMatter / total;
+
+                ctx.fillStyle = 'rgba(255,255,255,0.05)';
+                ctx.fillRect(bx, by, barW, barH);
+
+                ctx.fillStyle = GCOL;
+                ctx.fillRect(bx, by, barW * pF, barH);
+
+                const matterWidth = barW * mF;
+                const matterX = bx + barW * pF;
+                ctx.fillStyle = ECOL;
+                ctx.fillRect(matterX, by, matterWidth / 2, barH);
+                ctx.fillStyle = PCOL;
+                ctx.fillRect(matterX + matterWidth / 2, by, matterWidth / 2, barH);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.font = '10px Inter, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText('Energy distribution', bx + barW, by + barH + 16);
+            }
+
+            wrap.addEventListener('click', (e) => {
+                const rect = wrap.getBoundingClientRect();
+                const x = e.clientX - rect.left, y = e.clientY - rect.top;
+                let best = -1, bestD = 50;
+                photons.forEach((ph, i) => {
+                    const d = Math.hypot(ph.x - x, ph.y - y);
+                    if (d < bestD) { bestD = d; best = i; }
+                });
+                if (best >= 0) createPair(best);
+            });
+
+            let lastFrame = 0, visible = false;
+            const obs = new IntersectionObserver(([e]) => { visible = e.isIntersecting; }, { threshold: 0.05 });
+            obs.observe(wrap);
+
+            function animate(ts) {
+                requestAnimationFrame(animate);
+                if (!visible) return;
+                if (ts - lastFrame < 33) return;
+                lastFrame = ts;
+
+                ctx.clearRect(0, 0, W, H);
+                step();
+                checkAnnihilation();
+
+                for (const ph of photons) drawPhoton(ph);
+                for (const p of matter) drawMatter(p);
+                drawFlashes();
+                drawEnergyBar();
+            }
+
+            init();
+            computeAccel();
+            requestAnimationFrame(animate);
+        })();
+
+        // ═══════════════════════════════════════
+        // ESCHER INTERACTIVE — 4-STAGE PIPELINE
+        // z → ln(z) → (a+bi)·w → exp(w')
+        // ═══════════════════════════════════════
+        (function initEscher() {
+            const P1 = document.getElementById('escherP1');
+            const P2 = document.getElementById('escherP2');
+            const P3 = document.getElementById('escherP3');
+            const P4 = document.getElementById('escherP4');
+            const ctx1 = P1.getContext('2d');
+            const ctx2 = P2.getContext('2d');
+            const ctx3 = P3.getContext('2d');
+            const ctx4 = P4.getContext('2d');
+            const vecCanvas = document.getElementById('vectorCanvas');
+            const vecCtx = vecCanvas.getContext('2d');
+            const vecLabel = document.getElementById('vecLabel');
+            const formulaP3 = document.getElementById('formulaP3');
+            const uploadBtn = document.getElementById('escherUpload');
+            const fileInput = document.getElementById('escherFileInput');
+            const presetsContainer = document.getElementById('escherPresets');
+
+            const SZ = 280;
+            [P1, P2, P3, P4].forEach(c => { c.width = SZ; c.height = SZ; });
+
+            let cA = 1, cB = 0;
+
+            let sourceCanvas = document.createElement('canvas');
+            let sctx = sourceCanvas.getContext('2d');
+            const SRC_SZ = 400;
+            sourceCanvas.width = SRC_SZ; sourceCanvas.height = SRC_SZ;
+            let srcData = null;
+            let hasSource = false;
+            let transformQueued = false;
+
+            const VIEW_R = 1.5;
+            const U_MIN = -1.5, U_MAX = 1.5;
+            const V_MIN = -Math.PI, V_MAX = Math.PI;
+
+            function zToSrc(zr, zi) {
+                let sx = (zr + 1) / 2 * SRC_SZ;
+                let sy = (1 - zi) / 2 * SRC_SZ;
+                sx = ((Math.floor(sx) % SRC_SZ) + SRC_SZ) % SRC_SZ;
+                sy = ((Math.floor(sy) % SRC_SZ) + SRC_SZ) % SRC_SZ;
+                const idx = (sy * SRC_SZ + sx) * 4;
+                return [srcData[idx], srcData[idx + 1], srcData[idx + 2]];
+            }
+
+            function renderPanel1() {
+                ctx1.drawImage(sourceCanvas, 0, 0, SZ, SZ);
+            }
+
+            function renderPanel2() {
+                if (!srcData) return;
+                const out = ctx2.createImageData(SZ, SZ);
+                const d = out.data;
+                for (let py = 0; py < SZ; py++) {
+                    const v = V_MAX - (py / SZ) * (V_MAX - V_MIN);
+                    for (let px = 0; px < SZ; px++) {
+                        const u = U_MIN + (px / SZ) * (U_MAX - U_MIN);
+                        const eu = Math.exp(u);
+                        const zr = eu * Math.cos(v);
+                        const zi = eu * Math.sin(v);
+                        const [r, g, b] = zToSrc(zr, zi);
+                        const idx = (py * SZ + px) * 4;
+                        d[idx] = r; d[idx + 1] = g; d[idx + 2] = b; d[idx + 3] = 255;
+                    }
+                }
+                ctx2.putImageData(out, 0, 0);
+            }
+
+            function renderPanel3() {
+                if (!srcData) return;
+                const out = ctx3.createImageData(SZ, SZ);
+                const d = out.data;
+                const denom = cA * cA + cB * cB;
+                if (denom < 0.0001) { ctx3.clearRect(0, 0, SZ, SZ); return; }
+                for (let py = 0; py < SZ; py++) {
+                    const vp = V_MAX - (py / SZ) * (V_MAX - V_MIN);
+                    for (let px = 0; px < SZ; px++) {
+                        const up = U_MIN + (px / SZ) * (U_MAX - U_MIN);
+                        const wr = (up * cA + vp * cB) / denom;
+                        const wi = (vp * cA - up * cB) / denom;
+                        const ew = Math.exp(wr);
+                        const zr = ew * Math.cos(wi);
+                        const zi = ew * Math.sin(wi);
+                        const [r, g, b] = zToSrc(zr, zi);
+                        const idx = (py * SZ + px) * 4;
+                        d[idx] = r; d[idx + 1] = g; d[idx + 2] = b; d[idx + 3] = 255;
+                    }
+                }
+                ctx3.putImageData(out, 0, 0);
+            }
+
+            function renderPanel4() {
+                if (!srcData) return;
+                const out = ctx4.createImageData(SZ, SZ);
+                const d = out.data;
+                const denom = cA * cA + cB * cB;
+                if (denom < 0.0001) { ctx4.clearRect(0, 0, SZ, SZ); return; }
+                for (let py = 0; py < SZ; py++) {
+                    for (let px = 0; px < SZ; px++) {
+                        const zpr = (px / SZ - 0.5) * 2 * VIEW_R;
+                        const zpi = -(py / SZ - 0.5) * 2 * VIEW_R;
+                        const r2 = zpr * zpr + zpi * zpi;
+                        const idx = (py * SZ + px) * 4;
+                        if (r2 < 0.0001) {
+                            d[idx] = d[idx + 1] = d[idx + 2] = 0; d[idx + 3] = 255;
+                            continue;
+                        }
+                        const wpr = 0.5 * Math.log(r2);
+                        const wpi = Math.atan2(zpi, zpr);
+                        const wr = (wpr * cA + wpi * cB) / denom;
+                        const wi = (wpi * cA - wpr * cB) / denom;
+                        const ew = Math.exp(wr);
+                        const zr = ew * Math.cos(wi);
+                        const zi = ew * Math.sin(wi);
+                        const [rv, gv, bv] = zToSrc(zr, zi);
+                        d[idx] = rv; d[idx + 1] = gv; d[idx + 2] = bv; d[idx + 3] = 255;
+                    }
+                }
+                ctx4.putImageData(out, 0, 0);
+            }
+
+            function renderAll() {
+                if (!hasSource) return;
+                srcData = sctx.getImageData(0, 0, SRC_SZ, SRC_SZ).data;
+                renderPanel1();
+                renderPanel2();
+                renderPanel3();
+                renderPanel4();
+                updateFormulas();
+            }
+
+            function renderMultiplyPanels() {
+                if (!hasSource) return;
+                renderPanel3();
+                renderPanel4();
+                updateFormulas();
+            }
+
+            function queueRenderAll() {
+                if (transformQueued) return;
+                transformQueued = true;
+                requestAnimationFrame(() => { transformQueued = false; renderAll(); });
+            }
+
+            function queueRenderMultiply() {
+                if (transformQueued) return;
+                transformQueued = true;
+                requestAnimationFrame(() => { transformQueued = false; renderMultiplyPanels(); });
+            }
+
+            function updateFormulas() {
+                const mag = Math.sqrt(cA * cA + cB * cB);
+                const theta = Math.atan2(cB, cA);
+                const thetaDeg = (theta * 180 / Math.PI).toFixed(0);
+
+                if (Math.abs(cB) < 0.01) {
+                    formulaP3.innerHTML = `w' = ${cA.toFixed(2)} &middot; w`;
+                } else {
+                    formulaP3.innerHTML = `w' = (${cA.toFixed(2)} + ${cB.toFixed(2)}i) &middot; w = ${mag.toFixed(2)}e<sup>i${thetaDeg}&deg;</sup> &middot; w`;
+                }
+
+                vecLabel.innerHTML = `a = ${cA.toFixed(2)} &nbsp; b = ${cB.toFixed(2)} &nbsp; |z| = ${mag.toFixed(2)} &nbsp; &theta; = ${thetaDeg}&deg;`;
+            }
+
+            // ═══ VECTOR CONTROL ═══
+            const VCW = 150, VCH = 150;
+            const VCX = VCW / 2, VCY = VCH / 2;
+            const VSCALE = 35;
+            let dragging = false;
+
+            function drawVector() {
+                vecCtx.clearRect(0, 0, VCW, VCH);
+                vecCtx.fillStyle = '#fafafa';
+                vecCtx.fillRect(0, 0, VCW, VCH);
+                // Grid
+                vecCtx.strokeStyle = 'rgba(0,0,0,0.06)';
+                vecCtx.lineWidth = 1;
+                for (let i = -2; i <= 2; i++) {
+                    const gx = VCX + i * VSCALE;
+                    const gy = VCY - i * VSCALE;
+                    vecCtx.beginPath(); vecCtx.moveTo(gx, 0); vecCtx.lineTo(gx, VCH); vecCtx.stroke();
+                    vecCtx.beginPath(); vecCtx.moveTo(0, gy); vecCtx.lineTo(VCW, gy); vecCtx.stroke();
+                }
+                // Axes
+                vecCtx.strokeStyle = 'rgba(0,0,0,0.2)';
+                vecCtx.beginPath(); vecCtx.moveTo(0, VCY); vecCtx.lineTo(VCW, VCY); vecCtx.stroke();
+                vecCtx.beginPath(); vecCtx.moveTo(VCX, 0); vecCtx.lineTo(VCX, VCH); vecCtx.stroke();
+                // Labels
+                vecCtx.fillStyle = 'rgba(0,0,0,0.25)';
+                vecCtx.font = '9px Inter, sans-serif';
+                vecCtx.textAlign = 'center';
+                vecCtx.fillText('Re', VCW - 10, VCY - 5);
+                vecCtx.fillText('Im', VCX + 10, 10);
+                // Arrow
+                const ax = VCX + cA * VSCALE;
+                const ay = VCY - cB * VSCALE;
+                const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#c8394a';
+                vecCtx.strokeStyle = accentColor;
+                vecCtx.lineWidth = 2;
+                vecCtx.beginPath(); vecCtx.moveTo(VCX, VCY); vecCtx.lineTo(ax, ay); vecCtx.stroke();
+                // Arrowhead
+                const ang = Math.atan2(VCY - ay, ax - VCX);
+                vecCtx.fillStyle = accentColor;
+                vecCtx.beginPath();
+                vecCtx.moveTo(ax, ay);
+                vecCtx.lineTo(ax - 10 * Math.cos(ang - 0.4), ay + 10 * Math.sin(ang - 0.4));
+                vecCtx.lineTo(ax - 10 * Math.cos(ang + 0.4), ay + 10 * Math.sin(ang + 0.4));
+                vecCtx.fill();
+                // Dot
+                vecCtx.beginPath(); vecCtx.arc(ax, ay, 4, 0, Math.PI * 2); vecCtx.fill();
+            }
+
+            function handleVecEvent(e) {
+                e.preventDefault();
+                const rect = vecCanvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                const px = clientX - rect.left;
+                const py = clientY - rect.top;
+                cA = (px - VCX) / VSCALE;
+                cB = -(py - VCY) / VSCALE;
+                const mag = Math.sqrt(cA * cA + cB * cB);
+                if (mag > 3) { cA *= 3 / mag; cB *= 3 / mag; }
+                drawVector();
+                queueRenderMultiply();
+            }
+
+            vecCanvas.addEventListener('mousedown', (e) => { dragging = true; handleVecEvent(e); });
+            window.addEventListener('mousemove', (e) => { if (dragging) handleVecEvent(e); });
+            window.addEventListener('mouseup', () => { dragging = false; });
+            vecCanvas.addEventListener('touchstart', (e) => { dragging = true; handleVecEvent(e); }, { passive: false });
+            window.addEventListener('touchmove', (e) => { if (dragging) handleVecEvent(e); }, { passive: false });
+            window.addEventListener('touchend', () => { dragging = false; });
+
+            // ═══ PRESET PATTERNS ═══
+            const presetPatterns = [
+                { name: 'Grid', draw: drawGrid },
+                { name: 'Circles', draw: drawCircles },
+                { name: 'Moire', draw: drawMoire },
+                { name: 'City', draw: drawCity },
+            ];
+
+            function drawGrid(ctx, w, h) {
+                ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, w, h);
+                ctx.strokeStyle = '#e94560'; ctx.lineWidth = 1;
+                for (let x = 0; x < w; x += 20) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+                for (let y = 0; y < h; y += 20) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+            }
+
+            function drawCircles(ctx, w, h) {
+                ctx.fillStyle = '#0f3460'; ctx.fillRect(0, 0, w, h);
+                for (let i = 0; i < 10; i++) {
+                    ctx.strokeStyle = `hsl(${i * 36}, 80%, 60%)`; ctx.lineWidth = 2;
+                    ctx.beginPath(); ctx.arc(w / 2, h / 2, 10 + i * 18, 0, Math.PI * 2); ctx.stroke();
+                }
+            }
+
+            function drawMoire(ctx, w, h) {
+                ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, w, h);
+                for (let i = 0; i < 2; i++) {
+                    const ox = i === 0 ? w / 2 - 30 : w / 2 + 30;
+                    ctx.strokeStyle = i === 0 ? '#e94560' : '#4fc3f7'; ctx.lineWidth = 1;
+                    for (let r = 5; r < w; r += 8) { ctx.beginPath(); ctx.arc(ox, h / 2, r, 0, Math.PI * 2); ctx.stroke(); }
+                }
+            }
+
+            function drawCity(ctx, w, h) {
+                ctx.fillStyle = '#0a0a1a'; ctx.fillRect(0, 0, w, h);
+                const grad = ctx.createLinearGradient(0, 0, 0, h * 0.5);
+                grad.addColorStop(0, '#1a0a3e'); grad.addColorStop(1, '#0a0a1a');
+                ctx.fillStyle = grad; ctx.fillRect(0, 0, w, h * 0.5);
+                for (let i = 0; i < 40; i++) {
+                    ctx.fillStyle = `rgba(255,255,255,${0.3 + Math.random() * 0.7})`;
+                    ctx.fillRect(Math.random() * w, Math.random() * h * 0.45, 1.5, 1.5);
+                }
+                const bColors = ['#1a2a4a', '#2a1a3a', '#1a3a3a', '#2a2a1a'];
+                for (let i = 0; i < 12; i++) {
+                    const bw = 20 + Math.random() * 40, bh = 60 + Math.random() * 140;
+                    const bx = i * (w / 12) + Math.random() * 10;
+                    ctx.fillStyle = bColors[i % 4]; ctx.fillRect(bx, h - bh, bw, bh);
+                    ctx.fillStyle = '#ffd54f44';
+                    for (let wy = h - bh + 8; wy < h - 8; wy += 14)
+                        for (let wx = bx + 5; wx < bx + bw - 5; wx += 10)
+                            if (Math.random() > 0.3) ctx.fillRect(wx, wy, 5, 7);
+                }
+                ctx.fillStyle = '#0d0d0d'; ctx.fillRect(0, h - 15, w, 15);
+            }
+
+            // Build preset thumbnails
+            presetPatterns.forEach((preset) => {
+                const div = document.createElement('div');
+                div.className = 'escher-preset';
+                div.title = preset.name;
+                const c = document.createElement('canvas');
+                c.width = 96; c.height = 96;
+                preset.draw(c.getContext('2d'), 96, 96);
+                div.appendChild(c);
+                div.addEventListener('click', () => {
+                    document.querySelectorAll('.escher-preset').forEach(p => p.classList.remove('active'));
+                    div.classList.add('active');
+                    loadProceduralPreset(preset.draw);
+                });
+                presetsContainer.appendChild(div);
+            });
+
+            // Image presets helper
+            function addImagePreset(src, title) {
+                const div = document.createElement('div');
+                div.className = 'escher-preset';
+                div.title = title;
+                const img = new Image();
+                img.src = src;
+                img.onload = () => {
+                    const thumbC = document.createElement('canvas');
+                    thumbC.width = 96; thumbC.height = 96;
+                    const tc = thumbC.getContext('2d');
+                    const scale = Math.max(96 / img.width, 96 / img.height);
+                    const sw = img.width * scale, sh = img.height * scale;
+                    tc.drawImage(img, (96 - sw) / 2, (96 - sh) / 2, sw, sh);
+                    div.appendChild(thumbC);
+                    div.addEventListener('click', () => {
+                        document.querySelectorAll('.escher-preset').forEach(p => p.classList.remove('active'));
+                        div.classList.add('active');
+                        loadImageSource(img);
+                    });
+                    presetsContainer.appendChild(div);
+                };
+            }
+
+            addImagePreset('../../multimedia/stratas-media/Flor.jpg', 'Flower');
+
+            function loadProceduralPreset(drawFn) {
+                sourceCanvas.width = SRC_SZ; sourceCanvas.height = SRC_SZ;
+                drawFn(sctx, SRC_SZ, SRC_SZ);
+                hasSource = true;
+                queueRenderAll();
+            }
+
+            function loadImageSource(img) {
+                sourceCanvas.width = SRC_SZ; sourceCanvas.height = SRC_SZ;
+                const scale = Math.max(SRC_SZ / img.width, SRC_SZ / img.height);
+                const sw = img.width * scale, sh = img.height * scale;
+                sctx.drawImage(img, (SRC_SZ - sw) / 2, (SRC_SZ - sh) / 2, sw, sh);
+                hasSource = true;
+                queueRenderAll();
+            }
+
+            // File upload
+            uploadBtn.addEventListener('click', (e) => { e.stopPropagation(); fileInput.click(); });
+            uploadBtn.addEventListener('dragover', (e) => { e.preventDefault(); uploadBtn.style.borderColor = 'var(--accent)'; });
+            uploadBtn.addEventListener('dragleave', () => { uploadBtn.style.borderColor = ''; });
+            uploadBtn.addEventListener('drop', (e) => {
+                e.preventDefault(); e.stopPropagation(); uploadBtn.style.borderColor = '';
+                if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+            });
+            fileInput.addEventListener('change', () => { if (fileInput.files.length) handleFile(fileInput.files[0]); });
+
+            function handleFile(file) {
+                if (!file.type.startsWith('image/')) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        document.querySelectorAll('.escher-preset').forEach(p => p.classList.remove('active'));
+                        loadImageSource(img);
+                        uploadBtn.innerHTML = '';
+                        const thumb = document.createElement('img');
+                        thumb.src = ev.target.result;
+                        uploadBtn.appendChild(thumb);
+                    };
+                    img.src = ev.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+
+            // Init
+            drawVector();
+            updateFormulas();
+            if (presetPatterns.length > 0) {
+                presetsContainer.children[0].classList.add('active');
+                loadProceduralPreset(presetPatterns[0].draw);
+            }
+        })();
+
+    </script>
+
+    <!-- ═══════════════════════════════════════════════════
+         MARIPOSA 3D SCENE — Three.js
+         ═══════════════════════════════════════════════════ -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+        (function initMariposaScene() {
+            const section = document.getElementById('mariposaSection');
+            const canvas = document.getElementById('mariposaCanvas');
+            const gizmoC = document.getElementById('gizmoCanvas');
+            const btnPlay = document.getElementById('btnPlayPause');
+            const btnLabel = document.getElementById('btnLabels');
+            const btnFS = document.getElementById('btnFullscreen');
+            const btnHelp = document.getElementById('btnHelp');
+            const helpTip = document.getElementById('helpTooltip');
+            if (!canvas) return;
+
+            const dpr = Math.min(window.devicePixelRatio, 2);
+
+            /* ── Renderer ──────────────────────────────── */
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+            renderer.setPixelRatio(dpr);
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+            const scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x87ceeb);
+
+            /* ── Camera ────────────────────────────────── */
+            const camera = new THREE.PerspectiveCamera(50, 2, 0.1, 500);
+            camera.position.set(0, 60, 90);
+
+            const controls = new OrbitControls(camera, canvas);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.08;
+            controls.minDistance = 15;
+            controls.maxDistance = 155;
+            controls.maxPolarAngle = Math.PI * 0.5;
+            controls.minPolarAngle = Math.PI * 0.075;
+            controls.target.set(0, 25, 0);
+            controls.update();
+
+            /* ── Lights ────────────────────────────────── */
+            scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+            const sun = new THREE.DirectionalLight(0xffffff, 1.2);
+            sun.position.set(50, 80, 60);
+            scene.add(sun);
+            const fill = new THREE.DirectionalLight(0xaaddff, 0.4);
+            fill.position.set(-40, 20, -30);
+            scene.add(fill);
+
+            /* ── Ground plane with grass texture ──────── */
+            const grassCanvas = document.createElement('canvas');
+            grassCanvas.width = 256; grassCanvas.height = 256;
+            const gctx = grassCanvas.getContext('2d');
+            gctx.fillStyle = '#4a6e2a';
+            gctx.fillRect(0, 0, 256, 256);
+            // Noise-like grass blades
+            for (let i = 0; i < 6000; i++) {
+                const gx = Math.random() * 256;
+                const gy = Math.random() * 256;
+                const shade = 40 + Math.random() * 60 | 0;
+                gctx.fillStyle = `rgb(${shade},${shade + 30 + Math.random() * 30 | 0},${shade - 20 | 0})`;
+                gctx.fillRect(gx, gy, 1 + Math.random() * 2 | 0, 1);
+            }
+            const grassTex = new THREE.CanvasTexture(grassCanvas);
+            grassTex.wrapS = grassTex.wrapT = THREE.RepeatWrapping;
+            grassTex.repeat.set(12, 12);
+
+            const groundGeo = new THREE.PlaneGeometry(400, 400);
+            groundGeo.rotateX(-Math.PI / 2);
+            const groundMat = new THREE.MeshStandardMaterial({
+                map: grassTex, roughness: 1.0, metalness: 0.0,
+            });
+            const ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.position.y = -50;
+            scene.add(ground);
+
+            /* ── Seeded RNG (matches Python seed 2001) ── */
+            function mulberry32(seed) {
+                return function () {
+                    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+                    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+                    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+                    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+                };
+            }
+            const rng = mulberry32(2001);
+            function rngU(lo, hi) { return lo + rng() * (hi - lo); }
+
+            /* ══════════════════════════════════════════════
+               FLOWERS — 4 parametric surfaces
+               ══════════════════════════════════════════════ */
+            function makeFlowerGeom(fn, cx, cy, size, res) {
+                const g = new THREE.BufferGeometry();
+                const n = res;
+                const pos = [], uv = [], idx = [];
+                for (let j = 0; j <= n; j++) {
+                    for (let i = 0; i <= n; i++) {
+                        const x = cx - size + (2 * size * i) / n;
+                        const y = cy - size + (2 * size * j) / n;
+                        const z = fn(x - cx, y - cy);
+                        pos.push(x, z, -y);  // swap Y/Z for Three.js Y-up
+                        const r = Math.hypot(x - cx, y - cy) / size;
+                        uv.push(Math.min(r, 1), 0);
+                    }
+                }
+                for (let j = 0; j < n; j++) {
+                    for (let i = 0; i < n; i++) {
+                        const a = j * (n + 1) + i, b = a + 1, c = a + (n + 1), d = c + 1;
+                        idx.push(a, c, b, b, c, d);
+                    }
+                }
+                g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+                g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+                g.setIndex(idx);
+                g.computeVertexNormals();
+                return g;
+            }
+
+            // Flower equations from Python (clamped to avoid 1/r singularity)
+            const FLOWER_MIN = -15;
+            function f1(x, y) { const r = Math.hypot(x, y) + 1e-9; return Math.max(FLOWER_MIN, 24 - 3 / r + Math.sin(r) + Math.sqrt(Math.max(0, 200 - (2 * x * x + y * y) + 10 * Math.sin(x) + 10 * Math.sin(y))) / 1000); }
+            function f2(x, y) { const r = Math.hypot(x, y) + 1e-9, t = Math.atan2(y, x); return Math.max(FLOWER_MIN, 12 + 12 * Math.cos(5 * t) * Math.exp(-0.04 * r) + 3 * Math.sin(0.5 * r) + 2 * Math.cos(3 * r)); }
+            function f3(x, y) { const r = Math.hypot(x, y) + 1e-9; return Math.max(FLOWER_MIN, 16 + 10 * Math.cos(4 * r) - 2.5 / r + 2 * Math.sin(0.3 * r)); }
+            function f4(x, y) { const r = Math.hypot(x, y) + 1e-9, t = Math.atan2(y, x); return Math.max(FLOWER_MIN, 21 + 8 * Math.sin(3 * t) * Math.exp(-0.03 * r) + 2 * Math.cos(2 * r)); }
+
+            // Approximate colormaps as gradients
+            function makeGradientMap(colors) {
+                const c = document.createElement('canvas');
+                c.width = 256; c.height = 1;
+                const ctx = c.getContext('2d');
+                const g = ctx.createLinearGradient(0, 0, 256, 0);
+                colors.forEach(([stop, col]) => g.addColorStop(stop, col));
+                ctx.fillStyle = g;
+                ctx.fillRect(0, 0, 256, 1);
+                const tex = new THREE.CanvasTexture(c);
+                tex.needsUpdate = true;
+                return tex;
+            }
+
+            const cmapEmber = makeGradientMap([[0, '#1a0a00'], [0.3, '#8b2500'], [0.6, '#d4600a'], [0.85, '#ffaa33'], [1, '#ffe8a0']]);
+            const cmapPrins = makeGradientMap([[0, '#1e3a6e'], [0.3, '#f97316'], [0.5, '#ffffff'], [0.7, '#2563eb'], [1, '#1e3a6e']]);
+            const cmapOcean = makeGradientMap([[0, '#0a1628'], [0.3, '#0e4d6e'], [0.6, '#1a9988'], [0.85, '#80e0a0'], [1, '#e0ffe8']]);
+            const cmapFlamingo = makeGradientMap([[0, '#2d0a1e'], [0.3, '#a02060'], [0.6, '#e06080'], [0.85, '#ffa0b0'], [1, '#ffe0e8']]);
+
+            const flowerDefs = [
+                { fn: f1, cx: 5, cy: 10, size: 13, cmap: cmapEmber, res: 120 },
+                { fn: f2, cx: -15, cy: 50, size: 12, cmap: cmapPrins, res: 120 },
+                { fn: f3, cx: 20, cy: -20, size: 11, cmap: cmapOcean, res: 120 },
+                { fn: f4, cx: -35, cy: 10, size: 12, cmap: cmapFlamingo, res: 120 },
+                { fn: f2, cx: 50, cy: 5, size: 15, cmap: cmapEmber, res: 100 },
+                { fn: f4, cx: -45, cy: -25, size: 12, cmap: cmapOcean, res: 100 },
+                { fn: f1, cx: -10, cy: -30, size: 12, cmap: cmapPrins, res: 100 },
+            ];
+
+            const flowerMeshes = [];
+            for (const fd of flowerDefs) {
+                const geom = makeFlowerGeom(fd.fn, fd.cx, fd.cy, fd.size, fd.res);
+                const mat = new THREE.MeshStandardMaterial({
+                    map: fd.cmap, transparent: true, opacity: 0.92,
+                    side: THREE.DoubleSide, roughness: 0.7, metalness: 0.0,
+                });
+                const mesh = new THREE.Mesh(geom, mat);
+                scene.add(mesh);
+                flowerMeshes.push(mesh);
+            }
+
+            /* ══════════════════════════════════════════════
+               TREES — 12 trunks + crowns
+               ══════════════════════════════════════════════ */
+            const N_TREES = 35;
+            const trees = [];
+            for (let i = 0; i < N_TREES; i++) {
+                const angle = 2 * Math.PI * i / N_TREES;
+                const radius = rngU(60, 120);
+                trees.push({
+                    x0: radius * Math.cos(angle),
+                    y0: radius * Math.sin(angle),
+                    z0: -55,
+                    h: rngU(75, 95),
+                    rt: rngU(2, 3),
+                    rc: rngU(14, 24),
+                    p1: rngU(1, 12),
+                    p2: rngU(1, 12),
+                    colR: rngU(0.4, 0.95),
+                });
+            }
+
+            // Trunks — cylinders
+            for (const T of trees) {
+                const geom = new THREE.CylinderGeometry(T.rt, T.rt, T.h, 16, 1, true);
+                const mat = new THREE.MeshStandardMaterial({ color: 0x8B4513, roughness: 0.9 });
+                const mesh = new THREE.Mesh(geom, mat);
+                // Python: Z goes up, Three.js: Y goes up. z0=-55, height h
+                mesh.position.set(T.x0, T.z0 + T.h / 2, -T.y0);
+                scene.add(mesh);
+            }
+
+            // Crowns — deformed spheres via ParametricGeometry equivalent
+            for (const T of trees) {
+                const res = 40;
+                const pos = [], idx = [];
+                for (let j = 0; j <= res; j++) {
+                    const v = (j / res) * Math.PI;
+                    for (let i = 0; i <= res; i++) {
+                        const u = (i / res) * 2 * Math.PI;
+                        const x = T.rc * Math.cos(u) * Math.sin(v) * Math.sin(T.p1 * u + T.p2 * v) + T.x0;
+                        const y = T.rc * Math.sin(u) * Math.sin(v) * Math.sin(T.p2 * u + T.p1 * v) + T.y0;
+                        const z = T.rc * Math.cos(v) + T.z0 + 1.05 * T.h;
+                        pos.push(x, z, -y);  // swap Y/Z
+                    }
+                }
+                for (let j = 0; j < res; j++) {
+                    for (let i = 0; i < res; i++) {
+                        const a = j * (res + 1) + i, b = a + 1, c = a + (res + 1), d = c + 1;
+                        idx.push(a, c, b, b, c, d);
+                    }
+                }
+                const geom = new THREE.BufferGeometry();
+                geom.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+                geom.setIndex(idx);
+                geom.computeVertexNormals();
+                const mat = new THREE.MeshStandardMaterial({
+                    color: new THREE.Color(T.colR, 0.75, 0.3),
+                    roughness: 0.8, side: THREE.DoubleSide,
+                });
+                scene.add(new THREE.Mesh(geom, mat));
+            }
+
+            /* ══════════════════════════════════════════════
+               BUTTERFLY — body + wings
+               ══════════════════════════════════════════════ */
+
+            // Flight path: x=40cos(2πu), y=20sin(4πu), z=34+10sin²(2πu)
+            function flightPos(u) {
+                const a = 2 * Math.PI * u;
+                return new THREE.Vector3(
+                    40 * Math.cos(a),
+                    34 + 10 * Math.sin(a) * Math.sin(a),  // z→Y
+                    -(20 * Math.sin(2 * a))                // y→-Z
+                );
+            }
+
+            // Flight-path tube (shown together with labels)
+            const flightCurve = new THREE.CatmullRomCurve3(
+                Array.from({ length: 240 }, (_, i) => flightPos(i / 240)),
+                true
+            );
+            const flightPathGeom = new THREE.TubeGeometry(flightCurve, 400, 0.35, 8, true);
+            const flightPathLine = new THREE.Mesh(
+                flightPathGeom,
+                new THREE.MeshStandardMaterial({ color: 0x9b59b6, transparent: true, opacity: 0.8, emissive: 0x4a1860, emissiveIntensity: 0.4 })
+            );
+            flightPathLine.visible = false;
+            scene.add(flightPathLine);
+
+            // Body — thin tube along local x-axis, transformed to follow path
+            const bodyGroup = new THREE.Group();
+            scene.add(bodyGroup);
+
+            // Body mesh: cylinder along X
+            const bodyLen = 3.1, bodyR = 0.1;
+            const bodyCyl = new THREE.CylinderGeometry(bodyR, bodyR, bodyLen, 12, 1);
+            bodyCyl.rotateZ(Math.PI / 2);  // align along X
+            const bodyMesh = new THREE.Mesh(bodyCyl, new THREE.MeshStandardMaterial({ color: 0x2a0845 }));
+            bodyGroup.add(bodyMesh);
+            // Head sphere
+            const headGeo = new THREE.SphereGeometry(bodyR * 1.5, 10, 10);
+            const headMesh = new THREE.Mesh(headGeo, new THREE.MeshStandardMaterial({ color: 0x2a0845 }));
+            bodyGroup.add(headMesh);
+
+            // Wings — parametric surfaces built once, flapping via morph or rebuild
+            // Wing shape: x=t, y=±0.5*t²*sin(t), z=0.5*t²*sin(t), t∈[0,π]
+            const wingRes = 40;
+            const wingSpanRes = 15;
+            const WING_X_OFFSET = -Math.PI / 2; // center wings on body
+
+            function buildWingGeom(sign) {
+                const pos = [], uv = [], idx = [];
+                for (let j = 0; j <= wingSpanRes; j++) {
+                    const s = j / wingSpanRes;  // 0..1
+                    for (let i = 0; i <= wingRes; i++) {
+                        const t = (i / wingRes) * Math.PI;
+                        const baseY = 0.5 * t * t * Math.sin(t);
+                        const baseZ = 0.5 * t * t * Math.sin(t);
+                        pos.push(
+                            (1 - s) * t + WING_X_OFFSET,
+                            (1 - s) * baseZ,      // will be modulated by theta
+                            (1 - s) * sign * baseY // will be modulated by theta
+                        );
+                        uv.push(t / Math.PI * 0.25, s);
+                    }
+                }
+                for (let j = 0; j < wingSpanRes; j++) {
+                    for (let i = 0; i < wingRes; i++) {
+                        const a = j * (wingRes + 1) + i, b = a + 1, c = a + (wingRes + 1), d = c + 1;
+                        idx.push(a, c, b, b, c, d);
+                    }
+                }
+                const g = new THREE.BufferGeometry();
+                g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+                g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+                g.setIndex(idx);
+                g.computeVertexNormals();
+                return g;
+            }
+
+            // Purple butterfly wings (violet → magenta → lavender)
+            const cmapGothic = makeGradientMap([[0, '#e0c0f0'], [0.25, '#9b30ff'], [0.5, '#6a0dad'], [0.75, '#3b0764'], [1, '#1a0330']]);
+
+            const wingMatOpts = {
+                map: cmapGothic, transparent: true, opacity: 0.6,
+                side: THREE.DoubleSide, roughness: 0.5, metalness: 0.0,
+            };
+
+            const wingR = new THREE.Mesh(buildWingGeom(1), new THREE.MeshStandardMaterial(wingMatOpts));
+            const wingL = new THREE.Mesh(buildWingGeom(-1), new THREE.MeshStandardMaterial(wingMatOpts));
+            bodyGroup.add(wingR, wingL);
+
+            // Wing edge lines
+            function buildWingEdge(sign) {
+                const pts = [];
+                for (let i = 0; i <= 60; i++) {
+                    const t = (i / 60) * Math.PI;
+                    pts.push(new THREE.Vector3(t + WING_X_OFFSET, 0.5 * t * t * Math.sin(t), sign * 0.5 * t * t * Math.sin(t)));
+                }
+                const g = new THREE.BufferGeometry().setFromPoints(pts);
+                return new THREE.Line(g, new THREE.LineBasicMaterial({ color: 0x2a0845, linewidth: 2 }));
+            }
+            const edgeR = buildWingEdge(1), edgeL = buildWingEdge(-1);
+            bodyGroup.add(edgeR, edgeL);
+
+            // Update wing flap — modulate Y,Z of wing positions by theta
+            function flapWings(theta) {
+                const cosT = Math.cos(theta), sinT = Math.sin(theta);
+                for (const [wing, sign] of [[wingR, 1], [wingL, -1]]) {
+                    const p = wing.geometry.attributes.position;
+                    let vi = 0;
+                    for (let j = 0; j <= wingSpanRes; j++) {
+                        const s = j / wingSpanRes;
+                        for (let i = 0; i <= wingRes; i++) {
+                            const t = (i / wingRes) * Math.PI;
+                            const baseY = 0.5 * t * t * Math.sin(t);
+                            const baseZ = 0.5 * t * t * Math.sin(t);
+                            p.setXYZ(vi,
+                                (1 - s) * t + WING_X_OFFSET,
+                                (1 - s) * baseZ * sinT,
+                                (1 - s) * sign * baseY * cosT
+                            );
+                            vi++;
+                        }
+                    }
+                    p.needsUpdate = true;
+                    wing.geometry.computeVertexNormals();
+                }
+                // Update edges too
+                for (const [edge, sign] of [[edgeR, 1], [edgeL, -1]]) {
+                    const p = edge.geometry.attributes.position;
+                    for (let i = 0; i <= 60; i++) {
+                        const t = (i / 60) * Math.PI;
+                        const base = 0.5 * t * t * Math.sin(t);
+                        p.setXYZ(i, t + WING_X_OFFSET, base * sinT, sign * base * cosT);
+                    }
+                    p.needsUpdate = true;
+                }
+            }
+
+            // Orient bodyGroup so local -X points along flight direction
+            // (matches Python's rot_to_dir which aligns -X to dir, with Z kept upward)
+            function orientButterfly(pos, dir) {
+                bodyGroup.position.copy(pos);
+                const fwd = dir.clone().normalize();
+                const worldUp = new THREE.Vector3(0, 1, 0);
+                const right = new THREE.Vector3().crossVectors(worldUp, fwd).normalize();
+                if (right.lengthSq() < 0.001) right.set(0, 0, 1);
+                const up = new THREE.Vector3().crossVectors(fwd, right);
+                // Local axes: X = -fwd (head at -X), Y = up, Z = right
+                const m4 = new THREE.Matrix4().makeBasis(
+                    fwd.clone().negate(), up, right
+                );
+                bodyGroup.quaternion.setFromRotationMatrix(m4);
+            }
+
+            /* ══════════════════════════════════════════════
+               ANIMATION STATE
+               ══════════════════════════════════════════════ */
+            let playing = false;
+            let flightU = 0;       // 0..1 position along the path
+            const FLIGHT_SPEED = 0.04; // full loops per second
+
+            // Place butterfly at initial position
+            const initPos = flightPos(0);
+            const initDir = flightPos(0.001).sub(initPos).normalize();
+            orientButterfly(initPos, initDir);
+            flapWings(-0.35);
+            headMesh.position.set(-bodyLen / 2 - bodyR, 0, 0);
+
+            /* ══════════════════════════════════════════════
+               EQUATION LABELS
+               ══════════════════════════════════════════════ */
+            let labelsVisible = false;
+
+            const labelData = [
+                { text: "BUTTERFLY:\n BODY:\n  x = s\n  y = r·cos(θ)·sin(φ)\n  z = r·sin(θ)·sin(φ)\n WINGS:\n  x = t\n  y = ± ½t²·sin(t)·cos(θ)\n  z = ½t²·sin(t)·sin(θ)", getPos: () => bodyGroup.position.clone().add(new THREE.Vector3(0, 6, 0)) },
+                { text: "FLOWER₁:\n z = 24 - 3/√r + sin(r)\n   + √(200-r²+10sin(x)+10sin(y))·10⁻³", getPos: () => new THREE.Vector3(-18.73, f1(3, 3) + 5, -16) },
+                { text: "FLOWER₂:\n z = 12 + 12·cos(5θ)·e⁻⁰·⁰⁴ʳ\n   + 3·sin(½r) + 2·cos(3r)", getPos: () => new THREE.Vector3(-31.19, f2(3, 3) + 5, 19) },
+                { text: "FLOWER₃:\n z = 16 + 10·cos(4r) - 2.5/r\n   + 2·sin(0.3r)", getPos: () => new THREE.Vector3(30.71, f3(3, 3) + 5, -19) },
+                { text: "FLOWER₄:\n z = 21 + 8·sin(3θ)·e⁻⁰·⁰³ʳ\n   + 2·cos(2r)", getPos: () => new THREE.Vector3(15.68, f4(3, 3) + 5, 14) },
+                { text: "FLIGHT PATH:\n x = 40·cos(2πu)\n y = 20·sin(4πu)\n z = 34 + 10·sin²(2πu)", getPos: () => flightPos(0.125).add(new THREE.Vector3(0, 3, 0)) },
+                { text: "TRUNKS:\n x = x₀ + R·cos(θ)\n y = y₀ + R·sin(θ)\n z ∈ [z₀, z₀+h]", getPos: () => new THREE.Vector3(trees[0].x0, trees[0].z0 + trees[0].h / 2, -trees[0].y0) },
+                { text: "CROWNS:\n x = x₀+R·cos(u)·sin(v)·sin(p₁u+p₂v)\n y = y₀+R·sin(u)·sin(v)·sin(p₂u+p₁v)\n z = z₀+1.05h+R·cos(v)", getPos: () => new THREE.Vector3(trees[0].x0, trees[0].z0 + 1.05 * trees[0].h + trees[0].rc, -trees[0].y0) },
+            ];
+
+            // Create label DOM elements
+            const labelEls = labelData.map(ld => {
+                const el = document.createElement('div');
+                el.className = 'mariposa-label';
+                el.textContent = ld.text;
+                section.appendChild(el);
+                return el;
+            });
+
+            function updateLabels() {
+                if (!labelsVisible) return;
+                const rect = canvas.getBoundingClientRect();
+                const w = rect.width, h = rect.height;
+                for (let i = 0; i < labelData.length; i++) {
+                    const p = labelData[i].getPos();
+                    p.project(camera);
+                    const x = (p.x * 0.5 + 0.5) * w;
+                    const y = (-p.y * 0.5 + 0.5) * h;
+                    const el = labelEls[i];
+                    if (p.z > 1 || x < 0 || x > w || y < 0 || y > h) {
+                        el.style.display = 'none';
+                    } else {
+                        el.style.display = '';
+                        el.style.left = x + 'px';
+                        el.style.top = y + 'px';
+                    }
+                }
+            }
+
+            /* ══════════════════════════════════════════════
+               XYZ GIZMO
+               ══════════════════════════════════════════════ */
+            const gizmoCtx = gizmoC.getContext('2d');
+            gizmoC.width = 160; gizmoC.height = 160;
+
+            function drawGizmo() {
+                if (!labelsVisible) return;
+                const g = gizmoCtx;
+                g.clearRect(0, 0, 160, 160);
+                const cx = 80, cy = 80, len = 50;
+                // Use camera's rotation only (not translation) to project axes
+                const rot = new THREE.Matrix3().setFromMatrix4(camera.matrixWorldInverse);
+                const axes = [
+                    { v: new THREE.Vector3(1, 0, 0).applyMatrix3(rot), c: '#e74c3c', l: 'X' },
+                    { v: new THREE.Vector3(0, 1, 0).applyMatrix3(rot), c: '#2ecc71', l: 'Y' },
+                    { v: new THREE.Vector3(0, 0, 1).applyMatrix3(rot), c: '#3498db', l: 'Z' },
+                ];
+                // Sort by depth so front axes draw last
+                axes.sort((a, b) => a.v.z - b.v.z);
+                for (const ax of axes) {
+                    const ex = cx + ax.v.x * len;
+                    const ey = cy - ax.v.y * len;
+                    // Draw line
+                    g.beginPath();
+                    g.moveTo(cx, cy);
+                    g.lineTo(ex, ey);
+                    g.strokeStyle = ax.c;
+                    g.lineWidth = 3;
+                    g.stroke();
+                    // Draw arrowhead
+                    const dx = ex - cx, dy = ey - cy;
+                    const alen = Math.hypot(dx, dy);
+                    if (alen > 5) {
+                        const ux = dx / alen, uy = dy / alen;
+                        g.beginPath();
+                        g.moveTo(ex, ey);
+                        g.lineTo(ex - 8 * ux + 4 * uy, ey - 8 * uy - 4 * ux);
+                        g.lineTo(ex - 8 * ux - 4 * uy, ey - 8 * uy + 4 * ux);
+                        g.closePath();
+                        g.fillStyle = ax.c;
+                        g.fill();
+                    }
+                    // Label
+                    g.fillStyle = ax.c;
+                    g.font = 'bold 13px Inter, sans-serif';
+                    g.fillText(ax.l, ex + (ax.v.x > 0 ? 6 : -14), ey + (ax.v.y > 0 ? -6 : 16));
+                }
+            }
+
+            /* ══════════════════════════════════════════════
+               CONTROLS
+               ══════════════════════════════════════════════ */
+            btnPlay.addEventListener('click', (e) => {
+                e.stopPropagation();
+                playing = !playing;
+                btnPlay.textContent = playing ? '❚❚ Pause' : '▶ Play';
+            });
+
+            btnLabel.addEventListener('click', (e) => {
+                e.stopPropagation();
+                labelsVisible = !labelsVisible;
+                btnLabel.classList.toggle('active', labelsVisible);
+                labelEls.forEach(el => el.classList.toggle('visible', labelsVisible));
+                gizmoC.classList.toggle('visible', labelsVisible);
+                flightPathLine.visible = labelsVisible;
+                if (!labelsVisible) {
+                    labelEls.forEach(el => el.style.display = 'none');
+                }
+            });
+
+            btnFS.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (section.classList.contains('fullscreen')) {
+                    section.classList.remove('fullscreen');
+                    document.exitFullscreen?.().catch(() => { });
+                } else {
+                    section.classList.add('fullscreen');
+                    section.requestFullscreen?.().catch(() => { });
+                }
+                onResize();
+            });
+
+            document.addEventListener('fullscreenchange', () => {
+                if (!document.fullscreenElement) {
+                    section.classList.remove('fullscreen');
+                    onResize();
+                }
+            });
+
+            const mariposaControls = document.querySelector('.mariposa-controls');
+            const isMobile = () => window.matchMedia('(max-width: 768px)').matches;
+            btnHelp.addEventListener('mouseenter', () => {
+                if (!isMobile()) helpTip.classList.add('visible');
+            });
+            btnHelp.addEventListener('mouseleave', () => {
+                if (!isMobile()) helpTip.classList.remove('visible');
+            });
+            btnHelp.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (isMobile()) {
+                    const willShow = !mariposaControls.classList.contains('visible');
+                    mariposaControls.classList.toggle('visible', willShow);
+                    helpTip.classList.toggle('visible', willShow);
+                } else {
+                    helpTip.classList.toggle('visible');
+                }
+            });
+
+            /* ══════════════════════════════════════════════
+               RESIZE
+               ══════════════════════════════════════════════ */
+            function onResize() {
+                const w = canvas.clientWidth;
+                const h = canvas.clientHeight;
+                if (w === 0 || h === 0) return;
+                camera.aspect = w / h;
+                camera.updateProjectionMatrix();
+                renderer.setSize(w, h, false);
+            }
+
+            new ResizeObserver(onResize).observe(canvas);
+            window.addEventListener('resize', onResize);
+            onResize();
+
+            /* ══════════════════════════════════════════════
+               RENDER LOOP
+               ══════════════════════════════════════════════ */
+            const clock = new THREE.Clock();
+
+            function animate() {
+                requestAnimationFrame(animate);
+                const dt = Math.min(clock.getDelta(), 0.1);
+
+                controls.update();
+
+                // Clamp camera target so panning can't escape the scene
+                const t = controls.target;
+                const PAN_LIMIT = 60;
+                t.x = Math.max(-PAN_LIMIT, Math.min(PAN_LIMIT, t.x));
+                t.y = Math.max(-20, Math.min(60, t.y));
+                t.z = Math.max(-PAN_LIMIT, Math.min(PAN_LIMIT, t.z));
+
+                if (playing) {
+                    flightU = (flightU + FLIGHT_SPEED * dt) % 1;
+                    const pos = flightPos(flightU);
+                    const next = flightPos((flightU + 0.001) % 1);
+                    const dir = next.sub(pos).normalize();
+                    orientButterfly(pos, dir);
+
+                    // Wing flap: theta oscillates around -0.35 with amplitude 0.45
+                    const theta = -0.35 + 0.45 * Math.sin(flightU * Math.PI * 70);
+                    flapWings(theta);
+                }
+
+                updateLabels();
+                drawGizmo();
+
+                renderer.render(scene, camera);
+            }
+
+            animate();
+        })();
+    </script>
+
+</body>
+
+</html>

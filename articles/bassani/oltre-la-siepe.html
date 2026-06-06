@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="it">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Oltre la siepe - Elena Bassani | Antitesi Magazine</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Shared stylesheets (paths relative to articles/ subdirectory) -->
+    <link rel="stylesheet" href="../../css/index_style.css">
+    <link rel="stylesheet" href="../../css/article_style.css">
+    <link rel="stylesheet" href="../../css/mobile.css">
+
+    <!-- Flying magazine: desktop only -->
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="../../css/spark_styles.css">');
+            document.write('<script>window.magazineSparkMode = true;<\/script>');
+            document.write('<script src="../../js/flying-magazine.js"><\/script>');
+        }
+    </script>
+
+    <script src="../../js/articles-and-utils.js"></script>
+
+    <style>
+        :root {
+            --dynamic-color: #2b7a78;
+        }
+
+        /* ─── PROCEDURAL LEAVES BACKGROUND ─── */
+        body {
+            background: var(--paper-bg, #fafaf7);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        #leaf-background {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+            z-index: -1;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        #leaf-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* ─── ARTICLE TEMPLATE ─── */
+        .article-view {
+            max-width: 800px;
+        }
+
+        .article-header,
+        .article-content {
+            padding-top: 1rem;
+            padding-inline: 4rem;
+        }
+
+        .part-number {
+            font-family: var(--grotesk);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.4;
+            margin: 3rem 0 1.5rem;
+        }
+
+        .closing-quote {
+            margin: 3rem 0 1rem;
+            font-family: var(--serif-display, 'Fraunces', serif);
+            font-size: 1.25rem;
+            font-style: italic;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        .closing-quote cite {
+            display: block;
+            margin-top: 0.75rem;
+            font-family: var(--grotesk);
+            font-size: 0.8rem;
+            font-style: normal;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            opacity: 0.55;
+            color: inherit;
+        }
+
+        .nav-cluster a {
+            opacity: 1 !important;
+        }
+
+        .shortcuts-hint {
+            opacity: 1;
+        }
+
+        /* ─── EASTER EGG TRIGGERS ─── */
+        .easter-trigger {
+            color: var(--dynamic-color);
+            cursor: pointer;
+            border-bottom: 1px dashed currentColor;
+            transition: opacity 0.2s var(--ease, ease-out);
+        }
+
+        .easter-trigger:hover {
+            opacity: 0.65;
+        }
+
+        /* ─── MODAL ─── */
+        .easter-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.55);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s var(--ease, ease-out);
+        }
+
+        .easter-modal.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .easter-modal__panel {
+            background: var(--bg, #ffffff);
+            color: var(--fg, #111);
+            max-width: 560px;
+            width: calc(100% - 3rem);
+            max-height: 85vh;
+            overflow-y: auto;
+            padding: 2.5rem 2.75rem;
+            position: relative;
+            transform: translateY(8px) scale(0.98);
+            transition: transform 0.3s var(--ease, ease-out);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+        }
+
+        .easter-modal.is-open .easter-modal__panel {
+            transform: translateY(0) scale(1);
+        }
+
+
+        .easter-modal__close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.9rem;
+            background: none;
+            border: none;
+            font-size: 1.4rem;
+            line-height: 1;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.5;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .easter-modal__close:hover {
+            opacity: 1;
+        }
+
+        .easter-modal__title {
+            font-family: var(--display, 'Fraunces', serif);
+            font-size: 1.5rem;
+            margin: 0 0 0.25rem;
+        }
+
+        .easter-modal__subtitle {
+            font-family: var(--grotesk);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.55;
+            margin: 0 0 1.5rem;
+        }
+
+        .infinito-text {
+            font-family: var(--serif, 'Crimson Pro', serif);
+            font-size: 1.05rem;
+            line-height: 1.75;
+            white-space: pre-line;
+            font-style: italic;
+        }
+
+        .maslow-svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            margin: 0.5rem 0 1rem;
+        }
+
+        .maslow-svg .level {
+            transition: opacity 0.2s var(--ease, ease-out);
+            cursor: default;
+        }
+
+        .maslow-svg .level:hover {
+            opacity: 0.75;
+        }
+
+        .maslow-svg text {
+            font-family: var(--grotesk);
+            font-size: 11px;
+            fill: #fff;
+            text-anchor: middle;
+            dominant-baseline: middle;
+            letter-spacing: 0.05em;
+            pointer-events: none;
+        }
+
+        .maslow-caption {
+            font-size: 0.85rem;
+            line-height: 1.55;
+            opacity: 0.8;
+            margin: 0.75rem 0 0;
+        }
+
+        @media (max-width: 768px) {
+
+            .article-header,
+            .article-content {
+                padding-inline: 1.5rem;
+            }
+
+            .easter-modal__panel {
+                padding: 2rem 1.5rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- random paper color: pick one of the palette on every refresh -->
+    <script>
+        (function () {
+            const palette = [
+                { bg: '#fafaf7', word: 'bianco' },
+                { bg: '#8dffa6', word: 'verde' },
+                //{ bg: '#fff4e0', word: 'crema' },
+                { bg: '#9fc1ff', word: 'azzurro' }
+            ];
+            const choice = palette[Math.floor(Math.random() * palette.length)];
+            document.documentElement.style.setProperty('--paper-bg', choice.bg);
+            document.addEventListener('DOMContentLoaded', () => {
+                const el = document.getElementById('paper-color');
+                if (el) el.textContent = choice.word;
+            });
+        })();
+    </script>
+
+    <div id="leaf-background"></div>
+    <div class="progress-bar"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-cluster">
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+        <a href="../../archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <!-- Article -->
+    <article class="article-view">
+
+        <header class="article-header">
+            <h1 class="article-title">Oltre la siepe</h1>
+            <div class="article-meta" id="article-meta">
+                <span>Article</span>
+                <span>~X min read</span>
+                <span>Month Year</span>
+            </div>
+            <div class="article-author" id="article-author">by Elena Bassani</div>
+        </header>
+
+        <script>
+            (function () {
+                const filename = window.location.pathname.split('/').pop();
+                const data = (typeof articles !== 'undefined') && articles.find(a => a.filename === filename);
+                if (!data) return;
+                const meta = document.getElementById('article-meta');
+                const author = document.getElementById('article-author');
+                if (meta) meta.innerHTML = `<span>Article</span><span>~${data.readTime} read</span><span>${data.publishDate}</span>`;
+                if (author) author.textContent = 'by ' + data.author;
+            })();
+        </script>
+
+        <div class="article-content">
+
+            <p>Settimana scorsa ho assistito a una lezione su <em><span class="easter-trigger"
+                        data-modal="infinito">L'infinito</span></em> di Leopardi. Mentre la professoressa parlava, ho
+                sentito qualcosa muoversi dentro di me… o meglio, allargarsi. Non ho mai apprezzato questo autore, ma
+                quel giorno, complice la bravura dell'insegnante, ho sentito le parole entrarmi dentro e la sensazione
+                che il petto si espandesse. E sentendo, ho capito.</p>
+
+            <p>Quando la docente ha chiesto agli alunni cosa avesse suscitato in loro la lettura, il mio cuore ha
+                accelerato i battiti, ma mi è mancato il coraggio per condividere l'intuizione che avevo appena avuto.
+                Una sorta di rivelazione, di esperienza mistica, di espansione della coscienza. Come spiegarlo alle
+                dieci del mattino in una scuola media di periferia?</p>
+
+            <div class="section-divider"></div>
+
+            <p>Colgo così l'occasione della libertà che mi concede la scrittura, per riempire questo foglio <span id="paper-color">bianco</span> con
+                le mie riflessioni. Prima però, occorre fare un passo indietro e risalire due piani più in alto, sempre
+                in quella scuola, ma in un'altra classe, spoglia, grigia, con delle ampie finestre sul cielo azzurro.
+                Chiusa lì dentro, mi è capitato di osservarlo e chiedermi cosa ci facessi a scuola, al posto di
+                fluttuare nel blu. Ho desiderato e sognato quel cielo, maledicendo il muro che ci separava, colpevole di
+                rendere il mio essere immobile, silenzioso, invisibile.</p>
+
+            <p>Fino a quel fatidico giorno, in cui ho seguito Leopardi e mi sono trovata davanti alla siepe, con la
+                vista sbarrata e l'impossibilità di guardare oltre. Costretta a <em>stare</em>. Con gli occhi
+                impossibilitati a
+                rivolgersi oltre, lo scrittore ci suggerisce di rivolgerli… dentro. Ed è stato allora che ho sentito,
+                che ho capito. Ho sentito l'infinito dentro di me che prendeva spazio e assumeva una nuova forma. E ho
+                capito che quelle mura non erano altro che il riflesso di quella siepe.</p>
+
+            <p>Rivolgermi dentro. Non considerare quell'aula, quelle lezioni come qualcosa che costringe, che toglie
+                libertà, ma al contrario, come qualcosa che l'aumenta perché offre spunti di riflessione, conoscenze e
+                strumenti utili per crescere, per espandere la propria coscienza e per formarsi come essere umani. Offre
+                opportunità.</p>
+
+            <p>È un modo di vedere la scuola, tra molti altri, più o meno consapevoli e più lo sono, più sono legati a
+                una scelta. In fin dei conti, tutto si riduce a una scelta. E scegliere di aderire a questa prospettiva
+                offre un senso completamente diverso all'esperienza comune dietro ai banchi di scuola.</p>
+
+            <div class="section-divider"></div>
+
+            <p>E parlando di scelte e di senso, penso a Viktor Emil Frankl e alla sua logoterapia, in cui <em>logos</em>
+                non si riferisce alla parola, ma al senso. Secondo lo psichiatra (filosofo e neurologo austriaco) l'uomo
+                è spinto dalla ricerca del senso della vita e lo fa andando nel mondo. In particolare ne individua tre
+                diversi tipi: il primo legato alla costruzione, alla realizzazione di qualcosa di concreto, che possa
+                essere artistico o meno; il secondo legato alle relazioni e alla pienezza che si ricava instaurandone di
+                sane e positive e infine l'ultimo, quello più importante, legato all'atteggiamento.</p>
+
+            <p>Frankl fu deportato in quattro campi di concentramento, tra cui Auschwitz e Dachau, e fu lì dentro che
+                gettò le basi di quella che successivamente chiamerà logoterapia. Un'immagine gli rimase impressa: i
+                prigionieri che camminavano verso le camere a gas pregando e cantando. Frankl afferma quindi che,
+                indipendentemente dalle condizioni in cui può trovarsi una persona, rimane pur sempre una scelta
+                possibile: quale atteggiamento avere di fronte al proprio destino.</p>
+
+            <p>Tralasciando la valenza tragica e religiosa di quell'immagine, occorre riportare il concetto alla vita
+                quotidiana perché diventi uno strumento. Esiste sempre un margine di libertà — che risiede appunto nella
+                possibilità di scegliere — e questo margine è dentro ciascuno di noi. Ed è così che la frase <em>“dentro
+                    sono libera”</em>, detta da Goliarda Sapienza in merito alla sua esperienza come detenuta nel
+                carcere di Rebibbia, acquista ora un altro significato per me. Dentro = dentro di me. Sono libera.</p>
+
+            <p>Ed è questo spazio di libertà che coltivo e difendo a spada tratta, certa che nessuno arriverà mai a
+                possedermi completamente, fino a colonizzare questo luogo (sacro?). Per quanto io mi sia innamorata,
+                smarrita, confusa o allontanata da me stessa, quello spazio c'è e cresce quando coltivo le mie passioni,
+                i miei desideri, i miei talenti. Perché quando saremo morti, afferma Frankl, ci verrà chiesto se abbiamo
+                vissuto rimanendo fedeli a noi stessi. Fedeli a chi siamo realmente. E quale maggior libertà che essere
+                se stessi? Pienamente e profondamente.</p>
+
+            <div class="section-divider"></div>
+
+            <p>C'è un però.</p>
+
+            <p>Per far sì che ciò avvenga, abbiamo bisogno degli Altri. Infatti, secondo la teoria della mente
+                relazionale, l'Io non esiste senza un Tu e cioè l'identità non esiste se non all'interno della relazione
+                con l'Altro. Dalla siepe che mi aveva sbarrato la vista, mi sono persa nei meandri dell'anima per poi
+                rendermi conto di dover rivolgere lo sguardo nuovamente all'esterno, agli Altri, per poter esistere.</p>
+
+            <p>Nella sua piramide dei bisogni <span class="easter-trigger" data-modal="maslow">Maslow</span> parte da
+                quelli fisiologici per arrivare all'autorealizzazione come fine ultimo dell'uomo, ma Frankl critica la
+                teoria perché afferma che l'uomo non è una monade isolata dagli altri. L'uomo va nel mondo e, attraverso
+                le sue azioni, dà un senso alla sua vita. Non esiste libertà senza responsabilità.</p>
+
+            <p>E io infatti, cosa me ne faccio della consapevolezza di essere libera quando nel mondo ci muoviamo in
+                spazi di libertà sempre più precari? Concentrandoci solo sulla nostra libertà rischiamo di ricadere
+                nell'errore di Maslow e invece il nostro andare nel mondo non deve essere solo un atto “predatorio”, ma
+                anche un atto conoscitivo e trasformativo per far sì che la libertà sia sempre più condivisa.</p>
+
+            <p>Forse saremo veramente liberi quando lo saremo tutti. E non solo dentro di noi.</p>
+
+            <p class="closing-quote">
+                “Se non io, chi? Se non ora, quando?”
+                <cite>Viktor Emil Frankl, 1905–1997</cite>
+            </p>
+
+        </div>
+
+    </article>
+
+    <!-- ── Easter Egg Modals ───────────────────────────────────── -->
+    <div class="easter-modal" id="modal-infinito" role="dialog" aria-modal="true"
+        aria-labelledby="modal-infinito-title">
+        <div class="easter-modal__panel">
+            <button class="easter-modal__close" aria-label="Chiudi">×</button>
+            <h2 class="easter-modal__title" id="modal-infinito-title">L'infinito</h2>
+            <p class="easter-modal__subtitle">Giacomo Leopardi · 1819</p>
+            <p class="infinito-text">Sempre caro mi fu quest'ermo colle,
+                e questa siepe, che da tanta parte
+                dell'ultimo orizzonte il guardo esclude.
+                Ma sedendo e mirando, interminati
+                spazi di là da quella, e sovrumani
+                silenzi, e profondissima quïete
+                io nel pensier mi fingo, ove per poco
+                il cor non si spaura. E come il vento
+                odo stormir tra queste piante, io quello
+                infinito silenzio a questa voce
+                vo comparando: e mi sovvien l'eterno,
+                e le morte stagioni, e la presente
+                e viva, e il suon di lei. Così tra questa
+                immensità s'annega il pensier mio:
+                e il naufragar m'è dolce in questo mare.</p>
+        </div>
+    </div>
+
+    <div class="easter-modal" id="modal-maslow" role="dialog" aria-modal="true" aria-labelledby="modal-maslow-title">
+        <div class="easter-modal__panel">
+            <button class="easter-modal__close" aria-label="Chiudi">×</button>
+            <h2 class="easter-modal__title" id="modal-maslow-title">La piramide dei bisogni</h2>
+            <p class="easter-modal__subtitle">Abraham Maslow · 1943</p>
+            <svg class="maslow-svg" viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg"
+                aria-label="Piramide dei bisogni di Maslow">
+                <g class="level">
+                    <polygon points="30,300 370,300 320,240 80,240" fill="#a8c5a0" /><text x="200" y="272">Bisogni
+                        fisiologici</text>
+                </g>
+                <g class="level">
+                    <polygon points="80,240 320,240 280,180 120,180" fill="#7fa884" /><text x="200"
+                        y="212">Sicurezza</text>
+                </g>
+                <g class="level">
+                    <polygon points="120,180 280,180 240,120 160,120" fill="#588f6f" /><text x="200"
+                        y="152">Appartenenza</text>
+                </g>
+                <g class="level">
+                    <polygon points="160,120 240,120 210,60 190,60" fill="#3d7a78" /><text x="200" y="92">Stima</text>
+                </g>
+                <g class="level">
+                    <polygon points="190,60 210,60 200,20 200,20" fill="#2b5a78" />
+                </g>
+                <text x="200" y="42" style="font-size: 9px; fill: #fff;">▲</text>
+                <text x="200" y="10"
+                    style="font-size: 11px; fill: var(--fg, #111); font-style: italic;">Autorealizzazione</text>
+            </svg>
+            <p class="maslow-caption">Per Maslow l'autorealizzazione è il fine ultimo dell'essere umano. Frankl
+                criticherà questa visione troppo individualista: l'uomo trova senso <em>andando nel mondo</em>.</p>
+        </div>
+    </div>
+
+    <!-- Keyboard shortcut hint -->
+    <div class="shortcuts-hint"></div>
+
+
+    <script>
+        // ── Accent color cycling ───────────────────────────────
+        const colors = ['#2b7a78', '#3366ff', '#33ff66', '#ff9933', '#9933ff', '#33ffff'];
+        let colorIndex = 0;
+        function changeColor() {
+            colorIndex = (colorIndex + 1) % colors.length;
+            document.documentElement.style.setProperty('--dynamic-color', colors[colorIndex]);
+        }
+        document.addEventListener('click', changeColor);
+
+        // ── Easter Egg Modals ──────────────────────────────────
+        function closeAllModals() {
+            document.querySelectorAll('.easter-modal').forEach(m => m.classList.remove('is-open'));
+        }
+
+        document.querySelectorAll('.easter-trigger').forEach(t => {
+            t.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const target = document.getElementById('modal-' + t.dataset.modal);
+                if (target) target.classList.add('is-open');
+            });
+        });
+
+        document.querySelectorAll('.easter-modal__close').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeAllModals();
+            });
+        });
+
+        document.querySelectorAll('.easter-modal').forEach(m => {
+            m.addEventListener('click', (e) => {
+                if (e.target === m) {
+                    e.stopPropagation();
+                    closeAllModals();
+                }
+            });
+        });
+
+        document.querySelectorAll('.easter-modal__panel').forEach(p => {
+            p.addEventListener('click', (e) => e.stopPropagation());
+        });
+
+        // ── Keyboard shortcuts ─────────────────────────────────
+        initKeyboardShortcuts({
+            extraKeys: {
+                'a': openNextArticle,
+                'A': openNextArticle,
+                'Escape': returnToHome,
+                'h': returnToHome,
+                'H': returnToHome,
+            }
+        });
+    </script>
+
+    <script>
+        (function () {
+            /* LEAF BACKGROUND
+               Chunked DOM build → rasterize to one canvas for smooth scroll. */
+
+            const leafContainer = document.getElementById("leaf-background");
+            const articleEl = document.querySelector(".article-view");
+
+            const CONFIG = {
+                density: window.innerWidth < 768 ? 1100 : 3200,
+                minSize: 28,
+                maxSize: 144,
+                chunkSize: 250,
+                greensPalette: [
+                    "#1d5b2a", "#2b6c2d", "#347735", "#3d833b",
+                    "#4a9145", "#5b9c4d", "#709f5d", "#4f8238",
+                    "#2f6d31", "#5a8f42"
+                ]
+            };
+
+            const rand = (min, max) => min + Math.random() * (max - min);
+            const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+            function tintColor(hex, percent) {
+                let r = parseInt(hex.slice(1, 3), 16);
+                let g = parseInt(hex.slice(3, 5), 16);
+                let b = parseInt(hex.slice(5, 7), 16);
+                r = Math.min(255, Math.max(0, r + Math.floor(r * percent)));
+                g = Math.min(255, Math.max(0, g + Math.floor(g * percent)));
+                b = Math.min(255, Math.max(0, b + Math.floor(b * percent)));
+                return `#${(1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1)}`;
+            }
+
+            function collidesWithArticle(x, y) {
+                const rect = articleEl.getBoundingClientRect();
+                const scrollY = window.scrollY;
+                return (
+                    x > rect.left - 20 && x < rect.right + 20 &&
+                    y > rect.top + scrollY + 20 && y < rect.bottom + scrollY - 20
+                );
+            }
+
+            // ── SVG loading ─────────────────────────────────────
+            const svgCache = [];
+
+            function sanitizeSvg(rawString) {
+                const doc = new DOMParser().parseFromString(rawString, "image/svg+xml");
+                const allowed = new Set(["svg", "g", "path"]);
+                doc.querySelectorAll("*").forEach(node => {
+                    if (!allowed.has(node.tagName.toLowerCase())) node.remove();
+                });
+                return new XMLSerializer().serializeToString(doc);
+            }
+
+            function proceduralLeafSvg() {
+                const points = [];
+                for (let i = 0; i < 8; i++) {
+                    const angle = (i / 8) * Math.PI * 2;
+                    const radius = 40 + Math.floor(rand(-10, 15));
+                    points.push(`${50 + Math.cos(angle) * radius},${50 + Math.sin(angle) * radius}`);
+                }
+                return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M${points.join(' ')}Z" /></svg>`;
+            }
+
+            async function preloadSvgs() {
+                if (svgCache.length > 0) return;
+                try {
+                    const response = await fetch('leaves/');
+                    if (!response.ok) throw new Error('Cannot list folder');
+                    const html = await response.text();
+                    const doc = new DOMParser().parseFromString(html, 'text/html');
+                    const svgFiles = [...doc.querySelectorAll('a')]
+                        .map(a => a.getAttribute('href'))
+                        .filter(h => h && h.endsWith('.svg'));
+                    if (svgFiles.length === 0) throw new Error('No SVG files');
+                    await Promise.all(svgFiles.map(file =>
+                        fetch(`leaves/${file}`)
+                            .then(r => r.text())
+                            .then(raw => svgCache.push(sanitizeSvg(raw)))
+                            .catch(err => console.warn(`Failed to load ${file}:`, err))
+                    ));
+                } catch (err) {
+                    console.warn('Using fallback leaves:', err);
+                    for (let i = 0; i < 8; i++) svgCache.push(proceduralLeafSvg());
+                }
+                if (svgCache.length === 0) svgCache.push(proceduralLeafSvg());
+            }
+
+            // ── leaf placement ──────────────────────────────────
+            function buildLeafDescriptor() {
+                const articleRect = articleEl.getBoundingClientRect();
+                const scrollY = window.scrollY;
+                const articleTop = articleRect.top + scrollY;
+                const articleBottom = articleRect.bottom + scrollY;
+                const scrollHeight = document.body.scrollHeight;
+                const viewportW = window.innerWidth;
+
+                let xPos, yPos;
+                const zone = Math.random();
+
+                if (zone < 0.1) {
+                    xPos = rand(-90, viewportW + 90);
+                    yPos = rand(-40, articleTop - 20);
+                } else if (zone < 0.2) {
+                    xPos = rand(-90, viewportW + 90);
+                    yPos = rand(articleBottom + 20, scrollHeight + 200);
+                } else {
+                    let attempts = 0;
+                    do {
+                        xPos = rand(-90, viewportW + 90);
+                        yPos = rand(articleTop - 80, articleBottom + 80);
+                        attempts++;
+                        if (attempts > 25) break;
+                    } while (collidesWithArticle(xPos, yPos));
+                }
+
+                const sizeCurve = Math.pow(Math.random(), 1.6);
+                const size = CONFIG.minSize + (CONFIG.maxSize - CONFIG.minSize) * sizeCurve;
+
+                return {
+                    x: xPos,
+                    y: yPos,
+                    size,
+                    heightFactor: rand(1.15, 2.3),
+                    rotation: rand(0, 360),
+                    color: tintColor(pick(CONFIG.greensPalette), rand(-0.12, 0.09)),
+                    opacity: rand(0.85, 1),
+                    svg: pick(svgCache)
+                };
+            }
+
+            function createLeafElement(d) {
+                const wrapper = document.createElement("div");
+                wrapper.className = "procedural-leaf";
+                wrapper.style.cssText = `
+                    position: absolute;
+                    left: ${d.x}px;
+                    top: ${d.y}px;
+                    width: ${d.size}px;
+                    height: ${d.size * d.heightFactor}px;
+                    transform: translate(-50%, -50%) rotate(${d.rotation}deg);
+                    opacity: ${d.opacity};
+                    z-index: ${Math.floor(d.size)};
+                    transform-origin: center center;
+                `;
+                const colored = d.svg
+                    .replace(/fill="(.*?)"/g, `fill="${d.color}"`)
+                    .replace(/<path /g, `<path stroke="rgba(0,0,0,0.13)" stroke-width="3.5" stroke-linejoin="round" `);
+                wrapper.innerHTML = colored;
+                wrapper.querySelector("svg").style.cssText = "width:100%;height:100%;overflow:visible;";
+                return wrapper;
+            }
+
+            // ── chunked DOM insertion ───────────────────────────
+            function generateInChunks(descriptors, onComplete) {
+                let i = 0;
+                function step() {
+                    const fragment = document.createDocumentFragment();
+                    const end = Math.min(i + CONFIG.chunkSize, descriptors.length);
+                    for (; i < end; i++) fragment.appendChild(createLeafElement(descriptors[i]));
+                    leafContainer.appendChild(fragment);
+                    if (i < descriptors.length) requestAnimationFrame(step);
+                    else onComplete();
+                }
+                requestAnimationFrame(step);
+            }
+
+            // ── rasterize the whole subtree to one canvas ───────
+            function rasterizeToCanvas() {
+                const w = leafContainer.offsetWidth;
+                const h = leafContainer.offsetHeight;
+                if (w === 0 || h === 0) return;
+
+                const svgString =
+                    `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">` +
+                    `<foreignObject width="100%" height="100%">` +
+                    `<div xmlns="http://www.w3.org/1999/xhtml" style="width:${w}px;height:${h}px;position:relative;">` +
+                    leafContainer.innerHTML +
+                    `</div></foreignObject></svg>`;
+
+                const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+                const url = URL.createObjectURL(blob);
+                const img = new Image();
+
+                img.onload = () => {
+                    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                    const canvas = document.createElement("canvas");
+                    canvas.id = "leaf-canvas";
+                    canvas.width = w * dpr;
+                    canvas.height = h * dpr;
+                    const ctx = canvas.getContext("2d");
+                    ctx.scale(dpr, dpr);
+                    ctx.drawImage(img, 0, 0, w, h);
+                    URL.revokeObjectURL(url);
+                    leafContainer.innerHTML = "";
+                    leafContainer.appendChild(canvas);
+                };
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    console.warn("Canvas rasterization failed; keeping DOM leaves.");
+                };
+                img.src = url;
+            }
+
+            // ── main ────────────────────────────────────────────
+            async function generateFullScene() {
+                leafContainer.innerHTML = "";
+                await preloadSvgs();
+
+                const target = Math.floor(CONFIG.density * rand(0.94, 1.06));
+                const descriptors = [];
+                for (let i = 0; i < target; i++) descriptors.push(buildLeafDescriptor());
+
+                // wait two frames so every leaf is laid out + painted before snapshot
+                generateInChunks(descriptors, () => {
+                    requestAnimationFrame(() => requestAnimationFrame(rasterizeToCanvas));
+                });
+            }
+
+            generateFullScene();
+
+            // regenerate on resize (debounced) so the siepe fits the new viewport
+            let resizeTimer;
+            window.addEventListener("resize", () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(generateFullScene, 250);
+            });
+        })();
+    </script>
+
+</body>
+
+</html>

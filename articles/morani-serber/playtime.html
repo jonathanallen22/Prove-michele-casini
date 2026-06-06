@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Editor — L & K</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            background: #0a0a0a;
+            color: #e8e8e8;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 32px 20px 60px;
+        }
+
+        .header { text-align: center; margin-bottom: 24px; max-width: 540px; }
+        .header h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 28px; font-weight: 700;
+            letter-spacing: -0.02em; margin-bottom: 6px;
+        }
+        .header .sub {
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: 0.18em; opacity: 0.3;
+        }
+
+        /* ── Generator controls ────────────────────────────── */
+        .gen-row {
+            display: flex; gap: 8px; margin-bottom: 10px;
+            flex-wrap: wrap; justify-content: center; align-items: center;
+        }
+        .gen-row label {
+            font-size: 10px; text-transform: uppercase;
+            letter-spacing: 0.12em; opacity: 0.4;
+        }
+        .gen-row input[type=number] {
+            width: 48px; padding: 5px 6px; background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12); border-radius: 3px;
+            color: #fff; font-size: 12px; text-align: center;
+            font-family: monospace;
+        }
+        .gen-row input[type=number]:focus { outline: 1px solid rgba(255,51,102,0.4); }
+        .gen-row select {
+            padding: 5px 8px; background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12); border-radius: 3px;
+            color: #fff; font-size: 11px; font-family: 'Inter', sans-serif;
+            cursor: pointer;
+        }
+        .gen-row select option { background: #111; }
+        .gen-row .gen-btn {
+            padding: 6px 16px; background: rgba(255,51,102,0.15);
+            border: 1px solid rgba(255,51,102,0.4); border-radius: 4px;
+            color: #ff3366; font-size: 11px; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            font-family: 'Inter', sans-serif; font-weight: 500;
+            transition: background 0.15s;
+        }
+        .gen-row .gen-btn:hover { background: rgba(255,51,102,0.25); }
+        .algo-hint {
+            font-size: 10px; opacity: 0.25; margin-bottom: 16px;
+            text-align: center; font-style: italic; max-width: 440px;
+        }
+
+        /* ── Mode / entrance controls ─────────────────────── */
+        .controls {
+            display: flex; gap: 8px; margin-bottom: 20px;
+            flex-wrap: wrap; justify-content: center;
+        }
+        .controls button {
+            padding: 7px 18px; background: transparent;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 4px; color: #fff;
+            font-size: 11px; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 0.1em;
+            font-family: 'Inter', sans-serif; transition: background 0.15s;
+        }
+        .controls button:hover { background: rgba(255,255,255,0.06); }
+        .controls button.active { background: rgba(255,255,255,0.1); }
+        .controls button.active-walk { background: rgba(255,51,102,0.15); }
+        .controls .sep { width: 1px; background: rgba(255,255,255,0.08); margin: 0 4px; }
+        .btn-L { border-color: #3366ff !important; color: #3366ff !important; font-family: monospace !important; font-weight: 700 !important; }
+        .btn-L.active { background: rgba(51,102,255,0.2) !important; }
+        .btn-K { border-color: #33ff66 !important; color: #33ff66 !important; font-family: monospace !important; font-weight: 700 !important; }
+        .btn-K.active { background: rgba(51,255,102,0.2) !important; }
+
+        .entrance-hint {
+            font-size: 11px; opacity: 0.5; margin-bottom: 12px;
+            font-style: italic; text-align: center;
+        }
+
+        /* ── Maze grid ─────────────────────────────────────── */
+        .grid-wrap { position: relative; }
+        .maze {
+            display: inline-grid;
+            border: 2px solid rgba(255,255,255,0.25);
+        }
+        .room {
+            position: relative;
+            display: flex; align-items: center; justify-content: center;
+            overflow: visible;
+            border-right: 2px solid rgba(255,255,255,0.25);
+            border-bottom: 2px solid rgba(255,255,255,0.25);
+            transition: background 0.15s;
+        }
+        .room.col-last { border-right: none; }
+        .room.row-last { border-bottom: none; }
+        .room.open-right { border-right-color: transparent; }
+        .room.open-bottom { border-bottom-color: transparent; }
+
+        .wall-toggle { position: absolute; z-index: 10; cursor: pointer; border-radius: 3px; }
+        .wall-toggle:hover { background: rgba(255,51,102,0.18); }
+        .wall-toggle.right { top: 4px; right: -9px; width: 18px; height: calc(100% - 8px); }
+        .wall-toggle.bottom { bottom: -9px; left: 4px; height: 18px; width: calc(100% - 8px); }
+
+        .room.drop-target { background: rgba(255,51,102,0.12) !important; }
+        .room.entrance-L { box-shadow: inset 0 0 0 2px rgba(51,102,255,0.5); }
+        .room.entrance-K { box-shadow: inset 0 0 0 2px rgba(51,255,102,0.5); }
+        .room.walk-here { background: rgba(255,51,102,0.18) !important; }
+        .room.has-card { background: rgba(255,255,255,0.03); }
+        .room.fog { opacity: 0.08; }
+
+        .room .thumb {
+            width: 100%; height: 100%; object-fit: cover; opacity: 0.7;
+            position: absolute; inset: 0;
+        }
+        .room .text-preview {
+            font-size: 9px; color: rgba(255,255,255,0.5);
+            padding: 4px; text-align: center; overflow: hidden;
+            line-height: 1.3; font-family: 'Crimson Pro', Georgia, serif;
+            position: relative; z-index: 2;
+        }
+        .room .type-badge {
+            position: absolute; bottom: 2px; right: 4px;
+            font-size: 8px; opacity: 0.35; font-family: monospace; z-index: 3;
+        }
+        .room .entrance-label {
+            position: absolute; top: 2px; left: 4px;
+            font-size: 9px; font-weight: 700; font-family: monospace; z-index: 3;
+        }
+        .room .entrance-label.L { color: #3366ff; }
+        .room .entrance-label.K { color: #33ff66; }
+        .room .walk-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #ff3366;
+            box-shadow: 0 0 12px rgba(255,51,102,0.6);
+            z-index: 5; position: relative;
+        }
+        .room .placeholder {
+            font-size: 16px; opacity: 0.06; font-family: monospace;
+        }
+
+        #pathCanvas {
+            position: absolute; inset: 0;
+            pointer-events: none; z-index: 4;
+        }
+
+        /* ── Walk card ─────────────────────────────────────── */
+        .walk-card {
+            position: absolute; left: calc(100% + 24px); top: 0;
+            width: 300px; background: #0a0a0a;
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 6px; overflow: hidden;
+            animation: fadeIn 0.25s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateX(-8px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .walk-card img { width: 100%; height: 200px; object-fit: cover; }
+        .walk-card .card-text {
+            padding: 18px; font-size: 15px; line-height: 1.7;
+            font-family: 'Crimson Pro', Georgia, serif;
+            color: rgba(255,255,255,0.8);
+        }
+        .walk-card .card-meta {
+            padding: 8px 18px 12px; font-size: 9px;
+            font-family: monospace; opacity: 0.2;
+            text-transform: uppercase; letter-spacing: 0.1em;
+        }
+
+        /* ── Modal ─────────────────────────────────────────── */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.85);
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        .modal {
+            background: #111; border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px; padding: 28px; width: 380px;
+        }
+        .modal .modal-label {
+            font-size: 10px; text-transform: uppercase;
+            letter-spacing: 0.15em; opacity: 0.4; margin-bottom: 16px;
+        }
+        .modal .preview-img {
+            width: 100%; height: 180px; object-fit: cover;
+            border-radius: 4px; margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        .modal .type-row { display: flex; gap: 8px; margin-bottom: 16px; }
+        .modal .type-btn {
+            flex: 1; padding: 8px 0;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 4px; color: #fff;
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: 0.1em; cursor: pointer;
+            font-family: 'Inter', sans-serif; transition: all 0.15s;
+        }
+        .modal .type-btn.active {
+            background: rgba(255,51,102,0.2);
+            border-color: rgba(255,51,102,0.5);
+        }
+        .modal textarea {
+            width: 100%; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px; padding: 12px; color: #fff;
+            font-size: 14px; font-family: 'Crimson Pro', Georgia, serif;
+            resize: vertical; line-height: 1.6; outline: none;
+        }
+        .modal .actions { display: flex; gap: 8px; margin-top: 16px; }
+        .modal .btn-save {
+            flex: 1; padding: 10px 0; background: #ff3366;
+            border: none; border-radius: 4px; color: #fff;
+            font-size: 12px; cursor: pointer;
+            font-family: 'Inter', sans-serif; font-weight: 500;
+        }
+        .modal .btn-delete {
+            padding: 10px 16px; background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 4px; color: rgba(255,255,255,0.4);
+            font-size: 12px; cursor: pointer;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .entrance-chooser {
+            position: fixed; inset: 0; z-index: 1000;
+            background: rgba(0,0,0,0.9);
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 24px;
+        }
+        .entrance-chooser .label {
+            font-size: 11px; text-transform: uppercase;
+            letter-spacing: 0.2em; opacity: 0.4;
+        }
+        .entrance-chooser .choices { display: flex; gap: 20px; }
+        .entrance-chooser .choice-btn {
+            padding: 16px 32px; background: transparent;
+            border-radius: 4px; font-size: 18px; cursor: pointer;
+            font-family: 'Fraunces', serif; font-weight: 700;
+        }
+        .entrance-chooser .choice-L { border: 2px solid #3366ff; color: #3366ff; }
+        .entrance-chooser .choice-K { border: 2px solid #33ff66; color: #33ff66; }
+        .entrance-chooser .back-btn {
+            margin-top: 16px; padding: 8px 20px; background: transparent;
+            border: 1px solid rgba(255,255,255,0.15); border-radius: 4px;
+            color: rgba(255,255,255,0.4); font-size: 11px; cursor: pointer;
+        }
+
+        .walk-hint {
+            margin-top: 20px; font-size: 10px;
+            text-transform: uppercase; letter-spacing: 0.15em;
+            opacity: 0.3; text-align: center;
+        }
+        .footer {
+            margin-top: 40px; font-size: 10px; opacity: 0.15;
+            text-align: center; max-width: 420px;
+            line-height: 1.7; letter-spacing: 0.02em;
+        }
+
+        .wall-highlight {
+            position: absolute;
+            background: rgba(255,255,255,0.25);
+            pointer-events: none;
+            z-index: 6;
+        }
+
+        .wall-highlight.top {
+            top: 0; left: 0; right: 0; height: 3px;
+        }
+        .wall-highlight.bottom {
+            bottom: 0; left: 0; right: 0; height: 3px;
+        }
+        .wall-highlight.left {
+            top: 0; bottom: 0; left: 0; width: 3px;
+        }
+        .wall-highlight.right {
+            top: 0; bottom: 0; right: 0; width: 3px;
+        }
+        
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <h1>Maze Editor</h1>
+    <div class="sub" id="cardCount">0/16 cards</div>
+</div>
+
+<!-- Generator -->
+<div class="gen-row">
+    <label>Rows</label>
+    <input type="number" id="inRows" value="6" min="2" max="16">
+    <label style="margin-left:4px;">Cols</label>
+    <input type="number" id="inCols" value="6" min="2" max="16">
+    <select id="inAlgo">
+        <option value="dfs">Recursive Backtracker</option>
+        <option value="prim">Prim's</option>
+        <option value="kruskal">Kruskal's</option>
+    </select>
+    <button class="gen-btn" onclick="generate()">Generate</button>
+    <button class="gen-btn" onclick="clearMaze()" style="background:transparent; border-color:rgba(255,255,255,0.15); color:rgba(255,255,255,0.4);">Clear walls</button>
+</div>
+<div class="algo-hint" id="algoHint">Recursive Backtracker — long winding corridors, few dead ends</div>
+
+<!-- Mode controls -->
+<div class="controls">
+    <button id="btnBuild" class="active" onclick="switchMode('build')">Build</button>
+    <button id="btnWalk" onclick="switchMode('walk')">Walk</button>
+    <div class="sep"></div>
+    <button id="btnL" class="btn-L" onclick="toggleEntrance('L')">L</button>
+    <button id="btnK" class="btn-K" onclick="toggleEntrance('K')">K</button>
+</div>
+
+<div class="entrance-hint" id="entranceHint" style="display:none;"></div>
+
+<div class="grid-wrap" id="gridWrap">
+    <div class="maze" id="maze"></div>
+    <canvas id="pathCanvas"></canvas>
+    <div class="walk-card" id="walkCard" style="display:none;"></div>
+</div>
+
+<div class="walk-hint" id="walkHint" style="display:none;">
+    Arrow keys to move · click a room you're in to view its card
+</div>
+
+<div class="footer">
+    Prototype for L & K · generate or hand-draw mazes ·
+    drag photos onto rooms · paths traced as you walk
+</div>
+
+<!-- Card editor modal -->
+<div class="modal-overlay" id="cardModal" style="display:none;" onclick="saveCard()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-label">Edit Card</div>
+        <img class="preview-img" id="modalImg" style="display:none;">
+        <div class="type-row">
+            <button class="type-btn" data-type="image" onclick="setCardType('image')">Image</button>
+            <button class="type-btn" data-type="text" onclick="setCardType('text')">Text</button>
+            <button class="type-btn" data-type="both" onclick="setCardType('both')">Img + Txt</button>
+        </div>
+        <textarea id="modalText" rows="4" placeholder="Text for this card..." style="display:none;"></textarea>
+        <div class="actions">
+            <button class="btn-save" onclick="saveCard()">Save</button>
+            <button class="btn-delete" onclick="deleteCard()">Remove</button>
+        </div>
+    </div>
+</div>
+
+<!-- Entrance chooser -->
+<div class="entrance-chooser" id="entranceChooser" style="display:none;">
+    <div class="label">Choose your entrance</div>
+    <div class="choices">
+        <button class="choice-btn choice-L" id="chooseL" onclick="beginWalkFrom('L')" style="display:none;">L</button>
+        <button class="choice-btn choice-K" id="chooseK" onclick="beginWalkFrom('K')" style="display:none;">K</button>
+    </div>
+    <button class="back-btn" onclick="switchMode('build')">Back to editor</button>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+let ROWS = 6, COLS = 6;
+let CELL = 72; // recalculated on generate
+
+const cards = {};       // "r,c" → { image, text, type }
+const passages = {};    // "r,c,right"|"r,c,bottom" → true
+let entranceL = null, entranceK = null, settingEntrance = null;
+let mode = "build";
+let walkPos = null, visited = {}, walkPath = [];
+let editingCard = null, editCardType = "image", viewingCard = null;
+
+function kk(r, c) { return r + "," + c; }
+function cardCount() { return Object.keys(cards).length; }
+function isOpen(r, c, dir) { return !!passages[r + "," + c + "," + dir]; }
+function setOpen(r, c, dir) { passages[r + "," + c + "," + dir] = true; }
+function setClosed(r, c, dir) { delete passages[r + "," + c + "," + dir]; }
+
+function getBlockedDirs(r, c) {
+    return {
+        up: !canMove(r, c, r - 1, c),
+        down: !canMove(r, c, r + 1, c),
+        left: !canMove(r, c, r, c - 1),
+        right: !canMove(r, c, r, c + 1)
+    };
+}
+
+function togglePassage(r, c, dir) {
+    const key = r + "," + c + "," + dir;
+    if (passages[key]) delete passages[key]; else passages[key] = true;
+}
+
+function canMove(fr, fc, tr, tc) {
+    if (tr < 0 || tr >= ROWS || tc < 0 || tc >= COLS) return false;
+    if (tc === fc + 1) return isOpen(fr, fc, "right");
+    if (tc === fc - 1) return isOpen(fr, tc, "right");
+    if (tr === fr + 1) return isOpen(fr, fc, "bottom");
+    if (tr === fr - 1) return isOpen(tr, fc, "bottom");
+    return false;
+}
+
+function autoConnect(r, c) {
+    if (c > 0 && cards[kk(r, c - 1)]) setOpen(r, c - 1, "right");
+    if (c < COLS - 1 && cards[kk(r, c + 1)]) setOpen(r, c, "right");
+    if (r > 0 && cards[kk(r - 1, c)]) setOpen(r - 1, c, "bottom");
+    if (r < ROWS - 1 && cards[kk(r + 1, c)]) setOpen(r, c, "bottom");
+}
+
+function esc(t) { const d = document.createElement("div"); d.textContent = t; return d.innerHTML; }
+
+function recalcCellSize() {
+    const maxW = Math.min(window.innerWidth - 80, 800);
+    CELL = Math.max(36, Math.min(72, Math.floor(maxW / COLS)));
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MAZE GENERATION ALGORITHMS
+// ═══════════════════════════════════════════════════════════════
+
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function neighbors(r, c) {
+    const n = [];
+    if (r > 0) n.push({ r: r - 1, c, wr: r - 1, wc: c, dir: "bottom" });       // up  → open (r-1,c,bottom)
+    if (r < ROWS - 1) n.push({ r: r + 1, c, wr: r, wc: c, dir: "bottom" });     // down → open (r,c,bottom)
+    if (c > 0) n.push({ r, c: c - 1, wr: r, wc: c - 1, dir: "right" });         // left → open (r,c-1,right)
+    if (c < COLS - 1) n.push({ r, c: c + 1, wr: r, wc: c, dir: "right" });      // right → open (r,c,right)
+    return n;
+}
+
+// ── Recursive Backtracker (DFS) ─────────────────────────────
+function generateDFS() {
+    const vis = {};
+    const stack = [{ r: 0, c: 0 }];
+    vis[kk(0, 0)] = true;
+
+    while (stack.length) {
+        const cur = stack[stack.length - 1];
+        const unvisited = shuffle(neighbors(cur.r, cur.c)).filter(n => !vis[kk(n.r, n.c)]);
+
+        if (unvisited.length === 0) {
+            stack.pop();
+        } else {
+            const next = unvisited[0];
+            vis[kk(next.r, next.c)] = true;
+            setOpen(next.wr, next.wc, next.dir);
+            stack.push({ r: next.r, c: next.c });
+        }
+    }
+}
+
+// ── Prim's ──────────────────────────────────────────────────
+function generatePrim() {
+    const inMaze = {};
+    const frontier = []; // { r, c, wr, wc, dir, fromR, fromC }
+
+    function addFrontier(r, c) {
+        inMaze[kk(r, c)] = true;
+        for (const n of neighbors(r, c)) {
+            if (!inMaze[kk(n.r, n.c)]) {
+                frontier.push({ ...n, fromR: r, fromC: c });
+            }
+        }
+    }
+
+    // Start from random cell
+    const startR = Math.floor(Math.random() * ROWS);
+    const startC = Math.floor(Math.random() * COLS);
+    addFrontier(startR, startC);
+
+    while (frontier.length) {
+        const idx = Math.floor(Math.random() * frontier.length);
+        const edge = frontier.splice(idx, 1)[0];
+
+        if (inMaze[kk(edge.r, edge.c)]) continue;
+
+        setOpen(edge.wr, edge.wc, edge.dir);
+        addFrontier(edge.r, edge.c);
+    }
+}
+
+// ── Kruskal's ───────────────────────────────────────────────
+function generateKruskal() {
+    // Union-Find
+    const parent = {};
+    function find(x) {
+        if (parent[x] !== x) parent[x] = find(parent[x]);
+        return parent[x];
+    }
+    function union(a, b) {
+        const pa = find(a), pb = find(b);
+        if (pa === pb) return false;
+        parent[pa] = pb;
+        return true;
+    }
+
+    // Init each cell as its own set
+    for (let r = 0; r < ROWS; r++)
+        for (let c = 0; c < COLS; c++)
+            parent[kk(r, c)] = kk(r, c);
+
+    // Collect all edges
+    const edges = [];
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            if (c < COLS - 1) edges.push({ r1: r, c1: c, r2: r, c2: c + 1, wr: r, wc: c, dir: "right" });
+            if (r < ROWS - 1) edges.push({ r1: r, c1: c, r2: r + 1, c2: c, wr: r, wc: c, dir: "bottom" });
+        }
+    }
+
+    shuffle(edges);
+
+    for (const e of edges) {
+        if (union(kk(e.r1, e.c1), kk(e.r2, e.c2))) {
+            setOpen(e.wr, e.wc, e.dir);
+        }
+    }
+}
+
+// ── Generate entry point ────────────────────────────────────
+function generate() {
+    ROWS = Math.max(2, Math.min(16, parseInt(document.getElementById("inRows").value) || 6));
+    COLS = Math.max(2, Math.min(16, parseInt(document.getElementById("inCols").value) || 6));
+    document.getElementById("inRows").value = ROWS;
+    document.getElementById("inCols").value = COLS;
+
+    // Clear all passages (keep cards that still fit)
+    for (const key in passages) delete passages[key];
+
+    // Remove cards outside new bounds
+    for (const key in cards) {
+        const [r, c] = key.split(",").map(Number);
+        if (r >= ROWS || c >= COLS) delete cards[key];
+    }
+
+    // Clear entrances if out of bounds
+    if (entranceL) {
+        const [r, c] = entranceL.split(",").map(Number);
+        if (r >= ROWS || c >= COLS) entranceL = null;
+    }
+    if (entranceK) {
+        const [r, c] = entranceK.split(",").map(Number);
+        if (r >= ROWS || c >= COLS) entranceK = null;
+    }
+
+    const algo = document.getElementById("inAlgo").value;
+    if (algo === "dfs") generateDFS();
+    else if (algo === "prim") generatePrim();
+    else generateKruskal();
+
+    updateAlgoHint();
+    recalcCellSize();
+    switchMode("build");
+    render();
+}
+
+function clearMaze() {
+    for (const key in passages) delete passages[key];
+    render();
+}
+
+function updateAlgoHint() {
+    const hints = {
+        dfs: "Recursive Backtracker — long winding corridors, few dead ends",
+        prim: "Prim's — organic branching, shorter paths",
+        kruskal: "Kruskal's — even distribution, many small branches"
+    };
+    document.getElementById("algoHint").textContent = hints[document.getElementById("inAlgo").value] || "";
+}
+document.getElementById("inAlgo").addEventListener("change", updateAlgoHint);
+
+// ═══════════════════════════════════════════════════════════════
+// RENDERING
+// ═══════════════════════════════════════════════════════════════
+
+function roomCenter(r, c) {
+    const mazeEl = document.getElementById("maze");
+    const room = mazeEl.children[r * COLS + c];
+    if (!room) return { x: 0, y: 0 };
+    const mRect = mazeEl.getBoundingClientRect();
+    const rRect = room.getBoundingClientRect();
+    return {
+        x: rRect.left - mRect.left + rRect.width / 2,
+        y: rRect.top - mRect.top + rRect.height / 2
+    };
+}
+
+function drawPath() {
+    const canvas = document.getElementById("pathCanvas");
+    const maze = document.getElementById("maze");
+    const rect = maze.getBoundingClientRect();
+    canvas.width = rect.width * devicePixelRatio;
+    canvas.height = rect.height * devicePixelRatio;
+    canvas.style.width = rect.width + "px";
+    canvas.style.height = rect.height + "px";
+
+    const ctx = canvas.getContext("2d");
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+    ctx.clearRect(0, 0, rect.width, rect.height);
+
+    if (mode !== "walk" || walkPath.length < 2) return;
+
+    ctx.strokeStyle = "rgba(255, 51, 102, 0.5)";
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    ctx.beginPath();
+
+    const s = walkPath[0].split(",").map(Number);
+    const sp = roomCenter(s[0], s[1]);
+    ctx.moveTo(sp.x, sp.y);
+
+    for (let i = 1; i < walkPath.length; i++) {
+        const [r, c] = walkPath[i].split(",").map(Number);
+        const p = roomCenter(r, c);
+        ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle = "rgba(255, 51, 102, 0.25)";
+    for (const key of [...new Set(walkPath)]) {
+        const [r, c] = key.split(",").map(Number);
+        const p = roomCenter(r, c);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function render() {
+    const maze = document.getElementById("maze");
+    maze.style.gridTemplateColumns = `repeat(${COLS}, ${CELL}px)`;
+    maze.style.gridTemplateRows = `repeat(${ROWS}, ${CELL}px)`;
+    maze.innerHTML = "";
+
+    for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+            const key = kk(r, c);
+            const card = cards[key];
+            const room = document.createElement("div");
+            room.className = "room";
+            room.style.width = CELL + "px";
+            room.style.height = CELL + "px";
+
+            if (c === COLS - 1) room.classList.add("col-last");
+            if (r === ROWS - 1) room.classList.add("row-last");
+            if (isOpen(r, c, "right") && c < COLS - 1) room.classList.add("open-right");
+            if (isOpen(r, c, "bottom") && r < ROWS - 1) room.classList.add("open-bottom");
+
+            const isEntL = entranceL === key;
+            const isEntK = entranceK === key;
+            const isHere = walkPos && walkPos.r === r && walkPos.c === c;
+            const isVis = !!visited[key];
+            let blocked = null;
+            if (mode === "walk" && isVis) {
+                blocked = getBlockedDirs(r, c);
+            }
+            const fogOk = mode === "walk" ? (isVis || isHere) : true;
+
+            if (isEntL) room.classList.add("entrance-L");
+            if (isEntK) room.classList.add("entrance-K");
+            if (isHere) room.classList.add("walk-here");
+            if (card) room.classList.add("has-card");
+            if (!fogOk) room.classList.add("fog");
+
+            // Content
+            if (card && card.image && fogOk) {
+                const img = document.createElement("img");
+                img.src = card.image; img.className = "thumb"; img.draggable = false;
+                room.appendChild(img);
+            } else if (card && !card.image && card.text && fogOk) {
+                const d = document.createElement("div");
+                d.className = "text-preview"; d.textContent = card.text.slice(0, 40);
+                room.appendChild(d);
+            }
+
+            if (card && mode === "build") {
+                const b = document.createElement("div"); b.className = "type-badge";
+                b.textContent = card.type === "both" ? "◐" : card.type === "text" ? "¶" : "◻";
+                room.appendChild(b);
+            }
+
+            if (isEntL) { const l = document.createElement("div"); l.className = "entrance-label L"; l.textContent = "L"; room.appendChild(l); }
+            if (isEntK) { const l = document.createElement("div"); l.className = "entrance-label K"; l.textContent = "K"; room.appendChild(l); }
+            if (isHere) { const d = document.createElement("div"); d.className = "walk-dot"; room.appendChild(d); }
+            if (!card && mode === "build" && !settingEntrance && cardCount() < 16) {
+                const p = document.createElement("div"); p.className = "placeholder"; p.textContent = "+"; room.appendChild(p);
+            }
+
+            // Wall toggles (build)
+            if (mode === "build" && c < COLS - 1) {
+                const w = document.createElement("div"); w.className = "wall-toggle right";
+                w.onclick = (e) => { e.stopPropagation(); togglePassage(r, c, "right"); render(); };
+                room.appendChild(w);
+            }
+            if (mode === "build" && r < ROWS - 1) {
+                const w = document.createElement("div"); w.className = "wall-toggle bottom";
+                w.onclick = (e) => { e.stopPropagation(); togglePassage(r, c, "bottom"); render(); };
+                room.appendChild(w);
+            }
+
+            // Drag & drop
+            if (mode === "build") {
+                room.ondragover = (e) => { e.preventDefault(); room.classList.add("drop-target"); };
+                room.ondragleave = () => room.classList.remove("drop-target");
+                room.ondrop = (e) => { e.preventDefault(); room.classList.remove("drop-target"); handleDrop(r, c, e); };
+                room.style.cursor = settingEntrance ? "crosshair" : (card ? "pointer" : "default");
+            } else {
+                room.style.cursor = (isHere && card) ? "pointer" : "default";
+            }
+
+            room.onclick = () => {
+                if (mode === "walk" && card && isHere) showWalkCard(key);
+                else if (mode === "build") handleRoomClick(r, c);
+            };
+            
+            if (blocked) {
+                if (blocked.up) {
+                    const w = document.createElement("div");
+                    w.className = "wall-highlight top";
+                    room.appendChild(w);
+                }
+                if (blocked.down) {
+                    const w = document.createElement("div");
+                    w.className = "wall-highlight bottom";
+                    room.appendChild(w);
+                }
+                if (blocked.left) {
+                    const w = document.createElement("div");
+                    w.className = "wall-highlight left";
+                    room.appendChild(w);
+                }
+                if (blocked.right) {
+                    const w = document.createElement("div");
+                    w.className = "wall-highlight right";
+                    room.appendChild(w);
+                }
+            }
+            maze.appendChild(room);
+        }
+    }
+
+    document.getElementById("cardCount").textContent = cardCount() + "/16 cards";
+    updateEntranceButtons();
+    requestAnimationFrame(drawPath);
+    renderWalkCardPanel();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INTERACTION HANDLERS
+// ═══════════════════════════════════════════════════════════════
+
+function handleDrop(r, c, e) {
+    if (cardCount() >= 16 && !cards[kk(r, c)]) return;
+    const files = e.dataTransfer.files;
+    if (!files.length) return;
+    const file = files[0];
+    if (!file.type.startsWith("image/")) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+        cards[kk(r, c)] = { image: ev.target.result, text: "", type: "image" };
+        autoConnect(r, c);
+        render();
+    };
+    reader.readAsDataURL(file);
+}
+
+function handleRoomClick(r, c) {
+    if (settingEntrance) {
+        if (settingEntrance === "L") entranceL = kk(r, c);
+        else entranceK = kk(r, c);
+        settingEntrance = null;
+        document.getElementById("entranceHint").style.display = "none";
+        document.getElementById("btnL").classList.remove("active");
+        document.getElementById("btnK").classList.remove("active");
+        render(); return;
+    }
+    if (cards[kk(r, c)]) openCardEditor(kk(r, c));
+}
+
+function toggleEntrance(w) {
+    if (settingEntrance === w) {
+        settingEntrance = null;
+        document.getElementById("entranceHint").style.display = "none";
+        document.getElementById("btn" + w).classList.remove("active");
+    } else {
+        settingEntrance = w;
+        document.getElementById("entranceHint").style.display = "block";
+        document.getElementById("entranceHint").textContent = "Click a room to set " + w + "'s entrance";
+        document.getElementById("btnL").classList.remove("active");
+        document.getElementById("btnK").classList.remove("active");
+        document.getElementById("btn" + w).classList.add("active");
+    }
+}
+
+function updateEntranceButtons() {
+    document.getElementById("btnL").textContent = "L" + (entranceL ? " ✓" : "");
+    document.getElementById("btnK").textContent = "K" + (entranceK ? " ✓" : "");
+}
+
+// Card editor
+function openCardEditor(key) {
+    editingCard = key;
+    const card = cards[key];
+    editCardType = card.type || "image";
+    const img = document.getElementById("modalImg");
+    if (card.image) { img.src = card.image; img.style.display = "block"; } else img.style.display = "none";
+    document.getElementById("modalText").value = card.text || "";
+    updateTypeButtons(); updateTextVis();
+    document.getElementById("cardModal").style.display = "flex";
+}
+function setCardType(t) { editCardType = t; updateTypeButtons(); updateTextVis(); }
+function updateTypeButtons() {
+    document.querySelectorAll(".type-btn").forEach(b => b.classList.toggle("active", b.dataset.type === editCardType));
+}
+function updateTextVis() {
+    document.getElementById("modalText").style.display = (editCardType === "text" || editCardType === "both") ? "block" : "none";
+}
+function saveCard() {
+    if (!editingCard) return;
+    cards[editingCard] = { ...cards[editingCard], text: document.getElementById("modalText").value, type: editCardType };
+    editingCard = null; document.getElementById("cardModal").style.display = "none"; render();
+}
+function deleteCard() {
+    if (!editingCard) return;
+    delete cards[editingCard]; editingCard = null;
+    document.getElementById("cardModal").style.display = "none"; render();
+}
+
+// Mode
+function switchMode(m) {
+    if (m === "walk") {
+        if (cardCount() < 1) return;
+        mode = "walk"; viewingCard = null;
+        if (entranceL || entranceK) {
+            document.getElementById("chooseL").style.display = entranceL ? "block" : "none";
+            document.getElementById("chooseK").style.display = entranceK ? "block" : "none";
+            document.getElementById("entranceChooser").style.display = "flex";
+        } else {
+            startWalkAt(Object.keys(cards)[0]);
+        }
+    } else {
+        mode = "build"; walkPos = null; visited = {}; walkPath = []; viewingCard = null;
+        document.getElementById("entranceChooser").style.display = "none";
+        document.getElementById("walkCard").style.display = "none";
+        document.getElementById("walkHint").style.display = "none";
+    }
+    document.getElementById("btnBuild").classList.toggle("active", mode === "build");
+    document.getElementById("btnWalk").classList.toggle("active-walk", mode === "walk");
+    render();
+}
+
+function beginWalkFrom(w) {
+    const ent = w === "L" ? entranceL : entranceK;
+    if (!ent) return;
+    document.getElementById("entranceChooser").style.display = "none";
+    startWalkAt(ent);
+}
+
+function startWalkAt(key) {
+    const [r, c] = key.split(",").map(Number);
+    walkPos = { r, c }; visited = {}; visited[key] = true; walkPath = [key];
+    document.getElementById("walkHint").style.display = "block";
+    if (cards[key]) showWalkCard(key); else hideWalkCard();
+    render();
+}
+
+function moveWalk(dr, dc) {
+    if (!walkPos) return;
+    const nr = walkPos.r + dr, nc = walkPos.c + dc;
+    if (!canMove(walkPos.r, walkPos.c, nr, nc)) return;
+    const key = kk(nr, nc);
+    walkPos = { r: nr, c: nc }; visited[key] = true; walkPath.push(key);
+    if (cards[key]) showWalkCard(key); else hideWalkCard();
+    render();
+}
+
+function showWalkCard(key) { viewingCard = key; renderWalkCardPanel(); }
+function hideWalkCard() { viewingCard = null; document.getElementById("walkCard").style.display = "none"; }
+
+function renderWalkCardPanel() {
+    const panel = document.getElementById("walkCard");
+    if (mode !== "walk" || !viewingCard || !cards[viewingCard]) { panel.style.display = "none"; return; }
+    const card = cards[viewingCard];
+    let html = "";
+    if (card.image && (card.type === "image" || card.type === "both"))
+        html += '<img src="' + card.image + '">';
+    if (card.text && (card.type === "text" || card.type === "both"))
+        html += '<div class="card-text">' + esc(card.text) + '</div>';
+    html += '<div class="card-meta">' + Object.keys(visited).length + ' rooms · ' + walkPath.length + ' steps</div>';
+    panel.innerHTML = html; panel.style.display = "block";
+}
+
+// Keyboard
+document.addEventListener("keydown", (e) => {
+    if (mode !== "walk" || editingCard) return;
+    if (e.key === "ArrowUp")    { e.preventDefault(); moveWalk(-1, 0); }
+    if (e.key === "ArrowDown")  { e.preventDefault(); moveWalk(1, 0); }
+    if (e.key === "ArrowLeft")  { e.preventDefault(); moveWalk(0, -1); }
+    if (e.key === "ArrowRight") { e.preventDefault(); moveWalk(0, 1); }
+    if (e.key === "Escape") hideWalkCard();
+});
+
+// Init with a generated maze
+recalcCellSize();
+generateDFS();
+render();
+</script>
+</body>
+</html>

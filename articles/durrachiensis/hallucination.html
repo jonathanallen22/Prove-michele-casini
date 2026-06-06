@@ -1,0 +1,1610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<title>durrachiensis — bathroom</title>
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     Layout reset
+     ───────────────────────────────────────────────────────────── */
+  html, body {
+    margin: 0; padding: 0; overflow: hidden; background: #000;
+    font-family: ui-monospace, monospace; color: #aaa;
+    touch-action: none; -webkit-user-select: none; user-select: none;
+  }
+  canvas { display: block; cursor: grab; }
+  canvas:active { cursor: grabbing; }
+  body.paint-mode canvas { cursor: crosshair; }
+
+  /* Vignette overlay (matches the original hallucination aesthetic) */
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 2;
+    background: radial-gradient(ellipse at center,
+      transparent 50%, rgba(0,0,0,0.55) 100%);
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Loading screen
+     ───────────────────────────────────────────────────────────── */
+  #loading {
+    position: fixed; inset: 0; z-index: 50; background: #050505;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 1rem;
+    transition: opacity 0.6s ease;
+  }
+  #loading.hide { opacity: 0; pointer-events: none; }
+  #loading-label {
+    font-size: 0.7rem; letter-spacing: 0.35em;
+    text-transform: uppercase; color: #aaa;
+  }
+  #loading-sub {
+    font-size: 0.55rem; letter-spacing: 0.2em;
+    text-transform: uppercase; color: #555;
+  }
+  /* sweep bar — same compositor-driven loader as the parent placeholder */
+  #loading-bar {
+    width: 180px; height: 2px; background: rgba(255,255,255,0.06);
+    overflow: hidden; position: relative;
+  }
+  #loading-bar::after {
+    content: ''; position: absolute; inset: 0;
+    width: 40%; transform: translateX(-100%);
+    background: linear-gradient(90deg,
+      transparent 0%, rgba(255,255,255,0.5) 50%, transparent 100%);
+    animation: sweep 1.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    will-change: transform;
+  }
+  @keyframes sweep {
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(350%); }
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Hint text (bottom-left)
+     ───────────────────────────────────────────────────────────── */
+  #hint {
+    position: fixed; bottom: 18px; left: 18px; z-index: 5;
+    font-size: 10px; letter-spacing: 1.5px; line-height: 1.7;
+    text-transform: uppercase; opacity: 0.5; pointer-events: none;
+    transition: opacity 0.6s ease;
+  }
+  body.paint-mode #hint { opacity: 0; }
+
+  /* ─────────────────────────────────────────────────────────────
+     Unified mode toolbar — Look / Spray / Marker (bottom-right)
+     Three pill-shaped buttons in a single rounded container. The
+     active mode floats forward with a white pill background. The
+     others sit as compact dark chips. Hovering any inactive button
+     reveals its label; the active one's label is always shown.
+     ───────────────────────────────────────────────────────────── */
+  #toolbar {
+    position: fixed; bottom: 22px; right: 22px; z-index: 10;
+    display: flex; gap: 6px;
+    background: rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    padding: 6px;
+    border-radius: 999px;
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.55);
+  }
+  .mode-btn {
+    position: relative;
+    display: flex; align-items: center; gap: 0;
+    height: 44px;
+    padding: 0 14px;
+    background: transparent;
+    color: rgba(255, 255, 255, 0.65);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font-family: ui-monospace, monospace;
+    font-size: 0.55rem; letter-spacing: 0.22em;
+    text-transform: uppercase;
+    transition: background 0.22s ease,
+                color 0.22s ease,
+                padding 0.22s ease;
+  }
+  .mode-btn svg {
+    width: 22px; height: 22px; display: block; flex-shrink: 0;
+    color: inherit;
+  }
+  .mode-label {
+    overflow: hidden;
+    max-width: 0;
+    margin-left: 0;
+    opacity: 0;
+    transition: max-width 0.25s ease,
+                opacity 0.22s ease,
+                margin-left 0.25s ease;
+    white-space: nowrap;
+  }
+  .mode-btn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.10);
+  }
+  .mode-btn.active {
+    background: #fff;
+    color: #111;
+    padding: 0 16px;
+  }
+  .mode-btn.active .mode-label {
+    max-width: 80px;
+    margin-left: 8px;
+    opacity: 1;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Color picker — sits ABOVE the toolbar, only when a paint
+     mode (spray or marker) is selected. No toggle button: the
+     picker fades in/out based on mode.
+     ───────────────────────────────────────────────────────────── */
+  #color-picker {
+    position: fixed; bottom: 86px; right: 22px; z-index: 10;
+    display: flex; gap: 8px;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.62);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 999px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+    opacity: 0; transform: translateY(8px); pointer-events: none;
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  body.paint-mode #color-picker {
+    opacity: 1; transform: translateY(0); pointer-events: auto;
+  }
+  #color-picker button {
+    width: 28px; height: 28px; border-radius: 50%; padding: 0;
+    border: 2px solid rgba(255,255,255,0.25); cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  #color-picker button:hover  { transform: scale(1.18); }
+  #color-picker button.active {
+    border-color: #fff; transform: scale(1.2);
+    box-shadow: 0 0 0 2px rgba(255,255,255,0.35), 0 2px 5px rgba(0,0,0,0.4);
+  }
+
+/* ─────────────────────────────────────────────────────────────
+     Action buttons — Clear paint + Leave your mark (both bottom-left,
+     stacked). Top-right is left clear for the fullscreen button.
+     ───────────────────────────────────────────────────────────── */
+  #clear-paint, #leave-mark, #config-toggle {
+    position: fixed; z-index: 10;
+    background: rgba(0,0,0,0.55); color: #fff;
+    border: 1px solid rgba(255,255,255,0.22);
+    padding: 0.5rem 0.85rem;
+    font-family: ui-monospace, monospace;
+    font-size: 0.55rem; letter-spacing: 0.22em;
+    text-transform: uppercase; cursor: pointer;
+    transition: opacity 0.3s ease, background 0.2s ease;
+  }
+  #clear-paint:hover, #leave-mark:hover, #config-toggle:hover { background: rgba(0,0,0,0.85); }
+
+  /* Both appear together once the visitor has painted; stacked bottom-left. */
+  #leave-mark  { bottom: 22px; left: 22px; opacity: 0; pointer-events: none; }
+  #clear-paint { bottom: 60px; left: 22px; opacity: 0; pointer-events: none; }
+  body.has-paint #leave-mark  { opacity: 0.85; pointer-events: auto; }
+  body.has-paint #clear-paint { opacity: 0.75; pointer-events: auto; }
+  #leave-mark.sent { background: rgba(80,180,100,0.35);
+                     border-color: rgba(120,220,140,0.6); }
+
+  #config-toggle { top: 14px; left: 14px; opacity: 0.7;
+    display: none;  /* hidden until editor mode is activated by parent */
+  }
+  body.editor-mode #config-toggle { display: block; }
+  body.config-mode #config-toggle {
+    background: rgba(255, 51, 51, 0.85);
+    border-color: rgba(255, 130, 130, 0.9);
+    opacity: 1;
+  }
+  /* Editor badge — small indicator that POV is on (top center) */
+  #editor-badge {
+    position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+    z-index: 12; padding: 0.4rem 0.85rem;
+    background: rgba(204, 17, 0, 0.85);
+    border: 1px solid rgba(255, 130, 80, 0.7);
+    color: #fff;
+    font-family: ui-monospace, monospace;
+    font-size: 0.5rem; letter-spacing: 0.25em;
+    text-transform: uppercase;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    display: none;
+  }
+  body.editor-mode #editor-badge { display: block; }
+  /* Cursor while configurator is active */
+  body.config-mode canvas { cursor: cell; }
+
+  /* ─────────────────────────────────────────────────────────────
+     Configurator side panel
+     ───────────────────────────────────────────────────────────── */
+  #config-panel {
+    position: fixed; top: 56px; left: 14px; z-index: 11;
+    width: 260px; max-height: 70vh; overflow-y: auto;
+    background: rgba(8, 8, 10, 0.92);
+    border: 1px solid rgba(255, 80, 80, 0.35);
+    color: #eee;
+    font-family: ui-monospace, monospace;
+    font-size: 0.6rem;
+    padding: 0.7rem 0.8rem 0.85rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
+    opacity: 0; transform: translateX(-12px) scale(0.98);
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  body.config-mode #config-panel {
+    opacity: 1; transform: translateX(0) scale(1); pointer-events: auto;
+  }
+  .config-panel-head {
+    font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: #fff; padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(255,255,255,0.12);
+    margin-bottom: 0.5rem;
+  }
+  #config-status {
+    font-size: 0.55rem; line-height: 1.4; color: #b8b8b8;
+    margin-bottom: 0.7rem;
+  }
+  #config-shape-list {
+    display: flex; flex-direction: column; gap: 4px;
+    margin-bottom: 0.7rem;
+  }
+  .config-shape-row {
+    display: flex; align-items: center; gap: 8px;
+    padding: 4px 6px; background: rgba(255,255,255,0.05);
+    border-radius: 2px;
+  }
+  .config-shape-swatch {
+    width: 12px; height: 12px; border-radius: 50%;
+    flex-shrink: 0; box-shadow: 0 0 0 1px rgba(255,255,255,0.2);
+  }
+  .config-shape-label { flex: 1; font-size: 0.55rem; color: #ddd; }
+  .config-shape-del {
+    width: 18px; height: 18px; padding: 0;
+    background: transparent; color: #aaa;
+    border: 1px solid rgba(255,255,255,0.18);
+    font-size: 0.7rem; line-height: 1; cursor: pointer; border-radius: 2px;
+  }
+  .config-shape-del:hover { background: rgba(255,80,80,0.3); color: #fff; }
+  .config-panel-actions {
+    display: flex; gap: 6px; flex-wrap: wrap;
+    margin-bottom: 0.6rem;
+  }
+  .config-panel-actions button {
+    flex: 1; min-width: 70px;
+    padding: 0.4rem 0.5rem;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff;
+    font-family: ui-monospace, monospace;
+    font-size: 0.52rem; letter-spacing: 0.15em;
+    text-transform: uppercase; cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .config-panel-actions button:hover { background: rgba(255,255,255,0.14); }
+  #config-export-btn {
+    background: rgba(80, 180, 100, 0.25);
+    border-color: rgba(120, 220, 140, 0.55);
+  }
+  #config-clear-all {
+    background: rgba(180, 60, 60, 0.2);
+    border-color: rgba(220, 100, 100, 0.5);
+  }
+  .config-panel-hint {
+    font-size: 0.5rem; line-height: 1.5; color: #888;
+    letter-spacing: 0.05em;
+  }
+
+  /* ─────────────────────────────────────────────────────────────
+     Export popup (modal-ish)
+     ───────────────────────────────────────────────────────────── */
+  #config-export {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 100; width: min(520px, 90vw);
+    background: rgba(12, 12, 14, 0.97);
+    border: 1px solid rgba(120, 220, 140, 0.5);
+    color: #eee;
+    font-family: ui-monospace, monospace;
+    padding: 0.85rem 0.95rem 0.7rem;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.85);
+  }
+  #config-export.hidden { display: none; }
+  .config-export-head {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 0.6rem;
+    font-size: 0.6rem; letter-spacing: 0.22em; text-transform: uppercase;
+    color: #c0ffd0;
+  }
+  #config-export-close {
+    width: 24px; height: 24px; padding: 0;
+    background: transparent; color: #fff;
+    border: 1px solid rgba(255,255,255,0.2);
+    font-size: 0.95rem; line-height: 1; cursor: pointer; border-radius: 2px;
+  }
+  #config-export-close:hover { background: rgba(255,255,255,0.12); }
+  #config-export-text {
+    width: 100%; min-height: 160px; max-height: 260px;
+    background: rgba(0,0,0,0.55); color: #eee;
+    border: 1px solid rgba(255,255,255,0.15);
+    padding: 0.6rem 0.7rem; resize: vertical;
+    font-family: ui-monospace, monospace;
+    font-size: 0.62rem; line-height: 1.5;
+    white-space: pre;
+  }
+  .config-export-actions {
+    margin-top: 0.5rem;
+    display: flex; justify-content: flex-end;
+  }
+  #config-export-copy {
+    padding: 0.4rem 0.85rem;
+    background: rgba(120, 220, 140, 0.22);
+    border: 1px solid rgba(120, 220, 140, 0.55);
+    color: #fff;
+    font-family: ui-monospace, monospace;
+    font-size: 0.55rem; letter-spacing: 0.18em;
+    text-transform: uppercase; cursor: pointer;
+  }
+  #config-export-copy:hover { background: rgba(120, 220, 140, 0.4); }</style>
+  
+</head>
+<body>
+
+  <div id="loading">
+    <div id="loading-bar"></div>
+    <div id="loading-label">Bathroom</div>
+    <div id="loading-sub">loading panorama…</div>
+  </div>
+
+  <div id="hint">drag to look · 1 / 2 / 3 to switch tools</div>
+
+  <!-- Editor POV badge — shows when parent enables editor mode -->
+  <div id="editor-badge">Editor POV · configurator unlocked</div>
+
+  <!-- Top-right action cluster -->
+  <button id="clear-paint" type="button">Clear paint</button>
+  <button id="leave-mark" type="button">Leave your mark</button>
+
+
+  <!-- Configurator toggle (bottom-left, hidden until editor mode active) -->
+  <button id="config-toggle" type="button" title="Define areas where paint won't stick">⚙ Configurator</button>
+
+  <!-- Configurator side panel (visible only when configurator is on) -->
+  <div id="config-panel" aria-hidden="true">
+    <div class="config-panel-head">
+      <span>Blocked-area configurator</span>
+    </div>
+    <div id="config-status">Click on a wall to drop the first corner.</div>
+    <div id="config-shape-list"></div>
+    <div class="config-panel-actions">
+      <button id="config-close-shape"  type="button" style="display:none">Close shape</button>
+      <button id="config-cancel-shape" type="button" style="display:none">Cancel shape</button>
+      <button id="config-export-btn"   type="button">Export</button>
+      <button id="config-clear-all"    type="button">Clear all</button>
+    </div>
+    <div class="config-panel-hint">drag = look around · click on a wall = drop a pin · click near the first pin = close shape · esc = cancel</div>
+  </div>
+
+  <!-- Export popup -->
+  <div id="config-export" class="hidden">
+    <div class="config-export-head">
+      <span>Send me these values</span>
+      <button id="config-export-close" type="button" aria-label="close">×</button>
+    </div>
+    <textarea id="config-export-text" readonly></textarea>
+    <div class="config-export-actions">
+      <button id="config-export-copy" type="button">Copy</button>
+    </div>
+  </div>
+
+  <!-- ────────────────────────────────────────────────────────────
+       Bottom-right toolbar: three modes side-by-side
+       ─────────────────────────────────────────────────────────── -->
+  <div id="toolbar">
+    <button class="mode-btn active" data-mode="displace" title="Look around (1)">
+      <svg viewBox="0 0 32 32">
+        <!-- 4-way move arrows -->
+        <path d="M16 4 L12 9 H14 V14 H9 V12 L4 16 L9 20 V18 H14 V23 H12 L16 28 L20 23 H18 V18 H23 V20 L28 16 L23 12 V14 H18 V9 H20 Z"
+              fill="currentColor"/>
+      </svg>
+      <span class="mode-label">look</span>
+    </button>
+    <button class="mode-btn" data-mode="spray" title="Spray paint (2)">
+      <svg viewBox="0 0 32 32">
+        <!-- spray can -->
+        <rect x="14" y="3"  width="4"  height="3.5" fill="currentColor"/>
+        <rect x="11" y="7"  width="10" height="3.5" rx="0.8" fill="currentColor"/>
+        <rect x="10" y="12" width="12" height="16" rx="1.5" fill="none"
+              stroke="currentColor" stroke-width="1.6"/>
+        <rect x="10" y="16" width="12" height="3"  fill="currentColor"/>
+        <!-- dot mist -->
+        <circle cx="25" cy="10" r="0.7" fill="currentColor"/>
+        <circle cx="27" cy="13" r="0.5" fill="currentColor"/>
+        <circle cx="28" cy="9"  r="0.4" fill="currentColor"/>
+      </svg>
+      <span class="mode-label">spray</span>
+    </button>
+    <button class="mode-btn" data-mode="marker" title="Marker pen (3)">
+      <svg viewBox="0 0 32 32">
+        <!-- felt-tip marker -->
+        <path d="M5 27 L11 25 L26 10 L22 6 L7 21 Z" fill="none"
+              stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M22 6 L26 10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+        <line x1="20" y1="8" x2="24" y2="12" stroke="currentColor" stroke-width="1" opacity="0.55"/>
+        <path d="M5 27 L11 25" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      <span class="mode-label">marker</span>
+    </button>
+  </div>
+
+  <!-- Color picker — appears next to the toolbar when in spray or marker mode -->
+  <div id="color-picker">
+    <button data-color="#cc1100" style="background:#cc1100" class="active" aria-label="red"></button>
+    <button data-color="#1a78ff" style="background:#1a78ff" aria-label="blue"></button>
+    <button data-color="#ffd400" style="background:#ffd400" aria-label="yellow"></button>
+    <button data-color="#ffffff" style="background:#ffffff" aria-label="white"></button>
+    <button data-color="#111111" style="background:#111111" aria-label="black"></button>
+  </div>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.160.0/build/three.module.js"
+    }
+  }
+  </script>
+
+  <script type="module">
+  import * as THREE from 'three';
+
+  // ════════════════════════════════════════════════════════════════
+  //  CONFIG  — adjust to match your panorama
+  // ════════════════════════════════════════════════════════════════
+
+  // Path to the equirectangular bathroom panorama (2:1 aspect JPG).
+  // Drop your file at this exact path. Recommended: 4096×2048 or smaller,
+  // target file size under 2 MB.
+  const PANO_URL = '../../multimedia/durrachiensis-media/bathroom-pano.jpg';
+
+  // The 5 graffiti colors (in the order they appear in the UI).
+  const COLORS = ['#cc1100', '#1a78ff', '#ffd400', '#ffffff', '#111111'];
+
+  // ── Wall geometry ──────────────────────────────────────────────
+  // Each wall is defined by 4 corners in spherical angles relative to
+  // the camera at the origin:
+  //   azimuth   (°): 0 = forward, 90 = right, 180 = back, 270 = left
+  //   elevation (°): 0 = horizon, +90 = ceiling, -90 = floor
+  //
+  // The default below is a generic square room. After you drop in
+  // your real panorama, toggle TUNE = true (next variable) to see the
+  // wall edges as red wireframe — adjust the angles below until those
+  // edges align with the actual wall edges in your panorama image.
+  const RADIUS   = 100;  // distance from camera to walls (arbitrary)
+  const WALL_TOP = 35;   // elevation where walls meet ceiling
+  const WALL_BOT = -35;  // elevation where walls meet floor
+
+  // Order of corners per wall: top-left, top-right, bottom-right, bottom-left
+  // (as seen looking AT the wall from the camera).
+  const WALLS_CONFIG = [
+    { name: 'front', corners: [[-45, WALL_TOP], [ 45, WALL_TOP], [ 45, WALL_BOT], [-45, WALL_BOT]] },
+    { name: 'right', corners: [[ 45, WALL_TOP], [135, WALL_TOP], [135, WALL_BOT], [ 45, WALL_BOT]] },
+    { name: 'back',  corners: [[135, WALL_TOP], [225, WALL_TOP], [225, WALL_BOT], [135, WALL_BOT]] },
+    { name: 'left',  corners: [[225, WALL_TOP], [315, WALL_TOP], [315, WALL_BOT], [225, WALL_BOT]] },
+    // ceiling — 4 corners going around at WALL_TOP elevation
+    { name: 'ceiling', corners: [[-45, WALL_TOP], [ 45, WALL_TOP], [135, WALL_TOP], [225, WALL_TOP]] },
+    // floor — 4 corners going around at WALL_BOT elevation
+    { name: 'floor',   corners: [[-45, WALL_BOT], [ 45, WALL_BOT], [135, WALL_BOT], [225, WALL_BOT]] },
+  ];
+
+  // Set to true to see wall edges as red lines — useful when aligning
+  // the wall geometry to a new panorama. Set back to false for production.
+  const TUNE = false;
+
+  // ── Spray feel (much stronger / more opaque) ───────────────────
+  const SPRAY_DOT_COUNT  = 80;   // dots per spray pulse (outer cloud)
+  const SPRAY_RADIUS     = 44;   // px radius of dot cloud on the wall canvas
+  const SPRAY_DOT_SIZE   = 4.6;  // max dot radius
+  const SPRAY_ALPHA_MIN  = 0.18; // each dot's minimum alpha
+  const SPRAY_ALPHA_MAX  = 0.34; // each dot's maximum alpha
+  // Inner "core" pass — tighter, more opaque cluster.
+  const CORE_DOT_COUNT   = 30;
+  const CORE_RADIUS      = 14;
+  const CORE_ALPHA_MIN   = 0.34;
+  const CORE_ALPHA_MAX   = 0.58;
+  const WALL_TEX_RES     = 1536; // higher res so sharper marker strokes look clean
+
+  // ── Marker (felt-tip) settings ──────────────────────────────────
+  // Hard solid line, no spread, no overspray. Drawn as continuous
+  // stroke segments between consecutive pointer positions on the
+  // same wall — gives clean, sharp traces.
+  const MARKER_WIDTH      = 7;     // px line width on the wall canvas
+  const MARKER_ALPHA      = 0.92;  // opacity per stroke
+  const MARKER_DOT_RADIUS = 4.0;   // size of the tip when stationary
+
+  // ── Light-affected paint ────────────────────────────────────────
+  // When true, each spray dot's color is multiplied by the panorama's
+  // brightness/color at that point — paint sprayed in shadowy areas
+  // comes out darker, paint near a window highlight comes out brighter.
+  const LIGHT_MODULATION = true;
+  // How strongly the panorama lighting affects paint (0 = no effect,
+  // 1 = full pano luminance modulation). Range typically 0.3 – 0.9.
+  const LIGHT_STRENGTH   = 0.7;
+
+  // ── No-paint polygons ──────────────────────────────────────────
+  // Each polygon is an array of {az, el} corner pins in spherical
+  // degrees. Use the Configurator (toggle bottom-left) to define
+  // these interactively and Export to get the config string you can
+  // paste back into this array to persist.
+  let NO_PAINT_POLYGONS = [
+    // Window (rectangular)
+    [ {az:117.2, el:50.5}, {az:161, el:45.2}, {az:161.4, el:6.1}, {az:117, el:7.7} ],
+    // Ceiling outline (irregular polygon around the upper border)
+    [
+      {az:290.5, el:25.8}, {az:345.9, el:21.1}, {az:346.3, el:45.4},
+      {az:351.7, el:47.1}, {az:357.4, el:57.5}, {az:15.3,  el:63.9},
+      {az:47.2,  el:71.1}, {az:86.7,  el:78  }, {az:120,   el:80  },
+      {az:159.4, el:78.4}, {az:173.4, el:76.7}, {az:188.2, el:74.1},
+      {az:201.1, el:70.3}, {az:213.3, el:69.4}, {az:242.7, el:66.7},
+      {az:259.9, el:63.5}, {az:282,   el:53.6}, {az:280.9, el:43  },
+      {az:284,   el:36.2}, {az:289.1, el:33.3},
+    ],
+  ];
+  // localStorage overrides the source values ONLY when in editor mode
+  // (we restore them in the editor-mode init below, not here, so normal
+  //  visitors always see the polygons baked into the source).
+
+  // ════════════════════════════════════════════════════════════════
+  //  SETUP
+  // ════════════════════════════════════════════════════════════════
+
+  const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  document.body.appendChild(renderer.domElement);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  camera.position.set(0, 0, 0);
+
+  // ── Panorama sphere + hidden sampling canvas ───────────────────
+  // The sampling canvas is a low-res copy of the panorama that we
+  // use to look up the wall's brightness at any point. Reading
+  // pixels from the GPU texture each frame would be too expensive;
+  // the canvas lives on the CPU and stays cheap.
+  const panoSampleCanvas = document.createElement('canvas');
+  panoSampleCanvas.width  = 1024;
+  panoSampleCanvas.height = 512;
+  const panoSampleCtx = panoSampleCanvas.getContext('2d', { willReadFrequently: true });
+  let panoImageData = null;
+
+  const loader = new THREE.TextureLoader();
+  loader.setCrossOrigin('anonymous');
+  loader.load(
+    PANO_URL,
+    (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      const geo  = new THREE.SphereGeometry(500, 60, 40).scale(-1, 1, 1);
+      const mat  = new THREE.MeshBasicMaterial({ map: tex });
+      scene.add(new THREE.Mesh(geo, mat));
+
+      // Draw the panorama image into the sampling canvas so we can
+      // read pixel brightness later. Same-origin so should always
+      // succeed; if cross-origin without CORS, the catch logs a
+      // warning and light modulation just silently turns off.
+      try {
+        panoSampleCtx.drawImage(tex.image, 0, 0, panoSampleCanvas.width, panoSampleCanvas.height);
+        panoImageData = panoSampleCtx.getImageData(0, 0, panoSampleCanvas.width, panoSampleCanvas.height);
+      } catch (e) {
+        console.warn('panorama pixel sampling unavailable — paint will not be light-modulated.', e);
+      }
+
+      hideLoading();
+    },
+    undefined,
+    (err) => {
+      console.error(err);
+      const sub = document.getElementById('loading-sub');
+      if (sub) sub.textContent = 'panorama not found — drop a JPG at the configured path';
+    }
+  );
+
+  function hideLoading() {
+    const el = document.getElementById('loading');
+    if (el) el.classList.add('hide');
+  }
+
+  // ── Helpers: spherical (degrees) → cartesian Vector3 ────────────
+  function sphTo3D(azDeg, elDeg, r) {
+    const az = THREE.MathUtils.degToRad(azDeg);
+    const el = THREE.MathUtils.degToRad(elDeg);
+    return new THREE.Vector3(
+      r * Math.cos(el) * Math.sin(az),
+      r * Math.sin(el),
+      -r * Math.cos(el) * Math.cos(az)
+    );
+  }
+
+  // ── Build a paintable wall from 4 corners (tl, tr, br, bl) ──────
+  function buildWall(cfg) {
+    const [c0, c1, c2, c3] = cfg.corners.map(([az, el]) => sphTo3D(az, el, RADIUS));
+
+    // Two triangles: (c0, c3, c1) and (c1, c3, c2)
+    const positions = new Float32Array([
+      c0.x, c0.y, c0.z,  c3.x, c3.y, c3.z,  c1.x, c1.y, c1.z,
+      c1.x, c1.y, c1.z,  c3.x, c3.y, c3.z,  c2.x, c2.y, c2.z,
+    ]);
+    const uvs = new Float32Array([
+      0, 1,  0, 0,  1, 1,
+      1, 1,  0, 0,  1, 0,
+    ]);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geo.setAttribute('uv',       new THREE.BufferAttribute(uvs, 2));
+    geo.computeVertexNormals();
+
+    // Per-wall canvases:
+    //   base    — inherited graffiti from past visitors (painted on load)
+    //   overlay — THIS visitor's new marks (what we submit)
+    //   canvas  — the displayed texture = base + overlay composited
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = WALL_TEX_RES;
+    const ctx = canvas.getContext('2d');
+
+    const base = document.createElement('canvas');
+    base.width = base.height = WALL_TEX_RES;
+    const baseCtx = base.getContext('2d');
+
+    const overlay = document.createElement('canvas');
+    overlay.width = overlay.height = WALL_TEX_RES;
+    const overlayCtx = overlay.getContext('2d');
+
+    const tex = new THREE.CanvasTexture(canvas);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.minFilter  = THREE.LinearFilter;
+
+    const mat = new THREE.MeshBasicMaterial({
+      map: tex,
+      transparent: true,
+      depthWrite: false,
+      side: THREE.DoubleSide,
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    scene.add(mesh);
+
+    if (TUNE) {
+      const wf = new THREE.LineSegments(
+        new THREE.EdgesGeometry(geo),
+        new THREE.LineBasicMaterial({ color: 0xff0000 })
+      );
+      scene.add(wf);
+    }
+
+    return { name: cfg.name, mesh, canvas, ctx, tex,
+         base, baseCtx, overlay, overlayCtx };
+  }
+
+  const walls = WALLS_CONFIG.map(buildWall);
+
+  // ════════════════════════════════════════════════════════════════
+  //  LOOK CONTROLS — drag to rotate the view (when NOT in paint mode)
+  // ════════════════════════════════════════════════════════════════
+
+  let lon = 0, lat = 0;
+  let isLooking = false;
+  let lookStart = null;
+
+  function applyView() {
+    const phi   = THREE.MathUtils.degToRad(90 - lat);
+    const theta = THREE.MathUtils.degToRad(lon);
+    camera.lookAt(
+       Math.sin(phi) * Math.cos(theta),
+       Math.cos(phi),
+       Math.sin(phi) * Math.sin(theta)
+    );
+  }
+  applyView();
+
+  // ════════════════════════════════════════════════════════════════
+  //  PAINT
+  // ════════════════════════════════════════════════════════════════
+
+  // Single-source-of-truth mode: 'displace' | 'spray' | 'marker'
+  let currentMode = 'displace';
+  let spraying    = false;
+  let sprayColor  = COLORS[0];
+  let hasPaint    = false;
+  let lastMarker  = null; // { wall, u, v } — marker stroke continuity
+  let editorMode  = false; // toggled by parent's POV (postMessage)
+
+  const raycaster = new THREE.Raycaster();
+  const ndc       = new THREE.Vector2();
+  const wallMeshes = walls.map(w => w.mesh);
+
+  // Derived helper — true when the current mode draws on walls.
+  function isPaintingMode() {
+    return currentMode === 'spray' || currentMode === 'marker';
+  }
+
+  function setMode(mode) {
+    if (mode !== 'displace' && mode !== 'spray' && mode !== 'marker') return;
+    currentMode = mode;
+    document.body.classList.toggle('paint-mode', isPaintingMode());
+    document.body.dataset.mode = mode;
+    document.querySelectorAll('.mode-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.mode === mode);
+    });
+    lastMarker = null;
+  }
+
+  // ── World-direction → spherical (azimuth°, elevation°) ──────────
+  // Azimuth convention: 0° forward (-Z), 90° right (+X), 180° back (+Z),
+  // 270° left (-X). Elevation: 0° horizon, +90° up, -90° down.
+  function worldToSpherical(worldPoint) {
+    const d = worldPoint.clone().normalize();
+    const az = (Math.atan2(d.x, -d.z) * 180 / Math.PI + 360) % 360;
+    const el = Math.asin(Math.max(-1, Math.min(1, d.y))) * 180 / Math.PI;
+    return { az, el };
+  }
+
+  // ── Brightness lookup on the panorama at any world point ────────
+  // Returns { r, g, b, lum } in [0, 1]. White (1,1,1,1) when sampling
+  // unavailable — that keeps paint at full strength as a safe default.
+  function getPanoColorAt(worldPoint) {
+    if (!panoImageData) return { r: 1, g: 1, b: 1, lum: 1 };
+    const d = worldPoint.clone().normalize();
+    // Inverted sphere's equirectangular UV mapping. The signs were
+    // chosen to match Three.js's SphereGeometry with scale(-1,1,1):
+    //   u = (atan2(z, x) wrapped to [0,1])
+    //   v = (1 - acos(y)/π)  inverted because canvas Y goes top-down
+    let u = (Math.atan2(d.z, d.x) / (2 * Math.PI) + 1) % 1;
+    let v = 1 - (Math.acos(Math.max(-1, Math.min(1, d.y))) / Math.PI);
+    const w = panoImageData.width, h = panoImageData.height;
+    const x = Math.max(0, Math.min(w - 1, Math.floor(u * w)));
+    const y = Math.max(0, Math.min(h - 1, Math.floor(v * h)));
+    const i = (y * w + x) * 4;
+    const r = panoImageData.data[i]     / 255;
+    const g = panoImageData.data[i + 1] / 255;
+    const b = panoImageData.data[i + 2] / 255;
+    const lum = 0.299 * r + 0.587 * g + 0.114 * b;
+    return { r, g, b, lum };
+  }
+
+  // ── Polygon analysis: detect if a polygon wraps the dome ────────
+  // A polygon whose total signed azimuth winding is close to ±360°
+  // goes once around the sphere (e.g. a ceiling outline). The 2D
+  // point-in-polygon test can't reason about the polar cap, so we
+  // handle wraparound polygons specially.
+  function polygonWindsAround(poly) {
+    let total = 0;
+    for (let i = 0; i < poly.length; i++) {
+      const a0 = poly[i].az;
+      const a1 = poly[(i + 1) % poly.length].az;
+      let d = a1 - a0;
+      while (d > 180)  d -= 360;
+      while (d < -180) d += 360;
+      total += d;
+    }
+    return Math.abs(total) > 300; // generous threshold
+  }
+
+  // For a wraparound polygon, find its elevation at the given azimuth
+  // by walking edges and interpolating across whichever edge spans az.
+  // Returns the max polygon elevation at az (handles polygons that
+  // briefly double back at the same azimuth).
+  function polygonElAt(az, poly) {
+    let best = null;
+    for (let i = 0; i < poly.length; i++) {
+      const a0 = poly[i].az;
+      const a1 = poly[(i + 1) % poly.length].az;
+      const e0 = poly[i].el;
+      const e1 = poly[(i + 1) % poly.length].el;
+      // Shortest signed edge length in azimuth
+      let dA = a1 - a0;
+      while (dA > 180)  dA -= 360;
+      while (dA < -180) dA += 360;
+      if (Math.abs(dA) < 1e-6) continue; // vertical edge — skip
+      // Parameter t in [0,1] such that a0 + t*dA ≡ az (mod 360)
+      let dQ = az - a0;
+      while (dQ > 180)  dQ -= 360;
+      while (dQ < -180) dQ += 360;
+      const t = dQ / dA;
+      if (t >= 0 && t <= 1) {
+        const interp = e0 + t * (e1 - e0);
+        if (best === null || interp > best) best = interp;
+      }
+    }
+    return best;
+  }
+
+  // Standard 2D point-in-polygon (used for non-wraparound shapes
+  // like a window — most common case).
+  function pointInPolygon2D(az, el, polygon) {
+    if (!polygon || polygon.length < 3) return false;
+    const azs = polygon.map(p => p.az);
+    const minA = Math.min(...azs), maxA = Math.max(...azs);
+    let testAz = az;
+    let pts = polygon;
+    if (maxA - minA > 180) {
+      pts = polygon.map(p => ({ az: p.az < 180 ? p.az + 360 : p.az, el: p.el }));
+      if (testAz < 180) testAz += 360;
+    }
+    let inside = false;
+    for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+      const xi = pts[i].az, yi = pts[i].el;
+      const xj = pts[j].az, yj = pts[j].el;
+      const intersect = ((yi > el) !== (yj > el)) &&
+        (testAz < (xj - xi) * (el - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  // Pre-compute per-polygon metadata so the per-paint-dot cost stays
+  // low (these don't change at runtime in the normal viewer flow).
+  function analysePolygon(poly) {
+    const wraps = polygonWindsAround(poly);
+    const avgEl = poly.reduce((s, p) => s + p.el, 0) / poly.length;
+    return { wraps, avgEl };
+  }
+  let POLY_META = NO_PAINT_POLYGONS.map(analysePolygon);
+
+  // Recompute polygon metadata whenever the polygon list changes
+  // (editor mode add/delete/import).
+  function refreshPolyMeta() { POLY_META = NO_PAINT_POLYGONS.map(analysePolygon); }
+
+  function pointInSphericalPolygon(az, el, poly, meta) {
+    if (!poly || poly.length < 3) return false;
+    if (!meta || !meta.wraps) {
+      return pointInPolygon2D(az, el, poly);
+    }
+    // Wraparound polygon: it traces a ring around the dome and
+    // encloses a polar cap. The cap side is determined by the
+    // polygon's average elevation:
+    //   avgEl > 0  → north cap (ceiling-side polygon)
+    //   avgEl < 0  → south cap (floor-side polygon)
+    // A query point is inside if it's on the cap side of the curve
+    // at its own azimuth.
+    const curveEl = polygonElAt(az, poly);
+    if (curveEl === null) return false;
+    return meta.avgEl > 0 ? (el >= curveEl) : (el <= curveEl);
+  }
+
+  function isInNoPaintPolygon(worldPoint) {
+    if (!NO_PAINT_POLYGONS.length) return false;
+    const { az, el } = worldToSpherical(worldPoint);
+    for (let i = 0; i < NO_PAINT_POLYGONS.length; i++) {
+      if (pointInSphericalPolygon(az, el, NO_PAINT_POLYGONS[i], POLY_META[i])) return true;
+    }
+    return false;
+  }
+
+  // ── Hex color → [r, g, b] ──────────────────────────────────────
+  function hexToRgb(hex) {
+    const m = hex.replace('#', '').match(/.{1,2}/g);
+    return [parseInt(m[0], 16), parseInt(m[1], 16), parseInt(m[2], 16)];
+  }
+
+  // ── Modulate a paint color by the panorama brightness at a point ──
+  // Maps luminance [0, 1] to a multiplier in [1-LIGHT_STRENGTH, 1+LIGHT_STRENGTH*0.6].
+  // Each channel is also tinted toward the wall's color cast (mild),
+  // so paint near a yellow lamp picks up some warmth.
+  function modulatedSprayCss(baseHex, panoSample) {
+    if (!LIGHT_MODULATION || !panoImageData) return baseHex;
+    const [r0, g0, b0] = hexToRgb(baseHex);
+    const lum = panoSample.lum;
+    const mult = (1 - LIGHT_STRENGTH) + lum * (LIGHT_STRENGTH * 1.6);
+    // 30% color cast from the underlying wall, 70% pure paint
+    const castMix = 0.30;
+    const wr = panoSample.r * 255, wg = panoSample.g * 255, wb = panoSample.b * 255;
+    const r = Math.min(255, Math.max(0, Math.round((r0 * (1 - castMix) + wr * castMix) * mult)));
+    const g = Math.min(255, Math.max(0, Math.round((g0 * (1 - castMix) + wg * castMix) * mult)));
+    const b = Math.min(255, Math.max(0, Math.round((b0 * (1 - castMix) + wb * castMix) * mult)));
+    return `rgb(${r}, ${g}, ${b})`;
+  }
+
+  function sprayAt(clientX, clientY) {
+    ndc.x =  (clientX / window.innerWidth)  * 2 - 1;
+    ndc.y = -(clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(ndc, camera);
+    const hits = raycaster.intersectObjects(wallMeshes);
+    if (!hits.length) { lastMarker = null; return; }
+
+    const hit  = hits[0];
+    if (!hit.uv) { lastMarker = null; return; }
+    const wall = walls.find(w => w.mesh === hit.object);
+    if (!wall) { lastMarker = null; return; }
+
+    // Block paint inside no-paint polygons UNLESS the editor POV is
+    // active, which lets the editor draw anywhere for testing.
+    if (!editorMode && isInNoPaintPolygon(hit.point)) { lastMarker = null; return; }
+
+    const u = hit.uv.x * wall.canvas.width;
+    const v = (1 - hit.uv.y) * wall.canvas.height;
+
+    // Sample lighting at this point so paint inherits wall brightness.
+    const sample = getPanoColorAt(hit.point);
+    const finalColor = modulatedSprayCss(sprayColor, sample);
+    const ctx = wall.overlayCtx;          // paint the visitor's marks here
+
+    if (currentMode === 'marker') {
+      drawMarker(ctx, wall, u, v, finalColor);
+    } else {
+      drawSpray(ctx, u, v, finalColor);
+    }
+
+    ctx.globalAlpha = 1;
+    compositeWall(wall);                  // base + overlay → displayed texture
+
+    if (!hasPaint) {
+      hasPaint = true;
+      document.body.classList.add('has-paint');
+    }
+
+  }
+
+  // ── Spray: dot-cloud + tight core ───────────────────────────────
+  function drawSpray(ctx, u, v, color) {
+    ctx.fillStyle = color;
+    // Pass 1 — wide outer cloud (drift + overspray)
+    for (let i = 0; i < SPRAY_DOT_COUNT; i++) {
+      const r = Math.random() * SPRAY_RADIUS;
+      const a = Math.random() * Math.PI * 2;
+      ctx.globalAlpha = SPRAY_ALPHA_MIN + Math.random() * (SPRAY_ALPHA_MAX - SPRAY_ALPHA_MIN);
+      ctx.beginPath();
+      ctx.arc(
+        u + Math.cos(a) * r,
+        v + Math.sin(a) * r,
+        0.6 + Math.random() * SPRAY_DOT_SIZE,
+        0, Math.PI * 2
+      );
+      ctx.fill();
+    }
+    // Pass 2 — tighter, more opaque core
+    for (let i = 0; i < CORE_DOT_COUNT; i++) {
+      const r = Math.random() * CORE_RADIUS;
+      const a = Math.random() * Math.PI * 2;
+      ctx.globalAlpha = CORE_ALPHA_MIN + Math.random() * (CORE_ALPHA_MAX - CORE_ALPHA_MIN);
+      ctx.beginPath();
+      ctx.arc(
+        u + Math.cos(a) * r,
+        v + Math.sin(a) * r,
+        0.8 + Math.random() * (SPRAY_DOT_SIZE * 0.7),
+        0, Math.PI * 2
+      );
+      ctx.fill();
+    }
+  }
+
+  // ── Marker: clean continuous stroke ─────────────────────────────
+  function drawMarker(ctx, wall, u, v, color) {
+    ctx.lineCap   = 'round';
+    ctx.lineJoin  = 'round';
+    ctx.lineWidth = MARKER_WIDTH;
+    ctx.strokeStyle = color;
+    ctx.fillStyle   = color;
+    ctx.globalAlpha = MARKER_ALPHA;
+    // If we have a previous point on the SAME wall, connect with a line.
+    if (lastMarker && lastMarker.wall === wall) {
+      ctx.beginPath();
+      ctx.moveTo(lastMarker.u, lastMarker.v);
+      ctx.lineTo(u, v);
+      ctx.stroke();
+    } else {
+      // Starting point (or wall change) — drop a single tip dot so a
+      // brief tap still leaves a mark.
+      ctx.beginPath();
+      ctx.arc(u, v, MARKER_DOT_RADIUS, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    lastMarker = { wall, u, v };
+  }
+
+  function clearPaint() {
+    walls.forEach(w => {
+      w.overlayCtx.clearRect(0, 0, w.overlay.width, w.overlay.height);
+      compositeWall(w);
+    });
+    hasPaint = false;
+    document.body.classList.remove('has-paint');
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  //  CONFIGURATOR — corner-pin polygons to block out the window etc.
+  // ════════════════════════════════════════════════════════════════
+  //
+  //   1. Click "Configurator" (bottom-left) → enters config mode.
+  //   2. Click anywhere on a wall → drops a corner pin.
+  //   3. Click more corners. Click near the FIRST pin (or hit "Close
+  //      shape") to finalise that polygon.
+  //   4. Click again on a wall to start the NEXT polygon.
+  //   5. Click "Export" → opens a panel with the JSON config to send
+  //      back to me (also logged to console, copied to clipboard).
+  //   6. Hit Esc to cancel an in-progress polygon.
+  //
+  // Each polygon is rendered in 3D as colored corner spheres + edge
+  // lines + a translucent fill so you always see what you've blocked.
+
+  let configMode    = false;
+  let currentShape  = []; // array of {az, el} for the shape in progress
+  // Closed shapes live in NO_PAINT_POLYGONS (already declared above).
+
+  // Distinct colors per shape so they're easy to tell apart.
+  const SHAPE_COLORS = [0xff3333, 0xff9900, 0xffee00, 0x33ff77, 0x33ddff, 0xaa66ff, 0xff66bb];
+  function shapeColor(i) { return SHAPE_COLORS[i % SHAPE_COLORS.length]; }
+
+  // All shape visualisations live in this group so we can hide them
+  // when the configurator is off and the page looks normal.
+  const configGroup = new THREE.Group();
+  configGroup.visible = false;
+  scene.add(configGroup);
+
+  function clearConfigGroup() {
+    while (configGroup.children.length) {
+      const c = configGroup.children.pop();
+      if (c.geometry) c.geometry.dispose();
+      if (c.material) c.material.dispose();
+    }
+  }
+
+  // ── Build a 3D shape visualisation: pins + lines + fill ─────────
+  function addShapeVisualisation(shape, colorHex, closed) {
+    if (!shape || !shape.length) return;
+    const r = RADIUS - 0.5; // slightly closer to camera than wall planes
+
+    // Corner pins (small spheres)
+    shape.forEach((corner, i) => {
+      const pin = new THREE.Mesh(
+        new THREE.SphereGeometry(0.9, 14, 10),
+        new THREE.MeshBasicMaterial({
+          color: colorHex,
+          depthTest: false,
+          transparent: true,
+          opacity: i === 0 ? 1.0 : 0.85,  // first pin slightly brighter
+        })
+      );
+      pin.position.copy(sphTo3D(corner.az, corner.el, r));
+      pin.renderOrder = 1000;
+      configGroup.add(pin);
+    });
+
+    // Edge lines
+    const pts = shape.map(c => sphTo3D(c.az, c.el, r - 0.05));
+    if (closed && pts.length >= 3) pts.push(pts[0]); // close the loop
+    if (pts.length >= 2) {
+      const lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+      const lineMat = new THREE.LineBasicMaterial({
+        color: colorHex, depthTest: false, transparent: true, opacity: 0.95
+      });
+      const line = new THREE.Line(lineGeo, lineMat);
+      line.renderOrder = 999;
+      configGroup.add(line);
+    }
+
+    // Translucent fill (only for closed polygons with ≥3 corners).
+    // Triangle fan from vertex 0 — perfect for convex polygons,
+    // approximately OK for slightly concave ones.
+    if (closed && shape.length >= 3) {
+      const fillPts = shape.map(c => sphTo3D(c.az, c.el, r - 0.1));
+      const positions = [];
+      for (let i = 1; i < fillPts.length - 1; i++) {
+        positions.push(fillPts[0].x, fillPts[0].y, fillPts[0].z);
+        positions.push(fillPts[i].x, fillPts[i].y, fillPts[i].z);
+        positions.push(fillPts[i + 1].x, fillPts[i + 1].y, fillPts[i + 1].z);
+      }
+      const fillGeo = new THREE.BufferGeometry();
+      fillGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+      const fillMat = new THREE.MeshBasicMaterial({
+        color: colorHex,
+        transparent: true,
+        opacity: 0.28,
+        depthTest: false,
+        depthWrite: false,
+        side: THREE.DoubleSide,
+      });
+      const fill = new THREE.Mesh(fillGeo, fillMat);
+      fill.renderOrder = 998;
+      configGroup.add(fill);
+    }
+  }
+
+  function rebuildConfigVisuals() {
+    clearConfigGroup();
+    NO_PAINT_POLYGONS.forEach((shape, i) => addShapeVisualisation(shape, shapeColor(i), true));
+    if (currentShape.length) {
+      // In-progress shape always renders in bright red for clarity.
+      addShapeVisualisation(currentShape, 0xff2222, false);
+    }
+    updateConfigPanel();
+  }
+
+  function persistPolygons() {
+    try { localStorage.setItem('halluc.noPaintPolygons', JSON.stringify(NO_PAINT_POLYGONS)); }
+    catch (_) {}
+  }
+
+  function setConfigMode(on) {
+    configMode = on;
+    document.body.classList.toggle('config-mode', on);
+    configGroup.visible = on;
+    if (!on && currentShape.length) {
+      // Exiting mode mid-shape — discard the in-progress shape.
+      currentShape = [];
+      rebuildConfigVisuals();
+    }
+    rebuildConfigVisuals();
+  }
+
+  function cornerAtPointer(clientX, clientY) {
+    ndc.x =  (clientX / window.innerWidth)  * 2 - 1;
+    ndc.y = -(clientY / window.innerHeight) * 2 + 1;
+    raycaster.setFromCamera(ndc, camera);
+    const hits = raycaster.intersectObjects(wallMeshes);
+    if (!hits.length) return null;
+    return worldToSpherical(hits[0].point);
+  }
+
+  // Click radius (in pixels) for "near the first pin" → closes shape.
+  const CLOSE_RADIUS_PX = 24;
+
+  function isNearFirstPin(clientX, clientY) {
+    if (currentShape.length < 3) return false;
+    const first = currentShape[0];
+    const pos = sphTo3D(first.az, first.el, RADIUS - 0.5).clone();
+    pos.project(camera); // → NDC
+    const screenX = (pos.x * 0.5 + 0.5) * window.innerWidth;
+    const screenY = (-pos.y * 0.5 + 0.5) * window.innerHeight;
+    const dx = clientX - screenX, dy = clientY - screenY;
+    return Math.sqrt(dx*dx + dy*dy) < CLOSE_RADIUS_PX;
+  }
+
+  function handleConfigClick(clientX, clientY) {
+    // Click near first pin → close the current shape.
+    if (currentShape.length >= 3 && isNearFirstPin(clientX, clientY)) {
+      closeCurrentShape();
+      return;
+    }
+    const sph = cornerAtPointer(clientX, clientY);
+    if (!sph) return;
+    // Round so the exported values stay readable.
+    const r1 = (n) => Math.round(n * 10) / 10;
+    currentShape.push({ az: r1(sph.az), el: r1(sph.el) });
+    rebuildConfigVisuals();
+  }
+
+  function closeCurrentShape() {
+    if (currentShape.length < 3) return;
+    NO_PAINT_POLYGONS.push(currentShape);
+    currentShape = [];
+    persistPolygons();
+    refreshPolyMeta();
+    rebuildConfigVisuals();
+  }
+
+  function cancelCurrentShape() {
+    if (!currentShape.length) return;
+    currentShape = [];
+    rebuildConfigVisuals();
+  }
+
+  function deletePolygon(index) {
+    if (index < 0 || index >= NO_PAINT_POLYGONS.length) return;
+    NO_PAINT_POLYGONS.splice(index, 1);
+    persistPolygons();
+    refreshPolyMeta();
+    rebuildConfigVisuals();
+  }
+
+  function clearAllPolygons() {
+    NO_PAINT_POLYGONS = [];
+    currentShape = [];
+    persistPolygons();
+    refreshPolyMeta();
+    rebuildConfigVisuals();
+  }
+
+  function exportPolygons() {
+    // Format as a JS array literal that's easy to paste into the
+    // NO_PAINT_POLYGONS declaration above.
+    const lines = NO_PAINT_POLYGONS.map(shape => {
+      const corners = shape.map(c => `{az:${c.az}, el:${c.el}}`).join(', ');
+      return '  [ ' + corners + ' ],';
+    });
+    const text = '[\n' + lines.join('\n') + '\n]';
+    const panel = document.getElementById('config-export');
+    const ta = document.getElementById('config-export-text');
+    if (ta) ta.value = text;
+    if (panel) panel.classList.remove('hidden');
+    console.log('NO_PAINT_POLYGONS =', text);
+    try {
+      navigator.clipboard.writeText(text);
+    } catch (_) { /* clipboard may be unavailable in some contexts */ }
+    return text;
+  }
+
+  // Update the side-panel listing of shapes.
+  function updateConfigPanel() {
+    const list = document.getElementById('config-shape-list');
+    if (!list) return;
+    list.innerHTML = '';
+    NO_PAINT_POLYGONS.forEach((shape, i) => {
+      const row = document.createElement('div');
+      row.className = 'config-shape-row';
+      const sw = document.createElement('span');
+      sw.className = 'config-shape-swatch';
+      sw.style.background = '#' + shapeColor(i).toString(16).padStart(6, '0');
+      const label = document.createElement('span');
+      label.className = 'config-shape-label';
+      label.textContent = 'Shape ' + (i + 1) + ' · ' + shape.length + ' corners';
+      const del = document.createElement('button');
+      del.type = 'button';
+      del.className = 'config-shape-del';
+      del.textContent = '×';
+      del.title = 'Delete this shape';
+      del.addEventListener('click', () => deletePolygon(i));
+      row.appendChild(sw);
+      row.appendChild(label);
+      row.appendChild(del);
+      list.appendChild(row);
+    });
+    const status = document.getElementById('config-status');
+    if (status) {
+      if (currentShape.length === 0) {
+        status.textContent = NO_PAINT_POLYGONS.length
+          ? 'Click on a wall to start the next shape.'
+          : 'Click on a wall to drop the first corner.';
+      } else if (currentShape.length < 3) {
+        status.textContent = 'Shape in progress · ' + currentShape.length + ' corners. Need at least 3.';
+      } else {
+        status.textContent = 'Shape in progress · ' + currentShape.length + ' corners. Click near the first pin (or "Close shape") to finish.';
+      }
+    }
+    // Show / hide Close shape button
+    const closeBtn = document.getElementById('config-close-shape');
+    if (closeBtn) closeBtn.style.display = currentShape.length >= 3 ? '' : 'none';
+    const cancelBtn = document.getElementById('config-cancel-shape');
+    if (cancelBtn) cancelBtn.style.display = currentShape.length > 0 ? '' : 'none';
+  }
+
+  // ════════════════════════════════════════════════════════════════
+  //  POINTER HANDLING
+  // ════════════════════════════════════════════════════════════════
+
+  const sceneCanvas = renderer.domElement;
+
+  // Track whether the pointer moved between down and up — if not,
+  // a pointerup with no drag means "click" → drop a corner pin.
+  let downAt = null;
+  const CLICK_DRAG_THRESHOLD = 5; // px
+
+  sceneCanvas.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0 && e.pointerType !== 'touch') return;
+    downAt = { x: e.clientX, y: e.clientY };
+    if (configMode) {
+      // Configurator → drag to look; click without drag drops a pin.
+      isLooking = true;
+      lookStart = { x: e.clientX, y: e.clientY, lon, lat };
+      sceneCanvas.setPointerCapture(e.pointerId);
+      return;
+    }
+    if (isPaintingMode()) {
+      spraying = true;
+      sprayAt(e.clientX, e.clientY);
+    } else {
+      // Displace (look) mode
+      isLooking = true;
+      lookStart = { x: e.clientX, y: e.clientY, lon, lat };
+    }
+    sceneCanvas.setPointerCapture(e.pointerId);
+  });
+
+  sceneCanvas.addEventListener('pointermove', (e) => {
+    if (spraying && isPaintingMode()) {
+      sprayAt(e.clientX, e.clientY);
+    } else if (isLooking) {
+      lon = lookStart.lon - (e.clientX - lookStart.x) * 0.18;
+      lat = lookStart.lat + (e.clientY - lookStart.y) * 0.18;
+      lat = Math.max(-85, Math.min(85, lat));
+      applyView();
+    }
+  });
+
+  function endPointer(e) {
+    // In configurator mode: if the pointer barely moved between
+    // down and up, treat it as a click → drop a corner pin.
+    if (configMode && downAt && e && e.type === 'pointerup') {
+      const dx = (e.clientX - downAt.x), dy = (e.clientY - downAt.y);
+      if (Math.sqrt(dx*dx + dy*dy) < CLICK_DRAG_THRESHOLD) {
+        handleConfigClick(e.clientX, e.clientY);
+      }
+    }
+    downAt = null;
+    spraying  = false;
+    isLooking = false;
+    lastMarker = null; // start a fresh marker stroke next time
+    if (e && e.pointerId !== undefined && sceneCanvas.hasPointerCapture(e.pointerId)) {
+      sceneCanvas.releasePointerCapture(e.pointerId);
+    }
+  }
+  sceneCanvas.addEventListener('pointerup',     endPointer);
+  sceneCanvas.addEventListener('pointercancel', endPointer);
+  window.addEventListener('blur',               endPointer);
+
+  // ════════════════════════════════════════════════════════════════
+  //  UI WIRING
+  // ════════════════════════════════════════════════════════════════
+
+  // Toolbar — three modes (displace/spray/marker)
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const mode = btn.dataset.mode;
+      // Picking a paint mode while the configurator is open exits it,
+      // so the user can paint freely.
+      if (configMode && mode !== 'displace') setConfigMode(false);
+      setMode(mode);
+    });
+  });
+
+  // Keyboard shortcuts: 1 = look, 2 = spray, 3 = marker
+  window.addEventListener('keydown', (e) => {
+    if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
+    if (e.key === '1') setMode('displace');
+    else if (e.key === '2') setMode('spray');
+    else if (e.key === '3') setMode('marker');
+  });
+
+  // Configurator toggle
+  const cfgToggle = document.getElementById('config-toggle');
+  if (cfgToggle) cfgToggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    // Enter look mode while configurator is active so painting
+    // doesn't collide with corner-pinning.
+    if (!configMode) setMode('displace');
+    setConfigMode(!configMode);
+  });
+  // Config panel buttons
+  const closeShapeBtn  = document.getElementById('config-close-shape');
+  const cancelShapeBtn = document.getElementById('config-cancel-shape');
+  const exportBtn      = document.getElementById('config-export-btn');
+  const clearAllBtn    = document.getElementById('config-clear-all');
+  if (closeShapeBtn)  closeShapeBtn.addEventListener('click',  (e) => { e.stopPropagation(); closeCurrentShape(); });
+  if (cancelShapeBtn) cancelShapeBtn.addEventListener('click', (e) => { e.stopPropagation(); cancelCurrentShape(); });
+  if (exportBtn)      exportBtn.addEventListener('click',      (e) => { e.stopPropagation(); exportPolygons(); });
+  if (clearAllBtn)    clearAllBtn.addEventListener('click',    (e) => { e.stopPropagation(); clearAllPolygons(); });
+
+  // Export panel: close button + copy
+  const exportClose = document.getElementById('config-export-close');
+  if (exportClose) exportClose.addEventListener('click', (e) => {
+    e.stopPropagation();
+    document.getElementById('config-export').classList.add('hidden');
+  });
+  const exportCopy = document.getElementById('config-export-copy');
+  if (exportCopy) exportCopy.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const ta = document.getElementById('config-export-text');
+    if (ta) {
+      ta.select();
+      try { document.execCommand('copy'); } catch (_) {}
+      try { navigator.clipboard.writeText(ta.value); } catch (_) {}
+      exportCopy.textContent = 'Copied!';
+      setTimeout(() => { exportCopy.textContent = 'Copy'; }, 1200);
+    }
+  });
+
+  // Escape cancels in-progress shape OR exits configurator.
+  window.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!document.getElementById('config-export').classList.contains('hidden')) {
+      document.getElementById('config-export').classList.add('hidden');
+    } else if (currentShape.length) {
+      cancelCurrentShape();
+    } else if (configMode) {
+      setConfigMode(false);
+    }
+  });
+
+  // Initialise the panel listing on load (so restored polygons show up).
+  rebuildConfigVisuals();
+
+  // ════════════════════════════════════════════════════════════════
+  //  EDITOR MODE — gated by parent's editor's POV (postMessage)
+  // ════════════════════════════════════════════════════════════════
+  //
+  // The parent article sends { type: 'editor-mode', active: true|false }
+  // when its glasses-active state changes. This is the only way to
+  // unlock the configurator UI — regular visitors never see it.
+  //
+  // Optionally, when editor mode turns on, we restore polygons saved
+  // to localStorage so an editor's previous draft session persists
+  // for them. Source-baked polygons remain the canonical truth for
+  // everyone else.
+  function setEditorMode(on) {
+    editorMode = !!on;
+    document.body.classList.toggle('editor-mode', editorMode);
+    if (editorMode) {
+      try {
+        const saved = localStorage.getItem('halluc.noPaintPolygons');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (Array.isArray(parsed)) {
+            NO_PAINT_POLYGONS = parsed;
+            refreshPolyMeta();
+            rebuildConfigVisuals();
+          }
+        }
+      } catch (_) {}
+    } else {
+      // Exiting editor mode — close the configurator if it was open
+      // and discard any in-progress shape so the casual view is clean.
+      if (configMode) setConfigMode(false);
+      currentShape = [];
+      rebuildConfigVisuals();
+    }
+  }
+
+  window.addEventListener('message', (e) => {
+    const msg = e && e.data;
+    if (!msg || typeof msg !== 'object') return;
+    if (msg.type === 'editor-mode') setEditorMode(!!msg.active);
+  });
+
+  // Allow inline / dev testing: ?editor=1 in the URL turns it on.
+  if (/[?&]editor=1/.test(location.search)) setEditorMode(true);
+
+  document.querySelectorAll('#color-picker button').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sprayColor = btn.dataset.color;
+      document.querySelectorAll('#color-picker button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  document.getElementById('clear-paint').addEventListener('click', clearPaint);
+
+  // ════════════════════════════════════════════════════════════════
+  //  SHARED GRAFFITI WALL  — load past marks, submit your own
+  // ════════════════════════════════════════════════════════════════
+  const GRAFFITI_API = '/api/graffiti';   // same-origin; nginx proxies in prod
+  // Composite a wall's displayed texture from base (inherited) + overlay (mine).
+  function compositeWall(wall) {
+  const { ctx, canvas, base, overlay, tex } = wall;
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.drawImage(base, 0, 0);
+  ctx.drawImage(overlay, 0, 0);
+  tex.needsUpdate = true;
+  }
+  const wallByName = {};
+  walls.forEach(w => { wallByName[w.name] = w; });
+  // ── Load the last N contributions and layer them onto the bases ──
+  function loadSharedGraffiti() {
+  fetch(GRAFFITI_API + '?n=20', { cache: 'no-store' })
+  .then(r => r.ok ? r.json() : Promise.reject(r.status))
+  .then(data => {
+  const entries = (data && data.entries) || [];
+  if (!entries.length) return;
+  // Layer in chronological order (server returns oldest-first).
+  let pending = 0;
+  entries.forEach(entry => {
+  const wallsObj = entry.walls || {};
+  Object.keys(wallsObj).forEach(name => {
+  const wall = wallByName[name];
+  if (!wall) return;
+  pending++;
+  const img = new Image();
+  img.onload = () => {
+  wall.baseCtx.drawImage(img, 0, 0, wall.base.width, wall.base.height);
+  compositeWall(wall);
+  pending--;
+  };
+  img.onerror = () => { pending--; };
+  img.src = wallsObj[name];
+  });
+  });
+  })
+  .catch(err => console.warn('graffiti load failed:', err));
+  }
+  // ── Submit THIS visitor's overlay marks ──────────────────────────
+  let submitting = false;
+  function submitMyMarks() {
+  if (submitting) return;
+  const btn = document.getElementById('leave-mark');
+  // Export only walls the visitor actually painted on (non-empty overlay).
+  const payload = {};
+  walls.forEach(w => {
+    // Cheap emptiness check: scan a downscaled copy's alpha. For simplicity
+    // and reliability we just export any wall whose overlay has ANY pixel —
+    // detected by a quick getImageData on a small sample. To keep it simple
+    // and correct, we export the overlay and let the server-side size cap
+    // handle the rare all-empty case; but skip obviously-untouched walls.
+    if (overlayHasPaint(w)) {
+      payload[w.name] = w.overlay.toDataURL('image/png');
+    }
+  });
+
+  if (!Object.keys(payload).length) {
+    flashBtn(btn, 'nothing to leave', false);
+    return;
+  }
+
+  submitting = true;
+  if (btn) btn.textContent = 'sending…';
+
+  fetch(GRAFFITI_API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ walls: payload }),
+  })
+    .then(async r => {
+      const d = await r.json().catch(() => ({}));
+      if (r.ok) {
+        // Bake the visitor's marks into the base so they persist locally
+        // for the rest of the session, then clear the overlay.
+        walls.forEach(w => {
+          w.baseCtx.drawImage(w.overlay, 0, 0);
+          w.overlayCtx.clearRect(0, 0, w.overlay.width, w.overlay.height);
+          compositeWall(w);
+        });
+        hasPaint = false;
+        document.body.classList.remove('has-paint');
+        flashBtn(btn, 'left on the wall ✓', true);
+      } else {
+        flashBtn(btn, (d && d.error) ? d.error : 'rejected', false);
+      }
+    })
+    .catch(() => flashBtn(btn, 'network error', false))
+    .finally(() => { submitting = false; });
+  }
+  // Does this wall's overlay have any painted pixel? Samples a 64×64
+  // downscale of the overlay's alpha channel — cheap and good enough.
+  const _probe = document.createElement('canvas');
+  _probe.width = _probe.height = 64;
+  const _probeCtx = _probe.getContext('2d', { willReadFrequently: true });
+  function overlayHasPaint(wall) {
+  _probeCtx.clearRect(0, 0, 64, 64);
+  _probeCtx.drawImage(wall.overlay, 0, 0, 64, 64);
+  const a = _probeCtx.getImageData(0, 0, 64, 64).data;
+  for (let i = 3; i < a.length; i += 4) if (a[i] > 8) return true;
+  return false;
+  }
+  function flashBtn(btn, msg, ok) {
+  if (!btn) return;
+  const prev = 'Leave your mark';
+  btn.textContent = msg;
+  btn.classList.toggle('sent', !!ok);
+  setTimeout(() => {
+  btn.textContent = prev;
+  btn.classList.remove('sent');
+  }, 1800);
+  }
+  const leaveBtn = document.getElementById('leave-mark');
+  if (leaveBtn) leaveBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  submitMyMarks();
+  });
+  // Kick off the load once the panorama (and thus the walls) exist.
+  // The walls are built synchronously above, so we can load immediately.
+  loadSharedGraffiti();
+
+  // ════════════════════════════════════════════════════════════════
+  //  RENDER LOOP
+  // ════════════════════════════════════════════════════════════════
+
+  function animate() {
+    renderer.render(scene, camera);
+    requestAnimationFrame(animate);
+  }
+  animate();
+
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+  </script>
+</body>
+</html>

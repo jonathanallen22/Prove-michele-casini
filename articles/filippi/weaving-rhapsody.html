@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weaving my Rhapsody - Matilde Filippi | Antitesi Magazine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../../css/index_style.css">
+    <link rel="stylesheet" href="../../css/article_style.css">
+    <link rel="stylesheet" href="../../css/mobile.css">
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="../../css/spark_styles.css">');
+            document.write('<script>window.magazineSparkMode = true;<\/script>');
+            document.write('<script src="../../js/flying-magazine.js"><\/script>');
+        }
+    </script>
+    <script src="../../js/articles-and-utils.js"></script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #000;
+            --white: #fff;
+            --gray: #f3f3f3;
+            --accent: #c8394a;
+            --serif: 'Crimson Pro', serif;
+            --grotesk: 'Inter', sans-serif;
+            --display: 'Fraunces', serif;
+            --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+            --dynamic-color: #c8394a;
+            --border: rgba(0, 0, 0, 0.12);
+        }
+
+        body.dark-mode .section-ornament {
+            color: #333;
+        }
+
+        body.dark-mode .thread-ornament {
+            opacity: 0.12;
+        }
+
+        body.dark-mode .etymology-box {
+            background: #111;
+            border-color: #222;
+        }
+
+        body.dark-mode .image-caption {
+            color: #555;
+        }
+
+        body.dark-mode .media-frame {
+            border-color: #1e1e1e;
+            background: #080808;
+        }
+
+        body.dark-mode .media-link-frame {
+            border-color: #1e1e1e;
+            background: #080808;
+        }
+
+        body.dark-mode .media-link-frame:hover {
+            background: #111;
+        }
+
+        body.dark-mode .media-link-frame::after {
+            background: linear-gradient(to top, #0a0a0a 0%, transparent 100%);
+        }
+
+
+        /* ── Ornamental divider (replaces Part I / Part II) ── */
+        .section-ornament {
+            display: block;
+            text-align: center;
+            font-size: 1rem;
+            color: var(--dynamic-color);
+            opacity: 0.3;
+            letter-spacing: 0.6em;
+            margin: 3.5rem 0;
+            user-select: none;
+            transition: opacity 0.4s;
+        }
+
+        .section-ornament:hover {
+            opacity: 0.7;
+        }
+
+        /* ── Thread ornament ── */
+        .thread-ornament {
+            display: block;
+            text-align: center;
+            font-size: 1.2rem;
+            opacity: 0.1;
+            letter-spacing: 0.5em;
+            margin: 2.5rem 0;
+            user-select: none;
+            color: var(--dynamic-color);
+            transition: opacity 0.4s var(--ease), color 0.4s;
+        }
+
+        .thread-ornament:hover {
+            opacity: 0.3;
+        }
+
+        /* ── Etymology box ── */
+        .etymology-box {
+            margin: 2.5rem 0;
+            padding: 1.25rem 1.75rem;
+            border-left: 2px solid var(--dynamic-color);
+            background: var(--gray);
+            font-family: var(--grotesk);
+            font-size: 0.875rem;
+            line-height: 1.75;
+            letter-spacing: 0.01em;
+            transition: border-color 0.4s;
+        }
+
+        .etymology-box .greek {
+            font-family: var(--serif);
+            font-style: italic;
+            font-size: 1rem;
+        }
+
+        .etymology-box .label {
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            font-size: 0.65rem;
+            opacity: 0.4;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ── Media frames — linked ── */
+        .media-link-frame {
+            display: block;
+            margin: 3rem -1.5rem;
+            border: 1px solid var(--border);
+            background: var(--gray);
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            transition: border-color 0.3s var(--ease), transform 0.3s var(--ease);
+            cursor: pointer;
+        }
+
+        .media-link-frame:hover {
+            border-color: var(--dynamic-color);
+            transform: translateY(-2px);
+        }
+
+        .media-link-frame:hover .media-preview-overlay {
+            opacity: 1;
+        }
+
+        .media-preview-inner {
+            width: 100%;
+            height: 280px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .media-preview-inner iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            pointer-events: none;
+            transform-origin: top left;
+        }
+
+        .media-preview-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.04);
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .media-open-btn {
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            background: var(--white);
+            color: var(--black);
+            padding: 0.6rem 1.4rem;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .media-open-btn svg {
+            opacity: 0.5;
+        }
+
+        .media-link-frame:hover .media-open-btn {
+            background: var(--dynamic-color);
+            color: #fff;
+            border-color: var(--dynamic-color);
+        }
+
+        .media-link-frame:hover .media-open-btn svg {
+            opacity: 1;
+        }
+
+        .image-caption {
+            padding: 0.75rem 1.5rem;
+            font-family: var(--grotesk);
+            font-size: 0.72rem;
+            opacity: 0.4;
+            letter-spacing: 0.06em;
+            border-top: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .caption-tag {
+            font-family: var(--grotesk);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--dynamic-color);
+            opacity: 0.7;
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+        }
+
+
+        /* ── Loom widget — redesigned ── */
+        .loom-container {
+            margin: 5rem auto;
+            max-width: 600px;
+            padding: 0 1.5rem;
+        }
+
+        .loom-widget {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
+            background: var(--white);
+        }
+
+        .loom-widget:hover {
+            border-color: var(--accent);
+            box-shadow: 0 8px 40px rgba(200, 57, 74, 0.09);
+        }
+
+        .loom-preview {
+            width: 100%;
+            height: 330px;
+            overflow: hidden;
+            position: relative;
+            background: var(--gray);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .loom-preview iframe {
+            width: 200%;
+            height: 200%;
+            border: none;
+            display: block;
+            pointer-events: none;
+            transform: scale(0.5);
+            transform-origin: top left;
+        }
+
+        .loom-preview-veil {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            transition: opacity 0.3s var(--ease);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(13, 13, 13, 0.18);
+        }
+
+        .loom-widget:hover .loom-preview-veil {
+            opacity: 1;
+        }
+
+        /* Pill open button — replaces ? */
+        .loom-open-pill {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.65rem 1.4rem;
+            background: var(--white);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--black);
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        .loom-widget:hover .loom-open-pill {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .loom-widget:hover .loom-open-pill svg {
+            opacity: 1;
+        }
+
+        .loom-open-pill svg {
+            opacity: 0.6;
+        }
+
+        .loom-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.8rem 2.2rem;
+            gap: 2rem;
+        }
+
+        .loom-footer-left {
+            flex: 1;
+        }
+
+        .loom-footer-right {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.75rem;
+            flex-shrink: 0;
+        }
+
+        .loom-label {
+            font-family: var(--grotesk);
+            font-size: 0.62rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            opacity: 0.35;
+            margin-bottom: 0.5rem;
+        }
+
+        .loom-title {
+            font-family: var(--display);
+            font-size: clamp(1.2rem, 2.5vw, 1.55rem);
+            line-height: 1.2;
+            font-weight: 700;
+            margin-bottom: 0.6rem;
+        }
+
+        .loom-desc {
+            font-family: var(--serif);
+            font-size: 0.95rem;
+            line-height: 1.6;
+            opacity: 0.5;
+            max-width: 380px;
+        }
+
+        .warp-svg {
+            display: block;
+            width: 100px;
+            opacity: 0.18;
+            transition: opacity 0.4s;
+        }
+
+        .loom-widget:hover .warp-svg {
+            opacity: 0.5;
+        }
+
+        .loom-cta {
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .loom-arrow {
+            transition: transform 0.3s var(--ease);
+            display: inline-block;
+        }
+
+        .loom-widget:hover .loom-arrow {
+            transform: translateX(4px);
+        }
+
+        body.dark-mode .loom-widget {
+            background: #080808;
+        }
+
+        body.dark-mode .loom-preview {
+            background: #111;
+            border-bottom-color: #1e1e1e;
+        }
+
+        body.dark-mode .loom-open-pill {
+            background: #1a1a1a;
+            color: #e8e6e0;
+            border-color: #333;
+        }
+
+        /* ── Feature interactive block ── */
+        .feature-block {
+            margin: 5rem 0;
+        }
+
+        .feature-block-inner {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: border-color 0.3s var(--ease), transform 0.3s var(--ease);
+            background: var(--white);
+        }
+
+        .feature-block-inner:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+
+        .feature-preview {
+            width: 100%;
+            height: 360px;
+            overflow: hidden;
+            position: relative;
+            background: var(--gray);
+        }
+
+        .feature-preview iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            pointer-events: none;
+        }
+
+        .feature-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.03);
+            opacity: 0;
+            transition: opacity 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .feature-block-inner:hover .feature-overlay {
+            opacity: 1;
+        }
+
+        .feature-open-btn {
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            background: var(--white);
+            color: var(--black);
+            padding: 0.65rem 1.5rem;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background 0.2s, color 0.2s, border-color 0.2s;
+        }
+
+        .feature-block-inner:hover .feature-open-btn {
+            background: var(--accent);
+            color: #fff;
+            border-color: var(--accent);
+        }
+
+        .feature-body {
+            padding: 2rem 2.5rem 2.2rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .feature-label {
+            font-family: var(--grotesk);
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            opacity: 0.35;
+            margin-bottom: 1rem;
+        }
+
+        .feature-title {
+            font-family: var(--display);
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            line-height: 1.15;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .feature-title em {
+            font-style: italic;
+            opacity: 0.7;
+        }
+
+        .feature-desc {
+            font-family: var(--serif);
+            font-size: 1rem;
+            line-height: 1.7;
+            opacity: 0.6;
+            margin-bottom: 1.5rem;
+            max-width: 520px;
+        }
+
+        .feature-cta {
+            font-family: var(--grotesk);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .feature-arrow {
+            transition: transform 0.3s var(--ease);
+        }
+
+        .feature-block-inner:hover .feature-arrow {
+            transform: translateX(5px);
+        }
+
+        body.dark-mode .feature-block-inner {
+            background: #050505;
+        }
+
+        body.dark-mode .feature-preview {
+            background: #111;
+        }
+
+        @media (max-width: 768px) {
+            .media-link-frame {
+                margin: 2.5rem 0;
+            }
+
+            .feature-preview {
+                height: 240px;
+            }
+
+            .feature-body {
+                padding: 1.5rem;
+            }
+
+            .loom-container {
+                padding: 0;
+                margin: 3rem 0;
+            }
+
+            .loom-footer {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1.25rem 1.25rem 1.5rem;
+            }
+
+            .loom-footer-right {
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                width: 100%;
+            }
+
+            .warp-svg {
+                display: none;
+            }
+
+            .loom-title {
+                font-size: 1.2rem;
+            }
+
+            .loom-desc {
+                font-size: 0.9rem;
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+    <!-- Fullscreen particle canvas -->
+    <canvas id="eiffelCanvas" aria-hidden="true"></canvas>
+
+    <div class="progress-bar"></div>
+
+    <nav class="nav-cluster">
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+        <a href="../../archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <article class="article-view">
+        <header class="article-header">
+            <h1 class="article-title">Weaving my Rhapsody</h1>
+            <div class="article-meta" id="article-meta">
+                <span>Essay</span>
+                <span>~5 min read</span>
+                <span>March 2026</span>
+            </div>
+            <div class="article-author" id="article-author">by Matilde Filippi</div>
+        </header>
+
+        <script>
+            (function () {
+                const filename = window.location.pathname.split('/').pop();
+                const data = (typeof articles !== 'undefined') && articles.find(a => a.filename === filename);
+                if (!data) return;
+                const meta = document.getElementById('article-meta');
+                const author = document.getElementById('article-author');
+                if (meta) meta.innerHTML = `<span>Article</span><span>~${data.readTime} read</span><span>${data.publishDate}</span>`;
+                if (author) author.textContent = 'by ' + data.author;
+            })();
+        </script>
+
+
+        <div class="article-content">
+
+            <p>In my little bedroom, for at least ten years, there have been two Eiffel Towers.</p>
+
+            <p>The first is a small and mediocre impressionist painting, a middle-school assignment I was particularly
+                proud of. The second is a 3D puzzle which, during one of those Christmases void of exams, of a car, and
+                of much to do, I had the time to put together.</p>
+
+            <p>The tower, a symbol which so loudly screams Paris, used to annoy me because I had nothing to do with that
+                city. I had never been there, I wasn't especially interested in it, and I never got the accents right on
+                French tests (enough for me to mischiefvously declare, "I hate France.")</p>
+
+            <!-- MEDIA SLOT 1: Eiffel Tower particle animation trigger (canvas is fullscreen fixed) -->
+            <div class="eiffel-scene" aria-hidden="true"></div>
+
+            <p>Curiously, two weeks ago, while walking along the Seine, my bedroom - the museum of my adolescence - came
+                back to mind. With it, the two Towers.</p>
+
+            <p>Suddenly, the weaving began.</p>
+
+            <p>Suddenly, everything seemed to make sense: that empty symbol had simply been waiting to be filled with
+                meaning. It was simply a matter of time.</p>
+
+            <p>I chuckled at how easily one can create a mythology of oneself.</p>
+
+            <p>Whispering to myself that everything is connected, that life rhymes with itself, brings me great comfort.
+                I wrap myself in this warm, woven cloak and, for a few moments, the little voice which endlessly asks
+                "Was it the right choice?" falls silent.</p>
+
+            <span class="thread-ornament" title="ῥάπτω · to stitch">— ∿∿∿ —</span>
+
+            <p>We are all rhapsodes of ourselves.</p>
+
+            <div class="etymology-box">
+                <span class="label">Etymology</span>
+                <span class="greek">ῥαψῳδός (rhapsōdós)</span> — from Ancient Greek <span class="greek">ῥάπτω
+                    (rhápto)</span>, "to stitch," and <span class="greek">ᾠδή (ōidē)</span>, "song, poetry."
+                A rhapsode was a professional reciter of epic verse who <em>stitched together</em> stories into a
+                seamless whole.
+            </div>
+
+            <!-- Ornamental section break (replacing Part I / Part II) -->
+            <span class="section-ornament">·&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;·&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;·</span>
+
+            <p>To be honest, I ended up in Paris by chance, to research a topic I had chosen only halfway and had
+                entrusted, for the other half, to the advice of (ahimè) AI.</p>
+
+            <p>And yet, in this case as well, the skilled needle somehow found a marvelous way to hold the threads
+                together.</p>
+
+            <p>The pretext was the summer afternoons spent on my grandfather's knees, listening to stories of a surreal
+                childhood spent between football games in the courtyard and unexploded bombs on the road home, between a
+                maths lesson and one on how to load a gun, between a carefree theft of cherries and the anxiety that
+                Nazis might burn down your house.</p>
+
+            <p>Before realizing that I was interested in history in general, I became obsessed with the years of World
+                War II.</p>
+
+            <p>One moment it's Harry Potter and One Direction, the next it's Fascism and the Holocaust.</p>
+
+            <p>So, when my research took shape as an exploration of the chaos between the years 1945 and 1950, the
+                puzzle clicked. I could tell myself that this had been waiting for me since childhood.</p>
+
+            <p>And here I am, a few months later, intent on untangling the skein of narratives and counter-narratives
+                woven by the postwar press by redrawing the memory of Resistance and of Occupation. All to suit the
+                needs of its propaganda.</p>
+
+            <p>The left pulls threads in one direction, the right pulls them in another. The center stitches dull grey
+                patches over everything.</p>
+
+            <p>It's a Phoenician weave which I, an expert seamstress, am eager to decipher.</p>
+
+        </div>
+
+        <!-- Loom interactive widget -->
+        <div class="loom-container">
+            <a class="loom-widget" href="news.html" target="_blank">
+                <div class="loom-preview">
+                    <iframe src="news.html" scrolling="no" tabindex="-1" aria-hidden="true"></iframe>
+                    <div class="loom-preview-veil">
+                        <div class="loom-open-pill">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                                xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                                <path d="M2 7h10M7 2l5 5-5 5" stroke="currentColor" stroke-width="1.5"
+                                    stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <span>Explore archive</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="loom-footer">
+                    <div class="loom-footer-left">
+                        <div class="loom-label">Interactive · Antitesi Archivio</div>
+                        <div class="loom-desc">A visual exploration of how the postwar press rewove the memory of
+                            Resistance and Occupation.</div>
+                    </div>
+                    <div class="loom-footer-right">
+                        <svg class="warp-svg" viewBox="0 0 200 28" xmlns="http://www.w3.org/2000/svg"
+                            aria-hidden="true">
+                            <defs>
+                                <style>
+                                    .wt {
+                                        stroke: currentColor;
+                                        stroke-width: 1;
+                                        fill: none
+                                    }
+
+                                    @keyframes wv {
+
+                                        0%,
+                                        100% {
+                                            d: path("M0 14 Q25 4 50 14 Q75 24 100 14 Q125 4 150 14 Q175 24 200 14")
+                                        }
+
+                                        50% {
+                                            d: path("M0 14 Q25 24 50 14 Q75 4 100 14 Q125 24 150 14 Q175 4 200 14")
+                                        }
+                                    }
+
+                                    .l1 {
+                                        animation: wv 3.1s ease-in-out infinite;
+                                        opacity: .6
+                                    }
+
+                                    .l2 {
+                                        animation: wv 3.1s ease-in-out infinite reverse;
+                                        opacity: .35;
+                                        animation-delay: -1.5s
+                                    }
+                                </style>
+                            </defs>
+                            <path class="wt l1" d="M0 14 Q25 4 50 14 Q75 24 100 14 Q125 4 150 14 Q175 24 200 14" />
+                            <path class="wt l2" d="M0 14 Q25 24 50 14 Q75 4 100 14 Q125 24 150 14 Q175 4 200 14" />
+                        </svg>
+                        <div class="loom-cta">
+                            <span>Open</span>
+                            <span class="loom-arrow">→</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <div class="article-references">
+            <h3>References</h3>
+            <a href="https://gallica.bnf.fr/selections/fr/html/les-principaux-quotidiens" target="_blank">&rarr;
+                Gallica.bnf &mdash; Les principaux quotidiens</a>
+            <a href="https://logeion.uchicago.edu/%E1%BF%A5%CE%B1%CF%88%E1%BF%B3%CE%B4%CF%8C%CF%82"
+                target="_blank">&rarr; UChicago.edu &mdash; Rhapsody word info </a>
+            <a href="https://maps.app.goo.gl/jEQcHNTrGHh3NP918?g_st=aw" target="_blank">&rarr; Google Maps &mdash; Saule
+                Pleureur de la Pointe</a>
+            <a href="https://textcavator.hum.uu.nl/search/figaro?date=1945-01-01:1954-12-31&query=P%C3%A9tain"
+                target="_blank">&rarr; Text Cavator &mdash; Le Figaro archive search</a>
+        </div>
+    </article>
+
+
+    <div class="shortcuts-hint"></div>
+
+    <script>
+        const colors = ['#c8394a', '#2d5be3', '#1a9c5b', '#d4820a', '#7c3ae0', '#0a8a8a'];
+        let colorIndex = 0;
+
+        function changeColor() {
+            colorIndex = (colorIndex + 1) % colors.length;
+            const c = colors[colorIndex];
+            document.documentElement.style.setProperty('--dynamic-color', c);
+        }
+
+        document.addEventListener('click', (e) => {
+            // Don't change color when clicking a media link
+            if (!e.target.closest('.media-link-frame')) changeColor();
+        });
+        document.addEventListener('keydown', changeColor);
+
+        window.addEventListener('scroll', () => {
+            const scrollPercent = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+            document.querySelector('.progress-bar').style.height = scrollPercent + '%';
+        });
+
+
+        initKeyboardShortcuts({
+            extraKeys: {
+                'a': openNextArticle,
+                'A': openNextArticle,
+                'Escape': returnToHome,
+                'h': returnToHome,
+                'H': returnToHome,
+            }
+        });
+
+        const loomWidget = document.querySelector('.loom-widget');
+        if (loomWidget) {
+            loomWidget.addEventListener('click', changeColor);
+
+            loomWidget.addEventListener('click', function (e) {
+                e.preventDefault();
+                const href = loomWidget.getAttribute('href');
+
+                // Open the multimedia page
+                const win = window.open(href, '_blank');
+            });
+        }
+    </script>
+    <style>
+        /* Fullscreen particle canvas — fixed, behind everything */
+        #eiffelCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            display: block;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Spacer that marks where the animation "lives" in the scroll flow */
+        .eiffel-scene {
+            margin: 2.5rem 0;
+            height: 680px;
+            position: relative;
+            pointer-events: none;
+        }
+    </style>
+
+    <script>
+        (function () {
+            const canvas = document.getElementById('eiffelCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+
+            // The scroll-trigger zone is defined by the .eiffel-scene placeholder in the DOM
+            const scene = document.querySelector('.eiffel-scene');
+
+            // Rich red-family palette with real color variation
+            function getColor(yFrac, depthFrac, colorVariant) {
+                const palettes = [
+                    [
+                        { y: 0.0, r: 90, g: 15, b: 25 },
+                        { y: 0.25, r: 155, g: 28, b: 42 },
+                        { y: 0.5, r: 210, g: 55, b: 70 },
+                        { y: 0.75, r: 230, g: 75, b: 60 },
+                        { y: 1.0, r: 160, g: 30, b: 45 },
+                    ],
+                    [
+                        { y: 0.0, r: 140, g: 40, b: 55 },
+                        { y: 0.3, r: 210, g: 85, b: 90 },
+                        { y: 0.6, r: 235, g: 95, b: 65 },
+                        { y: 1.0, r: 195, g: 55, b: 50 },
+                    ],
+                    [
+                        { y: 0.0, r: 80, g: 10, b: 35 },
+                        { y: 0.35, r: 165, g: 20, b: 65 },
+                        { y: 0.65, r: 210, g: 50, b: 90 },
+                        { y: 1.0, r: 145, g: 25, b: 55 },
+                    ],
+                    [
+                        { y: 0.0, r: 120, g: 30, b: 15 },
+                        { y: 0.4, r: 200, g: 70, b: 30 },
+                        { y: 0.7, r: 220, g: 60, b: 55 },
+                        { y: 1.0, r: 170, g: 35, b: 35 },
+                    ],
+                ];
+                const stops = palettes[colorVariant % palettes.length];
+                let s0 = stops[0], s1 = stops[stops.length - 1];
+                for (let i = 0; i < stops.length - 1; i++) {
+                    if (yFrac >= stops[i].y && yFrac <= stops[i + 1].y) {
+                        s0 = stops[i]; s1 = stops[i + 1]; break;
+                    }
+                }
+                const t = s1.y === s0.y ? 0 : (yFrac - s0.y) / (s1.y - s0.y);
+                let r = s0.r + t * (s1.r - s0.r);
+                let g = s0.g + t * (s1.g - s0.g);
+                let b = s0.b + t * (s1.b - s0.b);
+                const shadow = 0.62 + depthFrac * 0.38;
+                r *= shadow; g *= shadow; b *= shadow;
+                const warm = depthFrac * 22;
+                r = Math.min(255, r + warm);
+                g = Math.min(255, g + warm * 0.2);
+                return `rgb(${Math.round(r)},${Math.round(g)},${Math.round(b)})`;
+            }
+
+            const profile = [
+                [0.00, 0.007], [0.08, 0.013], [0.16, 0.020],
+                [0.20, 0.060], [0.23, 0.062], [0.29, 0.046],
+                [0.38, 0.042], [0.48, 0.054], [0.52, 0.064],
+                [0.63, 0.098], [0.73, 0.130], [0.84, 0.162], [1.00, 0.215],
+            ];
+
+            // Viewport dimensions (canvas is fixed = always = viewport)
+            let vW = 0, vH = 0;
+            const particles = [];
+
+            function resize() {
+                vW = window.innerWidth;
+                vH = window.innerHeight;
+                canvas.width = Math.round(vW * devicePixelRatio);
+                canvas.height = Math.round(vH * devicePixelRatio);
+            }
+
+            function buildParticles() {
+                particles.length = 0;
+                // Tower target: centered in viewport, filling ~90% height
+                const isMobile = vW < 768;
+                const tH = isMobile ? vH * 0.50 : vH * 0.90;
+                const tW = isMobile ? vW * 0.70 : vW * 0.55;
+                const cx = vW / 2;
+                const baseY = isMobile ? vH * 0.75 : vH * 0.96;
+
+                for (let i = 0; i < 1100; i++) {
+                    const seg = Math.floor(Math.random() * (profile.length - 1));
+                    const tt = Math.random();
+                    const yF = profile[seg][0] + tt * (profile[seg + 1][0] - profile[seg][0]);
+                    const hwF = profile[seg][1] + tt * (profile[seg + 1][1] - profile[seg][1]);
+                    const ty = baseY - (1 - yF) * tH;
+                    const side = Math.random() < 0.5 ? -1 : 1;
+                    const edgeT = Math.random();
+                    const tx = cx + side * hwF * tW * (0.08 + edgeT * 0.92);
+                    const depthFrac = Math.max(0, 1 - Math.abs(tx - cx) / (hwF * tW * 0.55 + 1));
+
+                    const sizeBase = yF > 0.75 ? 1.6 + Math.random() * 2.4
+                        : yF > 0.35 ? 1.1 + Math.random() * 1.8
+                            : 0.7 + Math.random() * 1.2;
+
+                    // Scatter origin: random across entire viewport (fixed canvas coords)
+                    const sx = Math.random() * vW;
+                    const sy = Math.random() * vH;
+                    const colorVariant = Math.floor(Math.random() * 4);
+
+                    particles.push({
+                        tx, ty, sx, sy,
+                        size: sizeBase,
+                        delay: Math.random(),
+                        color: getColor(yF, depthFrac, colorVariant),
+                        yF
+                    });
+                }
+            }
+
+            function getSceneRect() {
+                if (!scene) return { top: 0, height: vH };
+                const r = scene.getBoundingClientRect();
+                return { top: r.top + window.scrollY, height: r.height };
+            }
+
+            function getT() {
+                const s = getSceneRect();
+                const sceneTopAbs = s.top;
+                const sceneH = s.height;
+                const vh = window.innerHeight;
+                const scrollY = window.scrollY;
+                const vpCenter = scrollY + vh / 2;
+                const scCenter = sceneTopAbs + sceneH / 2;
+                const past = vpCenter - scCenter;
+                const isMobile = vh < 768;
+                const gDist = isMobile ? vh * 0.7 : vh * 1.5;
+                const dDist = isMobile ? vh * 0.5 : vh * 2.5;
+                const rawG = (past + gDist) / gDist;
+                if (rawG <= 0) return 0;
+                if (rawG < 1) return rawG;
+                const rawD = past / dDist;
+                if (rawD >= 1) return 2;
+                return 1 + rawD;
+            }
+
+            function easeInOut(t) { return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; }
+            function easeOut3(t) { return 1 - Math.pow(1 - t, 3); }
+
+            function draw() {
+                requestAnimationFrame(draw);
+                if (!vW || !vH || !particles.length) return;
+                const raw = getT();
+                const gather = Math.min(1, Math.max(0, raw));
+                const dissolve = Math.min(1, Math.max(0, raw - 1));
+                const g = easeInOut(gather);
+                const dis = easeOut3(dissolve);
+                const dpr = devicePixelRatio;
+
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                for (const p of particles) {
+                    const gp = Math.max(0, Math.min(1, g * (1 + p.delay) - p.delay));
+                    const formX = p.sx + (p.tx - p.sx) * gp;
+                    const formY = p.sy + (p.ty - p.sy) * gp;
+                    const px = formX + (p.sx - formX) * dis;
+                    const py = formY + (p.sy - formY) * dis;
+                    const presence = gp * (1 - dis);
+
+                    ctx.globalAlpha = Math.max(0.05, 0.07 + 0.83 * presence);
+                    ctx.fillStyle = p.color;
+                    ctx.beginPath();
+                    ctx.arc(px * dpr, py * dpr, p.size * (0.35 + 0.65 * gp) * dpr, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            window.addEventListener('resize', () => { resize(); buildParticles(); });
+
+            function init() {
+                resize();
+                buildParticles();
+                draw();
+            }
+
+            if (document.readyState === 'complete') { init(); }
+            else { window.addEventListener('load', init); }
+        })();
+    </script>
+
+</body>
+
+</html>

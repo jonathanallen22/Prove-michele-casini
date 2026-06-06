@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Road to nowhere | Antitesi Magazine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../../css/article_style.css">
+    <link rel="stylesheet" href="../../css/index_style.css">
+    <link rel="stylesheet" href="../../css/mobile.css">
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="../../css/spark_styles.css">');
+            document.write('<script>window.magazineSparkMode = true;<\/script>');
+            document.write('<script src="../../js/flying-magazine.js"><\/script>');
+        }
+    </script>
+    <script src="../../js/articles-and-utils.js"></script>
+
+
+    <!-- Leaflet for interactive map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <!-- MathJax for mathematical expressions -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #000;
+            --white: #fff;
+            --gray: #f3f3f3;
+            --accent: #00ff88;
+            --serif: 'Crimson Pro', serif;
+            --grotesk: 'Inter', sans-serif;
+            --display: 'Fraunces', serif;
+            --ease: cubic-bezier(0.4, 0.0, 0.2, 1);
+            --dynamic-color: #00ff88;
+            color-scheme: light;
+        }
+
+        body.dark-mode .info-panel {
+            background: #111;
+            border-left-color: #333;
+        }
+
+        body.dark-mode .panel-header {
+            background: #111;
+            border-bottom-color: #333;
+        }
+
+        body.dark-mode .panel-header h3 {
+            color: var(--white);
+        }
+
+        body.dark-mode .panel-date {
+            color: var(--gray);
+        }
+
+        body.dark-mode .content-block p {
+            color: var(--gray);
+        }
+
+        body.dark-mode .content-block p.citation {
+            color: #aaa;
+        }
+
+        body.dark-mode .content-list li {
+            color: var(--gray);
+        }
+
+        body.dark-mode .close-btn {
+            color: var(--gray);
+        }
+
+        /* Map Container */
+        .map-container {
+            margin: 3rem 0;
+            position: relative;
+            z-index: 100;
+        }
+
+        .map-intro {
+            font-family: var(--grotesk);
+            font-size: 0.9rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        #map {
+            height: 600px;
+            width: 100%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .map-caption {
+            font-family: var(--grotesk);
+            font-size: 0.875rem;
+            color: #999;
+            font-style: italic;
+            text-align: center;
+        }
+
+        /* Enhanced marker styles for dark theme */
+        .node-marker {
+            z-index: 1;
+            background-color: var(--white);
+            border: 3px solid var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.3);
+            transition: all 0.3s var(--ease);
+        }
+
+        .node-marker.active {
+            background-color: var(--accent);
+            border-color: var(--white);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.6);
+            transform: scale(1.3);
+        }
+
+        .node-marker:hover {
+            transform: scale(1.15);
+            box-shadow: 0 6px 16px rgba(0, 255, 136, 0.5);
+            background-color: var(--accent);
+        }
+
+        .proust-marker {
+            z-index: 1000 !important;
+            transition: all 0.3s var(--ease);
+        }
+
+        .proust-marker:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(0, 255, 136, 0.6) !important;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            position: fixed;
+            top: 0;
+            right: -480px;
+            width: 480px;
+            height: 100vh;
+            background: #ffffff;
+            border-left: 1px solid #333;
+            padding: 0;
+            overflow-y: auto;
+            transition: right 0.4s var(--ease);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-panel.active {
+            right: 0;
+        }
+
+        .panel-header {
+            padding: 3rem 2rem 2rem 2rem;
+            border-bottom: 1px solid #333;
+            background: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+        }
+
+        .panel-header h3 {
+            font-family: var(--display);
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--black);
+            margin-bottom: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .panel-header .subtitle {
+            font-family: var(--serif);
+            font-size: 1.1rem;
+            color: var(--accent);
+            font-style: italic;
+            margin: 0;
+            max-width: none;
+        }
+
+        .panel-date {
+            font-family: var(--grotesk);
+            font-size: 0.9rem;
+            color: #1e1e1e;
+            margin-top: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 500;
+        }
+
+        .panel-content {
+            padding: 2rem;
+        }
+
+        .content-block {
+            margin-bottom: 2.5rem;
+        }
+
+        .content-block:last-child {
+            margin-bottom: 0;
+        }
+
+        .content-block p {
+            font-family: var(--serif);
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: var(--ffffff);
+            text-align: justify;
+            margin: 0;
+        }
+
+        .content-block p.citation {
+            font-style: italic;
+            color: #000000;
+            border-left: 3px solid var(--accent);
+            padding-left: 1.5rem;
+            margin: 1.5rem 0;
+            font-size: 1rem;
+            text-align: left;
+        }
+
+        .content-list {
+            margin-bottom: 2rem;
+        }
+
+        .content-list h4 {
+            font-family: var(--grotesk);
+            font-size: 1rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .content-list ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .content-list li {
+            font-family: var(--serif);
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--ffffff);
+            margin-bottom: 1rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .content-list li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: var(--accent);
+            font-weight: bold;
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            background: none;
+            border: none;
+            color: var(--black);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1001;
+            width: 2rem;
+            height: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s var(--ease);
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--white);
+        }
+
+        .close-btn-bottom {
+            display: none;
+        }
+
+        .panel-image {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-image {
+            width: 100%;
+            height: auto;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+
+        .image-caption {
+            font-family: var(--grotesk);
+            font-size: 0.9rem;
+            color: #999;
+            font-style: italic;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
+
+
+        .leaflet-control-container {
+            z-index: 100 !important;
+        }
+
+        .leaflet-control-attribution {
+            z-index: 100 !important;
+        }
+
+
+
+
+        @media (max-width: 768px) {
+            #map {
+                height: 340px;
+            }
+
+            /* Bottom sheet instead of right panel */
+            .info-panel {
+                width: 100%;
+                height: 70vh;
+                top: auto;
+                bottom: -70vh;
+                right: 0;
+                left: 0;
+                border-left: none;
+                border-top: 1px solid #333;
+                border-radius: 16px 16px 0 0;
+                transition: bottom 0.4s var(--ease);
+            }
+
+            .info-panel.active {
+                bottom: 0;
+                right: 0;
+                /* reset desktop override */
+            }
+
+            .close-btn {
+                top: 1rem;
+                right: 1rem;
+            }
+
+            .panel-header {
+                padding: 2rem 1.5rem 1.5rem 1.5rem;
+            }
+
+            .panel-content {
+                padding: 1.5rem;
+            }
+
+            .close-btn-bottom {
+                display: flex;
+                position: static;
+                margin: 1.5rem auto 2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+    <div class="progress-bar"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-cluster">
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+        <a href="../../archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+
+    <!-- Keyboard Shortcuts Hint -->
+    <div class="shortcuts-hint"></div>
+
+    <!-- Info Panel for map interactions -->
+    <div class="info-panel" id="infoPanel">
+        <button class="close-btn" onclick="closePanel()">×</button>
+        <div class="panel-content" id="panelContent">
+            <!-- Dynamic content will be loaded here -->
+        </div>
+    </div>
+
+    <!-- Article View -->
+    <article class="article-view">
+        <header class="article-header">
+            <h1 class="article-title">Road to nowhere</h1>
+            <div class="article-meta" id="article-meta">
+                <span>Article</span>
+                <span>~12 min read</span>
+                <span>February 2025</span>
+            </div>
+            <div class="article-author" id="article-author">by Olmo Notarianni</div>
+        </header>
+
+        <script>
+            (function () {
+                const filename = window.location.pathname.split('/').pop();
+                const data = (typeof articles !== 'undefined') && articles.find(a => a.filename === filename);
+                if (!data) return;
+                const meta = document.getElementById('article-meta');
+                const author = document.getElementById('article-author');
+                if (meta) meta.innerHTML = `<span>Article</span><span>~${data.readTime} read</span><span>${data.publishDate}</span>`;
+                if (author) author.textContent = 'by ' + data.author;
+            })();
+        </script>
+
+
+        <div class="section map-container">
+            <div id="map"></div>
+        </div>
+
+        <div class="section">
+            <p>In predictive modelling, given an input $x$ — e.g., the number of Japanese cars sold in the United States
+                — we want to predict $y = f(x)$ — e.g., the number of suicides by road accident (<a
+                    href="https://www.tylervigen.com/spurious-correlations" target="_blank">picked here</a>). There is
+                no physical model representing this; however, we can approximate an unknown function $f$ describing the
+                relation between $x$ and $y$ given past realizations of these variables. The concept, i.e. the hidden
+                relationship represented by $f$, changes over time. We might expect that due to a presidential election,
+                tariffs on Japanese cars could suddenly increase or suicide rate would decrease because people are too
+                busy keeping up with all the shit going on. The model must be updated to maintain a good approximation
+                over time. You don't know where you are, nor where you are going - probably, it doesn't even matter. It
+                took me a couple of months to understand that.<br>This was only the beginning. The landscape ran along
+                the strange route Milan-Bucharest-Istanbul-Milan-Sibenik-Sparta, so it seems appropriate to describe the
+                concept on a map.</p>
+        </div>
+        </div>
+
+
+        <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+        <script type="module">
+            // Data
+            import { points, nodeInfo, tripColors, routeData, researchData } from './data.js';
+
+            // Map setup
+            const map = L.map('map', {
+                zoomControl: false,
+                maxBounds: [[-90, -180], [90, 180]], // World boundaries
+                maxBoundsViscosity: 1.0, // Makes the boundary "sticky" - prevents dragging outside
+                minZoom: 2 // Prevents zooming out too far
+            }).setView([44.0, 20.0], 5);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            }).addTo(map);
+
+
+            // State management
+            const markers = {};
+            let currentActiveMarker = null;
+
+            // Add routes
+            routeData.forEach(line => {
+                const coords = line.coords.map(coord => [coord[0], coord[1]]);
+                const tripId = line.id || 0;
+                const tripColor = tripColors[tripId] || '#666';
+                const transport = line.transport ? line.transport.toLowerCase() : 'bus';
+
+                const dashPatterns = {
+                    'flight': null, 'train': '10,10', 'bus': '10,10',
+                    'ferry': '5,15', 'car': '10,10', 'motorbike': '15,5,5,5'
+                };
+
+                L.polyline(coords, {
+                    color: tripColor,
+                    weight: 4,
+                    opacity: 0.8,
+                    dashArray: dashPatterns[transport] || '10,10'
+                }).addTo(map);
+            });
+
+            // Add enhanced markers
+            Object.entries(points).forEach(([city, [lat, lon]]) => {
+                if (nodeInfo[city.toLowerCase()]) {
+                    let markerHTML, iconSize, iconAnchor, zIndexOffset;
+
+                    // Special styling for Paris with Proust image
+                    if (city.toLowerCase() === 'paris') {
+                        markerHTML = '<img src="../../multimedia/notarianni-media/proust.jpg" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;" class="proust-marker">';
+                        iconSize = [40, 40];
+                        iconAnchor = [20, 20];
+                        zIndexOffset = 1000; // This will put Proust on top
+                    } else {
+                        markerHTML = '<div class="node-marker" style="width: 16px; height: 16px;"></div>';
+                        iconSize = [22, 22];
+                        iconAnchor = [11, 11];
+                        zIndexOffset = 0; // Default z-index for other markers
+                    }
+
+                    const marker = L.marker([lat, lon], {
+                        icon: L.divIcon({
+                            className: 'node-pin',
+                            html: markerHTML,
+                            iconSize: iconSize,
+                            iconAnchor: iconAnchor
+                        }),
+                        zIndexOffset: zIndexOffset // Add this option to the marker
+                    });
+
+                    // Enhanced click handler with map centering
+                    marker.on('click', () => {
+                        centerMapOnCity(city.toLowerCase(), lat, lon);
+                        showCityInfo(city.toLowerCase());
+                    });
+
+                    // Store marker reference
+                    markers[city.toLowerCase()] = marker;
+                    marker.addTo(map);
+                }
+            });
+
+            // Fit map bounds
+            const isMobile = window.innerWidth < 768;
+            if (Object.keys(points).length > 0) {
+                const group = new L.featureGroup();
+                Object.values(points).forEach(([lat, lon]) => {
+                    group.addLayer(L.marker([lat, lon]));
+                });
+                map.fitBounds(group.getBounds().pad(isMobile ? 0.01 : 0.06));
+            }
+
+            // Enhanced function to center map on clicked city
+            function centerMapOnCity(city, lat, lon) {
+                // Clear previous active marker styling for ALL markers
+                Object.keys(markers).forEach(markerCity => {
+                    const marker = markers[markerCity];
+                    if (markerCity === 'paris') {
+                        const proustElement = marker._icon.querySelector('.proust-marker');
+                        if (proustElement) {
+                            proustElement.style.transform = 'scale(1)';
+                            proustElement.style.border = '';
+                            proustElement.style.boxShadow = '';
+                        }
+                    } else {
+                        const markerElement = marker._icon.querySelector('.node-marker');
+                        if (markerElement) {
+                            markerElement.classList.remove('active');
+                        }
+                    }
+                });
+
+                // Set new active marker
+                currentActiveMarker = markers[city];
+                if (currentActiveMarker) {
+                    if (city === 'paris') {
+                        const proustElement = currentActiveMarker._icon.querySelector('.proust-marker');
+                        if (proustElement) {
+                            proustElement.style.transform = 'scale(1.2)';
+                            proustElement.style.boxShadow = '0 6px 20px rgba(0,255,136,0.8)';
+                        }
+                    } else {
+                        const markerElement = currentActiveMarker._icon.querySelector('.node-marker');
+                        if (markerElement) {
+                            markerElement.classList.add('active');
+                        }
+                    }
+                }
+
+                // Calculate offset to center in visible 2/3 area (panel takes right 1/3)
+                const mapContainer = map.getContainer();
+                const panelWidth = 480;
+                const offsetX = 0 // panelWidth / 4; // Shift left by half panel width
+
+                // Convert the lat/lon to container point, apply offset, then convert back
+                const targetPoint = map.latLngToContainerPoint([lat, lon]);
+                const offsetPoint = L.point(targetPoint.x + offsetX, targetPoint.y);
+                const offsetLatLng = map.containerPointToLatLng(offsetPoint);
+
+                // Smooth pan to the offset position
+                map.panTo(offsetLatLng, {
+                    animate: true,
+                    duration: 0.8
+                });
+            }
+
+            function showCityInfo(city) {
+                const cityData = researchData[city];
+                if (!cityData) return;
+
+                let contentHTML = `
+                <div class="panel-header">
+                    <h3>${cityData.title}</h3>
+                    <p class="subtitle">${cityData.subtitle}</p>
+                    ${cityData.date && cityData.date !== 'Research Period' ? `<div class="panel-date">${cityData.date}</div>` : ''}
+                </div>
+                <div class="panel-content">
+            `;
+
+                if (cityData.image) {
+                    contentHTML += `<img src="${cityData.image}" alt="${cityData.title}" class="panel-image" onerror="this.style.display='none'">`;
+                }
+
+                cityData.content.forEach(block => {
+                    if (block.type === 'paragraph') {
+                        const paragraphClass = block.class ? ` class="${block.class}"` : '';
+                        contentHTML += `<div class="content-block"><p${paragraphClass}>${block.text}</p></div>`;
+                    } else if (block.type === 'list') {
+                        contentHTML += `
+                        <div class="content-block content-list">
+                            <h4>${block.title}</h4>
+                            <ul>
+                                ${block.items.map(item => `<li>${item}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                    } else if (block.type === 'image') {
+                        const imageClass = block.class ? `content-image ${block.class}` : 'content-image';
+                        contentHTML += `
+                        <div class="content-block">
+                            <img src="${block.src}" alt="${block.alt || ''}" class="${imageClass}" onerror="this.style.display='none'">
+                            ${block.caption ? `<p class="image-caption">${block.caption}</p>` : ''}
+                        </div>
+                    `;
+                    }
+                });
+
+                contentHTML += `<button class="close-btn close-btn-bottom">×</button></div>`;
+
+                document.getElementById('panelContent').innerHTML = contentHTML;
+                document.getElementById('infoPanel').classList.add('active');
+
+                // Re-render MathJax
+                if (window.MathJax) {
+                    MathJax.typesetPromise([document.getElementById('panelContent')]).catch(err => {
+                        console.log('MathJax typeset failed: ' + err.message);
+                    });
+                }
+            }
+
+            function closePanel() {
+                document.getElementById('infoPanel').classList.remove('active');
+
+                // Clear active marker styling for ALL markers
+                Object.keys(markers).forEach(markerCity => {
+                    const marker = markers[markerCity];
+                    if (markerCity === 'paris') {
+                        const proustElement = marker._icon.querySelector('.proust-marker');
+                        if (proustElement) {
+                            proustElement.style.transform = 'scale(1)';
+                            proustElement.style.border = '';
+                            proustElement.style.boxShadow = '';
+                        }
+                    } else {
+                        const markerElement = marker._icon.querySelector('.node-marker');
+                        if (markerElement) {
+                            markerElement.classList.remove('active');
+                        }
+                    }
+                });
+
+                currentActiveMarker = null;
+            }
+            document.querySelector('.close-btn').addEventListener('click', closePanel);
+            document.getElementById('panelContent').addEventListener('click', e => {
+                if (e.target.classList.contains('close-btn-bottom')) closePanel();
+            });
+
+            initKeyboardShortcuts({
+                extraKeys: {
+                    'a': openNextArticle,
+                    'A': openNextArticle,
+                    'Escape': returnToHome,
+                    'h': returnToHome,
+                    'H': returnToHome,
+                }
+            });
+
+        </script>
+</body>
+
+</html>

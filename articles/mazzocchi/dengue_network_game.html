@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Viral Syntax</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      font-family: 'Press Start 2P', monospace;
+      overflow: hidden;
+      color: #00ff88;
+      touch-action: none;
+      image-rendering: pixelated;
+    }
+
+    /* CRT scanlines effect */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(0deg,
+          rgba(0, 255, 0, 0.03),
+          rgba(0, 255, 0, 0.03) 1px,
+          transparent 1px,
+          transparent 2px);
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    svg {
+      display: block;
+      cursor: grab;
+      filter: none;
+    }
+
+    svg:active {
+      cursor: grabbing;
+    }
+
+    .node {
+      cursor: move;
+    }
+
+    .label {
+      font-size: 9px;
+      fill: #fff;
+      pointer-events: none;
+      text-shadow: 0 0 3px #000;
+      font-family: 'Press Start 2P', monospace;
+    }
+
+    .readable {
+      font-family: 'VT323', monospace;
+      letter-spacing: 0.5px;
+    }
+
+    .glow-cyan {
+      filter: drop-shadow(0 0 6px #0ff);
+    }
+
+    .glow-green {
+      filter: drop-shadow(0 0 6px #0f0);
+    }
+
+    .glow-purple {
+      filter: drop-shadow(0 0 6px #a0f);
+    }
+
+    .glow-orange {
+      filter: drop-shadow(0 0 6px #fa0);
+    }
+
+    .glow-red {
+      filter: drop-shadow(0 0 8px #f0f);
+    }
+
+    .glow-yellow {
+      filter: drop-shadow(0 0 6px #ff0);
+    }
+
+    .hud {
+      position: fixed;
+      left: 15px;
+      top: 15px;
+      background: rgba(0, 0, 0, 0.92);
+      padding: 18px 20px;
+      border: 3px solid #00ff88;
+      box-shadow: 0 0 20px #00ff88, inset 0 0 10px rgba(0, 255, 136, 0.1);
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      z-index: 10;
+      line-height: 1.3;
+    }
+
+    .hud-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 11px;
+      color: #0ff;
+      margin-bottom: 12px;
+      text-shadow: 0 0 5px #0ff;
+      letter-spacing: 2px;
+    }
+
+    .stat {
+      margin: 4px 0;
+      color: #00ff88;
+    }
+
+    .stat span {
+      color: #ff0;
+      text-shadow: 0 0 5px #ff0;
+    }
+
+    .danger {
+      color: #f00 !important;
+      text-shadow: 0 0 5px #f00 !important;
+      animation: blink 0.5s infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      49% {
+        opacity: 1;
+      }
+
+      50%,
+      100% {
+        opacity: 0.3;
+      }
+    }
+
+    .info {
+      position: fixed;
+      right: 15px;
+      top: 15px;
+      background: rgba(0, 0, 0, 0.92);
+      padding: 18px 20px;
+      border: 3px solid #00ff88;
+      box-shadow: 0 0 20px #00ff88, inset 0 0 10px rgba(0, 255, 136, 0.1);
+      max-width: 340px;
+      font-family: 'VT323', monospace;
+      font-size: 19px;
+      line-height: 1.3;
+      color: #00ff88;
+      z-index: 10;
+    }
+
+    .legend {
+      position: fixed;
+      left: 15px;
+      bottom: 15px;
+      background: rgba(0, 0, 0, 0.92);
+      padding: 14px 16px;
+      border: 3px solid #00ff88;
+      box-shadow: 0 0 20px #00ff88, inset 0 0 10px rgba(0, 255, 136, 0.1);
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      z-index: 10;
+      line-height: 1.3;
+    }
+
+    .legend-item {
+      margin: 3px 0;
+    }
+
+    .legend-item span {
+      font-size: 22px;
+      vertical-align: middle;
+    }
+
+    .button {
+      position: fixed;
+      right: 15px;
+      bottom: 15px;
+      background: rgba(0, 0, 0, 0.9);
+      color: #f0f;
+      padding: 14px 20px;
+      border: 3px solid #f0f;
+      box-shadow: 0 0 20px #f0f;
+      cursor: pointer;
+      font-size: 11px;
+      font-family: 'Press Start 2P', monospace;
+      z-index: 10;
+      text-shadow: 0 0 5px #f0f;
+      transition: all 0.1s;
+      letter-spacing: 1px;
+    }
+
+    .button:hover {
+      background: #f0f;
+      color: #000;
+      text-shadow: none;
+    }
+
+    .button:active {
+      transform: scale(0.95);
+    }
+
+    #tooltip {
+      position: fixed;
+      background: rgba(0, 0, 0, 0.95);
+      color: #0ff;
+      padding: 12px 16px;
+      border: 2px solid #0ff;
+      box-shadow: 0 0 15px #0ff;
+      font-family: 'VT323', monospace;
+      font-size: 18px;
+      pointer-events: none;
+      display: none;
+      max-width: 280px;
+      line-height: 1.3;
+      z-index: 20;
+      text-shadow: 0 0 3px #0ff;
+    }
+
+    .easter-egg {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) scale(0);
+      background: linear-gradient(135deg, rgba(255, 0, 255, 0.95), rgba(0, 255, 255, 0.95));
+      color: #000;
+      padding: 14px 22px;
+      border: 3px solid #fff;
+      box-shadow: 0 0 30px #f0f;
+      font-size: 8px;
+      display: none;
+      z-index: 50;
+      max-width: 90%;
+      text-align: center;
+      line-height: 1.5;
+      font-weight: 700;
+      animation: eggPop 0.4s ease-out forwards;
+    }
+
+    @keyframes eggPop {
+      0% {
+        transform: translateX(-50%) scale(0) rotate(-10deg);
+        opacity: 0;
+      }
+
+      50% {
+        transform: translateX(-50%) scale(1.1) rotate(5deg);
+      }
+
+      100% {
+        transform: translateX(-50%) scale(1) rotate(0deg);
+        opacity: 1;
+      }
+    }
+
+    #startOverlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      background: #000;
+    }
+
+    #startCard {
+      background: #000;
+      border: 3px solid #00ff88;
+      border-radius: 8px;
+      box-shadow: 0 0 20px #00ff88, inset 0 0 20px rgba(0, 255, 136, 0.1), 0 0 40px rgba(0, 255, 136, 0.3);
+      padding: 40px 45px;
+      text-align: center;
+      max-width: 560px;
+      margin: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #startCard::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 136, 0.2), transparent);
+      animation: scan 2.4s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes scan {
+      0% {
+        left: -100%;
+      }
+
+      100% {
+        left: 100%;
+      }
+    }
+
+    #startCard h1 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 26px;
+      color: #baffdc;
+      margin: 0 0 14px 0;
+      /* Tight outer glow instead of 30px bloom so the pixel strokes stay crisp */
+      text-shadow:
+        0 0 2px #00ff88,
+        0 0 6px rgba(0, 255, 136, 0.7),
+        0 0 14px rgba(0, 255, 136, 0.35);
+      letter-spacing: 3px;
+      -webkit-font-smoothing: none;
+      font-smooth: never;
+      animation: titlePulse 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes titlePulse {
+      0% {
+        text-shadow: 0 0 2px #00ff88, 0 0 6px rgba(0, 255, 136, 0.7), 0 0 14px rgba(0, 255, 136, 0.35);
+      }
+
+      100% {
+        text-shadow: 0 0 3px #00ff88, 0 0 10px rgba(0, 255, 136, 0.85), 0 0 22px rgba(0, 255, 136, 0.45);
+      }
+    }
+
+    #startCard .subtitle {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 9px;
+      color: #ff0;
+      text-shadow: 0 0 8px #ff0, 0 0 15px #ff0;
+      margin-bottom: 22px;
+      letter-spacing: 1px;
+    }
+
+    #startCard p {
+      font-family: 'VT323', monospace;
+      font-size: 22px;
+      line-height: 1.35;
+      margin: 14px 0;
+      color: #00ff88;
+      letter-spacing: 0.5px;
+    }
+
+    #startCard .quote {
+      color: #f0f;
+      margin: 20px 0;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      text-shadow: 0 0 5px #f0f;
+      font-style: italic;
+      letter-spacing: 0.5px;
+    }
+
+    #startCard .howto {
+      color: #0ff;
+      text-shadow: 0 0 5px #0ff;
+    }
+
+    #startButton {
+      margin-top: 28px;
+      padding: 16px 32px;
+      background: #000;
+      color: #00ff88;
+      cursor: pointer;
+      border: 3px solid #00ff88;
+      box-shadow: 0 0 20px #00ff88;
+      font-size: 13px;
+      font-family: 'Press Start 2P', monospace;
+      transition: all 0.15s;
+      letter-spacing: 2px;
+      text-shadow: 0 0 8px #00ff88;
+    }
+
+    #startButton:hover {
+      background: #00ff88;
+      color: #000;
+      box-shadow: 0 0 40px #00ff88;
+      text-shadow: none;
+      transform: scale(1.05);
+    }
+
+    #startButton:active {
+      transform: scale(0.95);
+    }
+
+    .pulse {
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.4;
+      }
+    }
+
+    .timer {
+      position: fixed;
+      top: 15px;
+      right: 380px;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 26px;
+      color: #ff0;
+      text-shadow: 0 0 10px #ff0;
+      z-index: 15;
+      pointer-events: none;
+      display: none;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 12px 22px;
+      border: 3px solid #ff0;
+      box-shadow: 0 0 20px #ff0;
+    }
+
+    .timer.critical {
+      color: #f00;
+      text-shadow: 0 0 10px #f00;
+      border-color: #f00;
+      box-shadow: 0 0 20px #f00;
+      animation: blink 0.3s infinite;
+    }
+
+    #gameOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    #gameOverCard {
+      background: rgba(0, 0, 0, 0.98);
+      border: 4px solid #f00;
+      box-shadow: 0 0 50px #f00, inset 0 0 20px rgba(255, 0, 0, 0.15);
+      padding: 36px 40px;
+      text-align: center;
+      max-width: 540px;
+      margin: 20px;
+    }
+
+    #gameOverCard h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 22px;
+      color: #f00;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #f00;
+      letter-spacing: 3px;
+    }
+
+    #gameOverCard p {
+      font-family: 'VT323', monospace;
+      font-size: 22px;
+      line-height: 1.35;
+      margin: 14px 0;
+      color: #00ff88;
+      letter-spacing: 0.5px;
+    }
+
+    #restartButton {
+      margin-top: 22px;
+      padding: 14px 28px;
+      background: #000;
+      color: #f00;
+      cursor: pointer;
+      border: 3px solid #f00;
+      box-shadow: 0 0 20px #f00;
+      font-size: 12px;
+      font-family: 'Press Start 2P', monospace;
+      transition: all 0.1s;
+      letter-spacing: 2px;
+    }
+
+    #restartButton:hover {
+      background: #f00;
+      color: #000;
+      box-shadow: 0 0 30px #f00;
+    }
+
+    #victoryOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+
+    #victoryCard {
+      background: rgba(0, 0, 0, 0.98);
+      border: 4px solid #00ff88;
+      box-shadow: 0 0 50px #00ff88, inset 0 0 20px rgba(0, 255, 136, 0.15);
+      padding: 36px 40px;
+      text-align: center;
+      max-width: 540px;
+      margin: 20px;
+    }
+
+    #victoryCard h2 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 22px;
+      color: #00ff88;
+      margin-bottom: 20px;
+      text-shadow: 0 0 10px #00ff88;
+      letter-spacing: 3px;
+    }
+
+    #victoryCard p {
+      font-family: 'VT323', monospace;
+      font-size: 22px;
+      line-height: 1.35;
+      margin: 14px 0;
+      color: #00ff88;
+      letter-spacing: 0.5px;
+    }
+
+    #playAgainButton {
+      margin-top: 22px;
+      padding: 14px 28px;
+      background: #000;
+      color: #00ff88;
+      cursor: pointer;
+      border: 3px solid #00ff88;
+      box-shadow: 0 0 20px #00ff88;
+      font-size: 12px;
+      font-family: 'Press Start 2P', monospace;
+      transition: all 0.1s;
+      letter-spacing: 2px;
+    }
+
+    #playAgainButton:hover {
+      background: #00ff88;
+      color: #000;
+      box-shadow: 0 0 30px #00ff88;
+    }
+
+    #puzzleOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.95);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 300;
+    }
+
+    #puzzleCard {
+      background: rgba(0, 0, 0, 0.98);
+      border: 3px solid #0ff;
+      border-radius: 8px;
+      box-shadow: 0 0 50px #0ff, inset 0 0 20px rgba(0, 255, 255, 0.15);
+      padding: 32px 36px;
+      text-align: center;
+      max-width: 680px;
+      margin: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #puzzleCard::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.12), transparent);
+      animation: scan 3s linear infinite;
+      pointer-events: none;
+    }
+
+    #puzzleCard h3 {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 14px;
+      color: #0ff;
+      margin-bottom: 10px;
+      text-shadow: 0 0 8px #0ff;
+      letter-spacing: 2px;
+    }
+
+    #puzzleCard .puzzle-tag {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 8px;
+      color: #f0f;
+      text-shadow: 0 0 6px #f0f;
+      letter-spacing: 2px;
+      margin-bottom: 18px;
+      display: block;
+    }
+
+    #puzzleCard .question {
+      font-family: 'VT323', monospace;
+      font-size: 26px;
+      line-height: 1.3;
+      margin: 18px 0 24px;
+      color: #fff;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 4px rgba(255, 255, 255, 0.3);
+    }
+
+    .answer-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 18px 0 8px;
+    }
+
+    .answer-btn {
+      background: rgba(0, 0, 0, 0.8);
+      border: 2px solid #00ff88;
+      color: #00ff88;
+      padding: 14px 16px;
+      cursor: pointer;
+      font-family: 'VT323', monospace;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+      transition: all 0.1s;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .answer-btn:hover {
+      background: #00ff88;
+      color: #000;
+      box-shadow: 0 0 14px #00ff88;
+      transform: translateY(-2px);
+    }
+
+    .answer-btn.correct {
+      background: #00ff88;
+      color: #000;
+      animation: flash 0.3s ease-out;
+    }
+
+    .answer-btn.wrong {
+      background: #f00;
+      color: #fff;
+      border-color: #f00;
+      animation: shake 0.3s ease-out;
+    }
+
+    .answer-btn.philosophical {
+      border-color: #f0f;
+      color: #f0f;
+    }
+
+    .answer-btn.philosophical:hover {
+      background: #f0f;
+      color: #000;
+      box-shadow: 0 0 14px #f0f;
+    }
+
+    #backToArticle {
+      right: 220px;
+      color: #0ff;
+      border-color: #0ff;
+      box-shadow: 0 0 20px #0ff;
+      text-shadow: 0 0 5px #0ff;
+    }
+
+    #backToArticle:hover {
+      background: #0ff;
+      color: #000;
+    }
+
+    @keyframes flash {
+      0% {
+        transform: scale(1);
+      }
+
+      50% {
+        transform: scale(1.05);
+        box-shadow: 0 0 20px #0f0;
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-5px);
+      }
+
+      75% {
+        transform: translateX(5px);
+      }
+    }
+
+    @media (max-width: 767px) {
+
+      .hud,
+      .info,
+      .legend,
+      #reset {
+        display: none !important;
+      }
+
+      .timer {
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 12px;
+        font-size: 18px;
+        padding: 8px 14px;
+      }
+
+      /* ---- Start card ---- */
+      #startCard {
+        padding: 28px 20px;
+        max-width: 92vw;
+        margin: 12px;
+      }
+
+      #startCard h1 {
+        font-size: 18px;
+        letter-spacing: 2px;
+        line-height: 1.5;
+        word-spacing: 4px;
+        margin-bottom: 10px;
+      }
+
+      #startCard .subtitle {
+        font-size: 7px;
+        letter-spacing: 0.5px;
+        line-height: 1.8;
+        margin-bottom: 16px;
+      }
+
+      #startCard p {
+        font-size: 17px;
+        line-height: 1.35;
+        margin: 10px 0;
+      }
+
+      #startCard .quote {
+        font-size: 15px;
+        margin: 14px 0;
+      }
+
+      #startButton {
+        font-size: 10px;
+        padding: 12px 20px;
+        letter-spacing: 1px;
+        white-space: nowrap;
+      }
+
+      /* ---- Puzzle card ---- */
+      #puzzleCard {
+        padding: 22px 18px;
+        max-width: 92vw;
+      }
+
+      #puzzleCard h3 {
+        font-size: 11px;
+        letter-spacing: 1px;
+        line-height: 1.5;
+      }
+
+      #puzzleCard .question {
+        font-size: 20px;
+        margin: 14px 0 18px;
+      }
+
+      .answer-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+      }
+
+      .answer-btn {
+        font-size: 16px;
+        padding: 12px 14px;
+      }
+
+      /* ---- Game over / victory ---- */
+      #gameOverCard,
+      #victoryCard {
+        padding: 26px 20px;
+        max-width: 92vw;
+      }
+
+      #gameOverCard h2,
+      #victoryCard h2 {
+        font-size: 16px;
+        letter-spacing: 2px;
+        line-height: 1.5;
+      }
+
+      #gameOverCard p,
+      #victoryCard p {
+        font-size: 17px;
+        margin: 10px 0;
+      }
+
+      #restartButton,
+      #playAgainButton {
+        font-size: 10px;
+        padding: 12px 18px;
+        letter-spacing: 1px;
+        white-space: nowrap;
+      }
+
+      /* ---- Bottom nav button (takes the #reset slot since reset is hidden) ---- */
+      #backToArticle {
+        right: 15px !important;
+        bottom: 15px;
+        font-size: 9px;
+        padding: 10px 14px;
+        letter-spacing: 1px;
+        white-space: nowrap;
+      }
+
+      /* ---- Easter egg sizing ---- */
+      .easter-egg {
+        font-size: 7px;
+        padding: 10px 14px;
+        max-width: 85vw;
+      }
+
+      /* ---- Node labels a bit smaller so they don't overlap on tight screens ---- */
+      .label {
+        font-size: 7px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      #startCard h1 {
+        font-size: 15px;
+        letter-spacing: 1px;
+      }
+
+      #startCard p {
+        font-size: 15px;
+      }
+
+      #startButton {
+        font-size: 9px;
+      }
+
+      #puzzleCard .question {
+        font-size: 18px;
+      }
+
+      .answer-btn {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="startOverlay">
+    <div id="startCard">
+      <h1>▶ VIRAL SYNTAX ◀</h1>
+      <div class="subtitle">⚡ INTERACTIVE NETWORK SIMULATION ⚡</div>
+      <p>Dengue rewrites the body's syntax. Immune cells, cytokines, viral proteins — all improvising against each
+        other.</p>
+      <div class="quote">"Language is a virus from outer space." — William S. Burroughs</div>
+      <p class="howto">Click yellow <strong>VULNERABILITIES</strong> to exploit them. Click red bugs again to
+        deactivate. Answer the prompt. Survive 40 seconds or clear all bugs.</p>
+      <button id="startButton">[ PRESS START ]</button>
+    </div>
+  </div>
+
+  <div class="hud">
+    <div class="hud-title">SYSTEM STATUS</div>
+    <div class="stat">INFECTION: <span id="infectionProb">15%</span></div>
+    <div class="stat">SYSTEMIC RISK: <span id="systemicRisk">000</span></div>
+    <div class="stat">VULNERABILITIES: <span id="vulnCount">0/4</span></div>
+    <div class="stat">VIRAL TROPISM: <span id="tropismLevel">LOW</span></div>
+  </div>
+
+  <div class="info">
+    <div id="infoText">Defenses online. Viral code contained.<br><br><strong style="color:#ff0">HOW TO WIN:</strong>
+      Survive 40s or deactivate all bugs.</div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item"><span style="color:#f0f">●</span> VIRUS</div>
+    <div class="legend-item"><span style="color:#ff0">●</span> VULNERABILITIES</div>
+    <div class="legend-item"><span style="color:#0ff">●</span> IMMUNE CELLS</div>
+    <div class="legend-item"><span style="color:#0f0">●</span> CYTOKINES</div>
+    <div class="legend-item"><span style="color:#a0f">●</span> VIRAL PROTEINS</div>
+    <div class="legend-item"><span style="color:#fa0">●</span> PATHWAYS</div>
+  </div>
+
+  <button class="button" id="reset">RESET SYSTEM</button>
+  <div class="button" id="backToArticle">BACK TO ARTICLE</div>
+
+  <div class="timer" id="timer">40</div>
+
+  <div id="tooltip"></div>
+
+  <div class="easter-egg" id="easterEgg">
+    💀 SYSTEM EXPLOIT DETECTED 💀
+  </div>
+
+  <div id="gameOverlay">
+    <div id="gameOverCard">
+      <h2>SYSTEM FAILURE</h2>
+      <p>The viral network has overwhelmed host defenses. Dengue fever replication cascade initiated.</p>
+      <p>FINAL STATUS: Critical immune collapse detected.</p>
+      <button id="restartButton">REINITIALIZE</button>
+
+    </div>
+  </div>
+
+  <div id="victoryOverlay">
+    <div id="victoryCard">
+      <h2>VICTORY ACHIEVED</h2>
+      <p>All vulnerabilities neutralized. Viral replication contained through targeted intervention.</p>
+      <p>IMMUNE SYSTEM: Restored to baseline function.</p>
+      <button id="playAgainButton">SIMULATE AGAIN</button>
+    </div>
+  </div>
+
+  <div id="puzzleOverlay">
+    <div id="puzzleCard">
+      <h3 id="puzzleTitle">BUG DEACTIVATION PROTOCOL</h3>
+      <div class="question" id="puzzleQuestion"></div>
+      <div class="answer-grid">
+        <button class="answer-btn" onclick="submitAnswer(0)"></button>
+        <button class="answer-btn" onclick="submitAnswer(1)"></button>
+        <button class="answer-btn" onclick="submitAnswer(2)"></button>
+        <button class="answer-btn" onclick="submitAnswer(3)"></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let simulation, nodes, links, node, link;
+    let systemicRisk = 0;
+    let activeVulnerabilities = 0;
+    let viralTropism = 1;
+    let gameOver = false;
+    let timeRemaining = 40;
+    let timerInterval;
+    let timerStarted = false;
+    let currentBugNode = null;
+    let currentPuzzle = null;
+
+    const easterEggs = [
+      "🇧🇷 BRAZIL 2024: 6.5M INFECTIONS +400% SPIKE",
+      "🇦🇷 ARGENTINA: 582K CASES SYSTEM OVERLOAD",
+      "🇵🇪 PERU: 20/24 REGIONS CRITICAL STATUS",
+      "🌡️ CLIMATE SHIFT: VECTOR RANGE +150KM SOUTH",
+      "💉 BRAZIL: QDENGA VACCINE MASS DEPLOYMENT",
+      "🦟 EL NIÑO 2023-24: OPTIMAL BREEDING CONDITIONS",
+      "🏙️ SÃO PAULO: HEAT ISLAND 3X TRANSMISSION BOOST",
+      "📊 DENV-2 STRAIN: DOMINANT SEROTYPE DETECTED",
+      "🇨🇴 COLOMBIA: 100K INFECTIONS BY MARCH 2024",
+      "🌊 RIO GRANDE: FLOOD ZONES BREEDING GROUNDS",
+      "🔬 WOLBACHIA BACTERIA: BLOCKS DENGUE TRANSMISSION",
+      "🌍 AEDES AEGYPTI: ADAPTS TO URBAN ENVIRONMENTS",
+      "💊 NO SPECIFIC ANTIVIRAL TREATMENT EXISTS YET",
+      "🩸 SECONDARY INFECTION: 15X HIGHER RISK DHF",
+      "🧬 4 SEROTYPES: DENV-1, DENV-2, DENV-3, DENV-4",
+      "🏥 500M CASES ANNUALLY WORLDWIDE",
+      "🌡️ FEVER PEAK: 40°C+ IN ACUTE PHASE",
+      "🦟 FEMALE MOSQUITOES: ONLY THEY BITE",
+      "📈 CASES DOUBLED EVERY DECADE SINCE 1970",
+      "🧪 RT-PCR: GOLD STANDARD FOR EARLY DETECTION"
+    ];
+
+    let easterEggCount = 0;
+    let lastEggTime = 0;
+
+    const timerDisplay = document.getElementById('timer');
+
+    // Audio context for sound effects
+    let audioContext;
+
+    function initAudio() {
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playBeep(freq = 440, duration = 0.1, type = 'sine') {
+      if (!audioContext) return;
+
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+
+      osc.frequency.value = freq;
+      osc.type = type;
+
+      gain.gain.setValueAtTime(0.1, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+      osc.start();
+      osc.stop(audioContext.currentTime + duration);
+    }
+
+    // Background music system
+    let bgMusicIntervals = [];
+
+    function playBgNote(freq, duration, delay = 0, volume = 0.06) {
+      setTimeout(() => {
+        const osc = audioContext.createOscillator();
+        const gain = audioContext.createGain();
+
+        osc.connect(gain);
+        gain.connect(audioContext.destination);
+
+        osc.frequency.value = freq;
+        osc.type = 'square';
+
+        gain.gain.setValueAtTime(volume, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + duration);
+
+        osc.start(audioContext.currentTime);
+        osc.stop(audioContext.currentTime + duration);
+      }, delay);
+    }
+
+    function startCumbiaLoop() {
+      stopCumbiaLoop();
+
+      // Giant Steps chord progression (simplified for 8-bit):
+      // Bmaj7 - D7 - Gmaj7 - Bb7 - Ebmaj7 - Am7 - D7 - Gmaj7 - Bb7 - Ebmaj7 - F#7 - Bmaj7 - Fm7 - Bb7 - Ebmaj7 - Am7 - D7 - Gmaj7
+
+      // Melody following Giant Steps changes with cumbia rhythm
+      const melody = [
+        // Bar 1: Bmaj7 (B-D#-F#-A#) - cumbia feel
+        { note: 494, time: 0, dur: 0.12 },      // B4
+        { note: 622, time: 150, dur: 0.12 },    // D#5
+        { note: 494, time: 300, dur: 0.12 },    // B4
+        { note: 740, time: 450, dur: 0.15 },    // F#5
+
+        // Bar 2: D7 (D-F#-A-C) -> Gmaj7 (G-B-D-F#)
+        { note: 587, time: 700, dur: 0.12 },    // D5
+        { note: 740, time: 850, dur: 0.12 },    // F#5
+        { note: 784, time: 1000, dur: 0.12 },   // G5
+        { note: 987, time: 1150, dur: 0.15 },   // B5
+
+        // Bar 3: Bb7 (Bb-D-F-Ab) -> Ebmaj7 (Eb-G-Bb-D)
+        { note: 932, time: 1400, dur: 0.12 },   // Bb5
+        { note: 1175, time: 1550, dur: 0.12 },  // D6
+        { note: 1245, time: 1700, dur: 0.12 },  // Eb6
+        { note: 1175, time: 1850, dur: 0.15 },  // D6
+
+        // Bar 4: Am7 (A-C-E-G) -> D7 (D-F#-A-C)
+        { note: 880, time: 2100, dur: 0.12 },   // A5
+        { note: 1047, time: 2250, dur: 0.12 },  // C6
+        { note: 1175, time: 2400, dur: 0.12 },  // D6
+        { note: 1047, time: 2550, dur: 0.15 },  // C6
+
+        // Bar 5: Gmaj7 (G-B-D-F#) - cumbia rhythm
+        { note: 784, time: 2800, dur: 0.12 },   // G5
+        { note: 987, time: 2950, dur: 0.12 },   // B5
+        { note: 740, time: 3100, dur: 0.12 },   // F#5
+        { note: 784, time: 3250, dur: 0.15 },   // G5
+
+        // Bar 6: Bb7 -> Ebmaj7 (descending)
+        { note: 932, time: 3500, dur: 0.12 },   // Bb5
+        { note: 784, time: 3650, dur: 0.12 },   // G5
+        { note: 622, time: 3800, dur: 0.15 },   // Eb5
+
+        // Bar 7: F#7 (F#-A#-C#-E) -> Bmaj7
+        { note: 740, time: 4050, dur: 0.12 },   // F#5
+        { note: 880, time: 4200, dur: 0.12 },   // A5
+        { note: 987, time: 4350, dur: 0.12 },   // B5
+        { note: 622, time: 4500, dur: 0.15 },   // D#5
+
+        // Bar 8: Fm7 (F-Ab-C-Eb) -> Bb7 -> Ebmaj7 (resolution)
+        { note: 698, time: 4750, dur: 0.12 },   // F5
+        { note: 831, time: 4900, dur: 0.12 },   // Ab5
+        { note: 932, time: 5050, dur: 0.12 },   // Bb5
+        { note: 1245, time: 5200, dur: 0.2 },   // Eb6 (hold)
+
+        // Final turnaround
+        { note: 880, time: 5500, dur: 0.12 },   // A5
+        { note: 1175, time: 5650, dur: 0.12 },  // D6
+        { note: 784, time: 5800, dur: 0.15 },   // G5
+      ];
+
+      // Bass line following Giant Steps root movement with cumbia walk
+      const bass = [
+        // Bmaj7
+        { note: 247, time: 0, dur: 0.15 },      // B3
+        { note: 247, time: 250, dur: 0.12 },    // B3
+        { note: 277, time: 450, dur: 0.12 },    // C#3
+
+        // D7 -> Gmaj7
+        { note: 294, time: 700, dur: 0.15 },    // D3
+        { note: 330, time: 950, dur: 0.12 },    // E3
+        { note: 196, time: 1150, dur: 0.15 },   // G3
+
+        // Bb7 -> Ebmaj7
+        { note: 233, time: 1400, dur: 0.15 },   // Bb2
+        { note: 262, time: 1650, dur: 0.12 },   // C3
+        { note: 311, time: 1850, dur: 0.15 },   // Eb3
+
+        // Am7 -> D7
+        { note: 220, time: 2100, dur: 0.15 },   // A2
+        { note: 247, time: 2350, dur: 0.12 },   // B2
+        { note: 294, time: 2550, dur: 0.15 },   // D3
+
+        // Gmaj7
+        { note: 196, time: 2800, dur: 0.15 },   // G3
+        { note: 220, time: 3050, dur: 0.12 },   // A3
+        { note: 196, time: 3250, dur: 0.12 },   // G3
+
+        // Bb7 -> Ebmaj7
+        { note: 233, time: 3500, dur: 0.15 },   // Bb2
+        { note: 262, time: 3750, dur: 0.15 },   // C3
+
+        // F#7 -> Bmaj7
+        { note: 185, time: 4050, dur: 0.15 },   // F#3
+        { note: 208, time: 4300, dur: 0.12 },   // Ab3
+        { note: 247, time: 4500, dur: 0.15 },   // B3
+
+        // Fm7 -> Bb7 -> Ebmaj7
+        { note: 175, time: 4750, dur: 0.15 },   // F3
+        { note: 233, time: 5000, dur: 0.15 },   // Bb2
+        { note: 311, time: 5250, dur: 0.2 },    // Eb3
+
+        // Turnaround
+        { note: 220, time: 5500, dur: 0.12 },   // A2
+        { note: 294, time: 5750, dur: 0.12 },   // D3
+        { note: 196, time: 5900, dur: 0.15 },   // G3
+      ];
+
+      // Percussive accents (cumbia-style hi-hat)
+      const percussion = [
+        { note: 3000, time: 0, dur: 0.02 },
+        { note: 3000, time: 200, dur: 0.02 },
+        { note: 3000, time: 350, dur: 0.02 },
+        { note: 3000, time: 600, dur: 0.02 },
+        { note: 3000, time: 800, dur: 0.02 },
+        { note: 3000, time: 950, dur: 0.02 },
+        { note: 3000, time: 1200, dur: 0.02 },
+        { note: 3000, time: 1400, dur: 0.02 },
+        { note: 3000, time: 1550, dur: 0.02 },
+        { note: 3000, time: 1800, dur: 0.02 },
+        { note: 3000, time: 2000, dur: 0.02 },
+        { note: 3000, time: 2200, dur: 0.02 },
+        { note: 3000, time: 2400, dur: 0.02 },
+        { note: 3000, time: 2600, dur: 0.02 },
+        { note: 3000, time: 2800, dur: 0.02 },
+        { note: 3000, time: 3000, dur: 0.02 },
+        { note: 3000, time: 3200, dur: 0.02 },
+        { note: 3000, time: 3400, dur: 0.02 },
+        { note: 3000, time: 3600, dur: 0.02 },
+        { note: 3000, time: 3800, dur: 0.02 },
+        { note: 3000, time: 4000, dur: 0.02 },
+        { note: 3000, time: 4200, dur: 0.02 },
+        { note: 3000, time: 4400, dur: 0.02 },
+        { note: 3000, time: 4600, dur: 0.02 },
+        { note: 3000, time: 4800, dur: 0.02 },
+        { note: 3000, time: 5000, dur: 0.02 },
+        { note: 3000, time: 5200, dur: 0.02 },
+        { note: 3000, time: 5400, dur: 0.02 },
+        { note: 3000, time: 5600, dur: 0.02 },
+        { note: 3000, time: 5800, dur: 0.02 },
+      ];
+
+      const loopDuration = 6200; // ~6.2 seconds for full Giant Steps cycle
+
+      function playLoop() {
+        // Melody
+        melody.forEach(n => {
+          playBgNote(n.note, n.dur, n.time, 0.04);
+        });
+
+        // Bass
+        bass.forEach(n => {
+          playBgNote(n.note, n.dur, n.time, 0.07);
+        });
+
+        // Percussion (subtle)
+        percussion.forEach(n => {
+          playBgNote(n.note, n.dur, n.time, 0.01);
+        });
+      }
+
+      // Start immediately
+      playLoop();
+
+      // Loop
+      const loopInterval = setInterval(playLoop, loopDuration);
+      bgMusicIntervals.push(loopInterval);
+    }
+
+    function stopCumbiaLoop() {
+      bgMusicIntervals.forEach(interval => clearInterval(interval));
+      bgMusicIntervals = [];
+    }
+
+
+    function playClick() { playBeep(800, 0.05, 'square'); }
+    function playStartup() { playBeep(220, 0.3, 'triangle'); }
+    function playExploit() { playBeep(150, 0.4, 'sawtooth'); }
+    function playSystemFailure() {
+      playBeep(100, 0.8, 'sawtooth');
+      setTimeout(() => playBeep(80, 0.8, 'sawtooth'), 200);
+    }
+    function playVictory() {
+      playBeep(440, 0.2, 'sine');
+      setTimeout(() => playBeep(550, 0.2, 'sine'), 150);
+      setTimeout(() => playBeep(660, 0.3, 'sine'), 300);
+    }
+
+    function showEasterEgg() {
+      const now = Date.now();
+      if (now - lastEggTime < 3000) return;
+
+      lastEggTime = now;
+      const egg = easterEggs[easterEggCount % easterEggs.length];
+      easterEggCount++;
+
+      // Play chiptune melody for easter egg
+      const melody = [523, 659, 784, 1047];
+      melody.forEach((freq, i) => {
+        setTimeout(() => playBeep(freq, 0.12, 'square'), i * 100);
+      });
+
+      const el = document.getElementById('easterEgg');
+      el.textContent = egg;
+      el.style.display = 'block';
+      el.style.animation = 'none';
+      el.style.opacity = '1';  // Ensure visibility
+      el.style.transition = '';  // Clear any previous transitions
+
+      // Trigger animation
+      setTimeout(() => {
+        el.style.animation = 'eggPop 0.4s ease-out forwards';
+      }, 10);
+
+      // Hide with simpler approach
+      setTimeout(() => {
+        el.style.animation = 'none';
+        el.style.display = 'none';
+      }, 3500);
+    }
+
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerDisplay.style.display = 'block';
+
+      timerInterval = setInterval(() => {
+        timeRemaining--;
+        timerDisplay.textContent = timeRemaining;
+
+        if (timeRemaining <= 8) {
+          timerDisplay.classList.add('critical');
+        }
+
+        if (timeRemaining <= 0) {
+          gameOver = true;
+          clearInterval(timerInterval);
+          showGameOver();
+        }
+
+        if (activeVulnerabilities >= 3) {
+          timeRemaining = Math.max(0, timeRemaining - 1);
+        }
+      }, 1000);
+    }
+
+    function showGameOver() {
+      stopCumbiaLoop();
+      playSystemFailure();
+      document.getElementById('gameOverlay').style.display = 'flex';
+    }
+
+    function checkVictory() {
+      const allDeactivated = nodes.filter(n => n.type === 'vuln').every(n => !n.clicked);
+
+      if (allDeactivated && !gameOver) {
+        gameOver = true;
+        clearInterval(timerInterval);
+        stopCumbiaLoop();
+        updateHUD();
+        playVictory();
+        document.getElementById('victoryOverlay').style.display = 'flex';
+      }
+    }
+
+    // Define updateHUD function before it's used
+    function updateHUD() {
+      const virus = nodes.find(n => n.id === 'DENV');
+
+      d3.select('#infectionProb').text(Math.round(virus.infectionProb * 100) + '%')
+        .classed('danger', virus.infectionProb > 0.5);
+
+      d3.select('#systemicRisk').text(String(systemicRisk).padStart(3, '0'))
+        .classed('danger', systemicRisk > 150);
+
+      d3.select('#vulnCount').text(`${activeVulnerabilities}/4`);
+
+      let tropismText = 'LOW';
+      if (viralTropism === 2) tropismText = 'MED';
+      if (viralTropism === 3) tropismText = 'HIGH';
+      if (viralTropism >= 4) tropismText = 'MAX';
+
+      d3.select('#tropismLevel').text(tropismText)
+        .classed('danger', viralTropism >= 3);
+
+      let infoMsg = 'Defenses online. Viral code contained.<br><br><strong style="color:#ff0">HOW TO WIN:</strong> Survive 40s or deactivate all bugs.';
+      if (activeVulnerabilities === 0 && nodes.filter(n => n.type === 'vuln').some(n => n.hasOwnProperty('clicked'))) {
+        infoMsg = '<span style="color:#00ff88">✓ ALL VULNERABILITIES NEUTRALIZED</span><br><br><strong style="color:#00ff88">SUCCESS:</strong> System restored to baseline.';
+      } else if (activeVulnerabilities === 1) {
+        infoMsg = 'Bug exploited. Code rewriting vectors.<br><br><strong style="color:#ff0">TIP:</strong> Click the red bug to deactivate it.';
+      } else if (activeVulnerabilities === 2) {
+        infoMsg = 'Firewall breached. Restricted nodes accessible.<br><br><strong style="color:#f00">WARNING:</strong> Disease cascade forming.';
+      } else if (activeVulnerabilities >= 3) {
+        infoMsg = '⚠ Critical failure. System collapse imminent.<br><br><strong style="color:#f00">URGENT:</strong> Timer accelerating — deactivate now.';
+      }
+      d3.select('#infoText').html(infoMsg);
+    }
+
+    const puzzles = {
+      V1: {
+        question: "How does dengue virus evade interferon responses?",
+        answers: [
+          "Blocks STAT phosphorylation",
+          "Degrades interferon receptors",
+          "Inhibits RNA synthesis",
+          "Activates complement system"
+        ],
+        correct: 0,
+        explanation: "Dengue NS5 protein blocks STAT1/2 phosphorylation, preventing interferon signaling."
+      },
+      V2: {
+        question: "What is the primary mechanism of dengue pathogenesis?",
+        answers: [
+          "Direct cytotoxicity",
+          "Antibody-dependent enhancement",
+          "Complement activation",
+          "Autoimmune response"
+        ],
+        correct: 1,
+        explanation: "ADE allows virus entry through Fc receptors, causing increased viral replication."
+      },
+      V3: {
+        question: "How does NS1 protein contribute to dengue pathology?",
+        answers: [
+          "Induces apoptosis",
+          "Activates complement cascade",
+          "Blocks protein synthesis",
+          "Causes vascular leakage"
+        ],
+        correct: 3,
+        explanation: "NS1 disrupts endothelial glycocalyx, increasing vascular permeability."
+      },
+      V4: {
+        question: "What triggers disseminated intravascular coagulation?",
+        answers: [
+          "Platelet activation",
+          "Endothelial damage",
+          "Cytokine storm",
+          "All of the above"
+        ],
+        correct: 3,
+        explanation: "DIC results from multiple factors including cytokine storm and endothelial dysfunction."
+      }
+    };
+
+    // Unanswerable philosophical prompts. Any choice "works" — the bug dissolves
+    // because the question itself short-circuits the immune/viral dialectic.
+    const philosophicalPuzzles = [
+      {
+        question: "If language is a virus, who is patient zero?",
+        answers: ["The first speaker", "The first listener", "The silence before", "It's a collective thing"]
+      },
+      {
+        question: "Is also imagination inffected by the virus?",
+        answers: ["It is biased by language so yes", "No, it's the only safe place", "It depends on your strength", "It's the source code, so it's the most infected"]
+      },
+      {
+        question: "Is forgetting a form of immunity, or a form of infection?",
+        answers: ["Immunity", "Infection", "Neither", "Both, in sequence"]
+      },
+      {
+        question: "If the immune system is a reader, what does it mean when it misreads the self?",
+        answers: ["Autoimmunity", "Poetry", "it's already inffected", "'The self' was mistranslated"]
+      },
+      {
+        question: "Does the elegance of an idea make it more infectious?",
+        answers: ["Yes, beauty easily bypasses rational immunity", "No, absolute truth is often ugly", "Elegance is just a bias of the host", "It simply makes the virus harder to detect"]
+      },
+      {
+        question: "If words are pathogens, what is silence?",
+        answers: ["The absolute quarantine zone", "The original, uncorrupted state of health", "The most lethal, undetectable strain of all", "A blank canvas waiting for infection"]
+      },
+    ];
+
+    function getPuzzleForBug(bugNode) {
+      // ~50% chance the bug manifests as a philosophical prompt instead of clinical.
+      if (Math.random() < 0.5) {
+        const p = philosophicalPuzzles[Math.floor(Math.random() * philosophicalPuzzles.length)];
+        return {
+          question: p.question,
+          answers: p.answers,
+          correct: -1,
+          philosophical: true,
+          explanation: "Any answer is correct. Some syntax cannot be debugged."
+        };
+      }
+      return puzzles[bugNode.id];
+    }
+
+    function showPuzzle(bugNode) {
+      currentBugNode = bugNode;
+      currentPuzzle = getPuzzleForBug(bugNode);
+
+      // Pause timer
+      if (timerInterval) {
+        clearInterval(timerInterval);
+      }
+
+      initAudio();
+      playClick();
+
+      const puzzle = currentPuzzle;
+      document.getElementById('puzzleTitle').textContent = `DEACTIVATE ${bugNode.id}`;
+      document.getElementById('puzzleQuestion').textContent = puzzle.question;
+
+      const buttons = document.querySelectorAll('.answer-btn');
+      buttons.forEach((btn, i) => {
+        btn.textContent = puzzle.answers[i];
+        btn.classList.remove('correct', 'wrong', 'philosophical');
+        if (puzzle.philosophical) btn.classList.add('philosophical');
+      });
+
+      document.getElementById('puzzleOverlay').style.display = 'flex';
+    }
+
+    function submitAnswer(selected) {
+      const puzzle = currentPuzzle;
+      const bugNode = currentBugNode;
+
+      playClick();
+
+      // Hide puzzle first
+      document.getElementById('puzzleOverlay').style.display = 'none';
+
+      const isCorrect = puzzle.philosophical || selected === puzzle.correct;
+
+      if (isCorrect) {
+        // Correct answer - deactivate bug
+        const circle = node.filter(n => n.id === bugNode.id).select('circle');
+        bugNode.clicked = false;
+        activeVulnerabilities--;
+        systemicRisk = Math.max(0, systemicRisk - Math.round(bugNode.risk * 100));
+        circle.attr('fill', '#ff0').attr('class', 'glow-yellow');
+
+        playBeep(600, 0.2, 'sine');
+
+        // Show success feedback
+        const feedback = document.createElement('div');
+        feedback.style.cssText = `
+      position: fixed;
+      top: 25%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0, 255, 0, 0.95);
+      color: #000;
+      padding: 20px 30px;
+      border: 3px solid #fff;
+      box-shadow: 0 0 40px #0f0;
+      font-size: 11px;
+      z-index: 200;
+      text-align: center;
+      font-weight: bold;
+    `;
+        feedback.textContent = puzzle.philosophical
+          ? '~ BUG DISSOLVED INTO PARADOX ~'
+          : '✓ BUG DEACTIVATED!';
+        document.body.appendChild(feedback);
+        setTimeout(() => feedback.remove(), 1500);
+
+        // Apply bug deactivation effects
+        const virus = nodes.find(n => n.id === 'DENV');
+        if (bugNode.id === 'V1' || bugNode.id === 'V2') {
+          virus.infectionProb = Math.max(0.15, virus.infectionProb - 0.25);
+          viralTropism = Math.max(1, viralTropism - 1);
+
+          link.filter(l => l.source.id === 'IFN' || l.target.id === 'IFN')
+            .transition().duration(300)
+            .attr('opacity', 0.6)
+            .attr('stroke', '#0ff');
+
+          node.filter(n => ['IFN', 'STAT', 'NK'].includes(n.id))
+            .select('circle')
+            .each(function (n) {
+              d3.select(this)
+                .transition().duration(300)
+                .attr('fill', n.color)
+                .attr('stroke', n.color)
+                .attr('r', 11);
+            });
+        }
+
+        if (bugNode.id === 'V3') {
+          virus.infectionProb = Math.max(0.15, virus.infectionProb - 0.2);
+          node.filter(n => n.id === 'NS1')
+            .select('circle')
+            .transition().duration(300)
+            .attr('r', 18)
+            .attr('fill', '#f0f')
+            .attr('class', 'glow-red');
+        }
+
+        if (bugNode.id === 'V4') {
+          node.filter(n => n.id === 'DIC')
+            .select('circle')
+            .transition().duration(300)
+            .attr('r', 11)
+            .attr('fill', '#f00')
+            .attr('stroke', '#f00')
+            .attr('class', 'glow-red');
+        }
+
+        link.filter(l => l.restricted && l.source.id === 'DENV')
+          .transition().duration(300)
+          .attr('opacity', 0.3)
+          .attr('stroke', '#fa0')
+          .attr('stroke-width', d => 1 + d.weight * 2);
+
+        node.filter(n => n.id === 'DENV')
+          .select('circle')
+          .transition().duration(300)
+          .attr('r', 18);
+
+        updateHUD();
+
+        // Resume timer
+        if (!gameOver) {
+          startTimer();
+        }
+
+        // Check for victory
+        checkVictory();
+
+      } else {
+        // Wrong answer
+        const btns = document.querySelectorAll('.answer-btn');
+        btns[selected].classList.add('wrong');
+        setTimeout(() => btns[selected].classList.remove('wrong'), 300);
+        playBeep(200, 0.1, 'sawtooth');
+
+        // Resume timer even for wrong answers
+        if (!gameOver) {
+          startTimer();
+        }
+      }
+    }
+
+    function randomizeInitialPathogens() {
+      // Get all vulnerability nodes
+      const vulnNodes = nodes.filter(n => n.type === 'vuln');
+
+      // Choose random number of pathogens to activate (1 to 4, since we have 4 total)
+      const numToActivate = Math.floor(Math.random() * vulnNodes.length) + 1; // Random number from 1 to 4
+
+      // Randomly select which pathogens to activate
+      const shuffled = vulnNodes.sort(() => 0.5 - Math.random());
+      const toActivate = shuffled.slice(0, numToActivate);
+
+      // Activate selected pathogens
+      toActivate.forEach(vuln => {
+        vuln.clicked = true;
+        activeVulnerabilities++;
+        systemicRisk += Math.round(vuln.risk * 100);
+
+        // Apply the same effects as clicking would
+        const virus = nodes.find(n => n.id === 'DENV');
+
+        if (vuln.id === 'V1' || vuln.id === 'V2') {
+          virus.infectionProb = Math.min(0.95, virus.infectionProb + 0.25);
+          viralTropism++;
+        }
+
+        if (vuln.id === 'V3') {
+          virus.infectionProb += 0.2;
+        }
+      });
+
+      return toActivate;
+    }
+
+    function initializeGameState() {
+      // Reset base state
+      systemicRisk = 0;
+      activeVulnerabilities = 0;
+      viralTropism = 1;
+      gameOver = false;
+      timeRemaining = 40;
+
+      // Reset timer
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+      timerStarted = false;
+      timerDisplay.textContent = '40';
+      timerDisplay.style.display = 'none';
+      timerDisplay.classList.remove('critical');
+
+      // Reset node states
+      nodes.forEach(n => {
+        if (n.type === 'vuln') n.clicked = false;
+        if (n.id === 'DENV') n.infectionProb = 0.15;
+      });
+
+      // Randomize initial pathogens (same logic as before)
+      const activatedPathogens = randomizeInitialPathogens();
+
+      return activatedPathogens;
+    }
+
+    function init() {
+      initAudio();
+
+      setTimeout(() => startCumbiaLoop(), 600);
+
+      document.getElementById('startOverlay').style.display = 'none';
+      document.getElementById('gameOverlay').style.display = 'none';
+      document.getElementById('victoryOverlay').style.display = 'none';
+
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      // Clear any existing SVG
+      d3.select('svg').remove();
+
+      const svg = d3.select('body').append('svg')
+        .attr('width', width)
+        .attr('height', height);
+
+      gameOver = false;
+      systemicRisk = 0;
+      activeVulnerabilities = 0;
+      viralTropism = 1;
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = null;
+      timerStarted = false;
+      timeRemaining = 40;
+      timerDisplay.textContent = '40';
+      timerDisplay.style.display = 'none';
+      timerDisplay.classList.remove('critical');
+
+      // Network data
+      nodes = [
+        // Virus (center)
+        { id: 'DENV', label: 'DENV', type: 'virus', color: '#f0f', x: width / 2, y: height / 2, infectionProb: 0.15 },
+
+        // Immune cells
+        { id: 'DC', label: 'DC', type: 'immune', color: '#0ff' },
+        { id: 'MAC', label: 'MAC', type: 'immune', color: '#0ff' },
+        { id: 'MON', label: 'MON', type: 'immune', color: '#0ff' },
+        { id: 'NK', label: 'NK', type: 'immune', color: '#0ff' },
+        { id: 'T4', label: 'CD4+', type: 'immune', color: '#0ff' },
+        { id: 'T8', label: 'CD8+', type: 'immune', color: '#0ff' },
+
+        // Cytokines
+        { id: 'IFN', label: 'IFN-α', type: 'cytokine', color: '#0f0' },
+        { id: 'TNF', label: 'TNF-α', type: 'cytokine', color: '#0f0' },
+        { id: 'IL6', label: 'IL-6', type: 'cytokine', color: '#0f0' },
+        { id: 'IL1', label: 'IL-1β', type: 'cytokine', color: '#0f0' },
+        { id: 'STAT', label: 'STAT1', type: 'cytokine', color: '#0f0' },
+
+        // Viral proteins
+        { id: 'NS1', label: 'NS1', type: 'viral', color: '#a0f' },
+        { id: 'NS3', label: 'NS3', type: 'viral', color: '#a0f' },
+        { id: 'NS5', label: 'NS5', type: 'viral', color: '#a0f' },
+
+        // Pathways
+        { id: 'ADE', label: 'ADE', type: 'pathway', color: '#fa0' },
+        { id: 'DIC', label: 'DIC', type: 'pathway', color: '#fa0' },
+        { id: 'VL', label: 'V.LEAK', type: 'pathway', color: '#fa0' },
+
+        // Vulnerabilities
+        {
+          id: 'V1', label: 'V1', type: 'vuln', color: '#ff0', clicked: false, risk: 0.25,
+          tooltip: 'IFN EVASION: NS5 blocks STAT phosphorylation'
+        },
+        {
+          id: 'V2', label: 'V2', type: 'vuln', color: '#ff0', clicked: false, risk: 0.30,
+          tooltip: 'ADE PATHWAY: Enhanced infection via Fc receptors'
+        },
+        {
+          id: 'V3', label: 'V3', type: 'vuln', color: '#ff0', clicked: false, risk: 0.20,
+          tooltip: 'VASCULAR LEAK: NS1 disrupts endothelial barrier'
+        },
+        {
+          id: 'V4', label: 'V4', type: 'vuln', color: '#ff0', clicked: false, risk: 0.35,
+          tooltip: 'COAGULATION: Cytokine-induced DIC cascade'
+        }
+      ];
+
+      links = [
+        // Core viral interactions
+        { source: 'DENV', target: 'DC', weight: 0.9 },
+        { source: 'DENV', target: 'MAC', weight: 0.8 },
+        { source: 'DENV', target: 'MON', weight: 0.9, restricted: true },
+
+        // Immune responses
+        { source: 'DC', target: 'IFN', weight: 0.7 },
+        { source: 'MAC', target: 'TNF', weight: 0.8 },
+        { source: 'IFN', target: 'STAT', weight: 0.9 },
+        { source: 'STAT', target: 'NK', weight: 0.6 },
+
+        // T cell activation
+        { source: 'DC', target: 'T4', weight: 0.7 },
+        { source: 'T4', target: 'T8', weight: 0.6 },
+        { source: 'T8', target: 'DENV', weight: 0.5 },
+
+        // Viral proteins
+        { source: 'DENV', target: 'NS1', weight: 0.9 },
+        { source: 'DENV', target: 'NS3', weight: 0.8 },
+        { source: 'DENV', target: 'NS5', weight: 0.9 },
+
+        // Pathways
+        { source: 'NS1', target: 'VL', weight: 0.8 },
+        { source: 'ADE', target: 'DENV', weight: 0.9, restricted: true },
+        { source: 'TNF', target: 'DIC', weight: 0.7 },
+        { source: 'IL6', target: 'DIC', weight: 0.6 },
+
+        // Vulnerability connections
+        { source: 'V1', target: 'NS5', weight: 0.9 },
+        { source: 'V1', target: 'IFN', weight: 0.8, restricted: true },
+        { source: 'V2', target: 'ADE', weight: 0.9 },
+        { source: 'V2', target: 'MON', weight: 0.7, restricted: true },
+        { source: 'V3', target: 'NS1', weight: 0.8 },
+        { source: 'V3', target: 'VL', weight: 0.9 },
+        { source: 'V4', target: 'DIC', weight: 0.9 },
+        { source: 'V4', target: 'TNF', weight: 0.7 },
+
+        // Cytokine network
+        { source: 'MAC', target: 'IL6', weight: 0.7 },
+        { source: 'MON', target: 'IL1', weight: 0.6 },
+        { source: 'IL1', target: 'TNF', weight: 0.5 },
+        { source: 'TNF', target: 'IL6', weight: 0.6 }
+      ];
+
+      simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links).id(d => d.id).strength(d => d.weight * 0.3))
+        .force('charge', d3.forceManyBody().strength(-150))
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('collision', d3.forceCollide(25));
+
+      link = svg.append('g')
+        .selectAll('line')
+        .data(links)
+        .enter()
+        .append('line')
+        .attr('stroke', d => d.weight > 0.8 ? '#f0f' : d.restricted ? '#fa0' : '#0ff')
+        .attr('stroke-width', d => 1 + d.weight * 2)
+        .attr('opacity', d => d.restricted ? 0.3 : 0.6);
+
+      node = svg.append('g')
+        .selectAll('g')
+        .data(nodes)
+        .enter()
+        .append('g')
+        .attr('class', 'node')
+        .call(d3.drag()
+          .on('start', dragstarted)
+          .on('drag', dragged)
+          .on('end', dragended));
+
+      node.append('circle')
+        .attr('r', d => d.type === 'virus' ? 18 : d.type === 'vuln' ? 15 : 11)
+        .attr('fill', d => d.color)
+        .attr('stroke', d => d.color)
+        .attr('stroke-width', 2)
+        .attr('class', d => {
+          if (d.color === '#f0f') return 'glow-red';
+          if (d.color === '#ff0') return 'glow-yellow';
+          if (d.color === '#0ff') return 'glow-cyan';
+          if (d.color === '#0f0') return 'glow-green';
+          if (d.color === '#a0f') return 'glow-purple';
+          if (d.color === '#fa0') return 'glow-orange';
+          return 'glow-cyan';
+        })
+        .on('click', handleClick)
+        .on('mouseover', showTooltip)
+        .on('mouseout', hideTooltip);
+
+      node.append('text')
+        .attr('class', 'label')
+        .attr('dy', '.35em')
+        .attr('text-anchor', 'middle')
+        .text(d => d.label);
+
+      function showTooltip(event, d) {
+        if (!d.tooltip) return;
+        const tooltip = d3.select('#tooltip');
+        tooltip.style('display', 'block')
+          .style('left', (event.pageX + 10) + 'px')
+          .style('top', (event.pageY - 10) + 'px')
+          .html(`<strong>${d.label}</strong><br>${d.tooltip}`);
+      }
+
+      function hideTooltip() {
+        d3.select('#tooltip').style('display', 'none');
+      }
+
+      function dragstarted(event) {
+        if (!event.active) simulation.alphaTarget(0.3).restart();
+        event.subject.fx = event.subject.x;
+        event.subject.fy = event.subject.y;
+      }
+
+      function dragged(event) {
+        event.subject.fx = event.x;
+        event.subject.fy = event.y;
+      }
+
+      function dragended(event) {
+        if (!event.active) simulation.alphaTarget(0);
+        event.subject.fx = null;
+        event.subject.fy = null;
+      }
+
+      function handleClick(event, d) {
+        if (d.type !== 'vuln' || gameOver) return;
+
+        if (d.clicked) {
+          // Bug is active (red) - show puzzle to deactivate
+          showPuzzle(d);
+        } else {
+          // Bug is inactive (yellow) - activate it (for testing/demo)
+          const circle = d3.select(event.target);
+          const virus = nodes.find(n => n.id === 'DENV');
+
+          d.clicked = true;
+          activeVulnerabilities++;
+          systemicRisk += Math.round(d.risk * 100);
+          circle.attr('fill', '#f00').attr('class', 'glow-red pulse');
+          showEasterEgg();
+          playExploit();
+
+          if (!timerStarted) {
+            timerStarted = true;
+            startTimer();
+          } else {
+            // Restart timer if already running to apply speed changes
+            startTimer();
+          }
+
+          if (activeVulnerabilities >= 3) {
+            setTimeout(() => playSystemFailure(), 200);
+          }
+
+          if (d.id === 'V1' || d.id === 'V2') {
+            virus.infectionProb = Math.min(0.95, virus.infectionProb + 0.25);
+            viralTropism++;
+
+            link.filter(l => l.source.id === 'IFN' || l.target.id === 'IFN')
+              .transition().duration(300)
+              .attr('opacity', 0.1)
+              .attr('stroke', '#f00');
+
+            node.filter(n => ['IFN', 'STAT', 'NK'].includes(n.id))
+              .select('circle')
+              .transition().duration(300)
+              .attr('fill', '#f00')
+              .attr('stroke', '#f00')
+              .attr('r', 6);
+          }
+
+          if (d.id === 'V3') {
+            virus.infectionProb += 0.2;
+            node.filter(n => n.id === 'NS1')
+              .select('circle')
+              .transition().duration(300)
+              .attr('r', 22)
+              .attr('fill', '#f0f')
+              .attr('class', 'glow-red pulse');
+          }
+
+          if (d.id === 'V4') {
+            node.filter(n => n.id === 'DIC')
+              .select('circle')
+              .transition().duration(300)
+              .attr('r', 20)
+              .attr('fill', '#f00')
+              .attr('class', 'glow-red pulse');
+          }
+
+          link.filter(l => l.restricted && l.source.id === 'DENV')
+            .transition().duration(300)
+            .attr('opacity', 0.8)
+            .attr('stroke', '#f0f')
+            .attr('stroke-width', 4);
+
+          node.filter(n => n.id === 'DENV')
+            .select('circle')
+            .transition().duration(300)
+            .attr('r', 18 + activeVulnerabilities * 4);
+
+        }
+      }
+
+      simulation.on('tick', () => {
+        // Constrain nodes to viewport
+        nodes.forEach(d => {
+          d.x = Math.max(50, Math.min(width - 50, d.x));
+          d.y = Math.max(50, Math.min(height - 50, d.y));
+        });
+
+        link
+          .attr('x1', d => d.source.x)
+          .attr('y1', d => d.source.y)
+          .attr('x2', d => d.target.x)
+          .attr('y2', d => d.target.y);
+
+        node.attr('transform', d => `translate(${d.x},${d.y})`);
+      });
+
+      d3.select('#reset').on('click', () => {
+        if (gameOver) return;
+
+        playClick();
+        setTimeout(() => playStartup(), 100);
+        setTimeout(() => {
+          initAudio();
+          startCumbiaLoop();
+        }, 600);
+
+        d3.select('#backToArticle').on('click', () => {
+          playClick();
+          setTimeout(() => {
+            window.location.href = 'burnout-clarity';
+          }, 100);
+        });
+
+        // Use the same initialization logic as init()
+        const activatedPathogens = initializeGameState();
+
+        // Reset visual elements
+        node.select('circle')
+          .each(function (d) {
+            d3.select(this)
+              .attr('fill', d.color)
+              .attr('stroke', d.color)
+              .attr('r', d.type === 'virus' ? 18 : d.type === 'vuln' ? 15 : 11)
+              .attr('class', () => {
+                if (d.color === '#f0f') return 'glow-red';
+                if (d.color === '#ff0') return 'glow-yellow';
+                if (d.color === '#0ff') return 'glow-cyan';
+                if (d.color === '#0f0') return 'glow-green';
+                if (d.color === '#a0f') return 'glow-purple';
+                if (d.color === '#fa0') return 'glow-orange';
+                if (d.color === '#f00') return 'glow-red';
+                return 'glow-cyan';
+              });
+          });
+
+        link
+          .attr('opacity', d => d.restricted ? 0.3 : 0.6)
+          .attr('stroke', d => d.weight > 0.8 ? '#f0f' : d.restricted ? '#fa0' : '#0ff')
+          .attr('stroke-width', d => 1 + d.weight * 2);
+
+        // Apply visual effects to activated pathogens (same logic from init())
+        setTimeout(() => {
+          activatedPathogens.forEach(vuln => {
+            const circle = node.filter(n => n.id === vuln.id).select('circle');
+            circle.attr('fill', '#f00').attr('class', 'glow-red pulse');
+
+            // Apply specific visual effects based on pathogen type
+            const virus = nodes.find(n => n.id === 'DENV');
+
+            if (vuln.id === 'V1' || vuln.id === 'V2') {
+              link.filter(l => l.source.id === 'IFN' || l.target.id === 'IFN')
+                .attr('opacity', 0.1)
+                .attr('stroke', '#f00');
+
+              node.filter(n => ['IFN', 'STAT', 'NK'].includes(n.id))
+                .select('circle')
+                .attr('fill', '#f00')
+                .attr('stroke', '#f00')
+                .attr('r', 6);
+            }
+
+            if (vuln.id === 'V3') {
+              node.filter(n => n.id === 'NS1')
+                .select('circle')
+                .attr('r', 22)
+                .attr('fill', '#f0f')
+                .attr('class', 'glow-red pulse');
+            }
+
+            if (vuln.id === 'V4') {
+              node.filter(n => n.id === 'DIC')
+                .select('circle')
+                .attr('r', 20)
+                .attr('fill', '#f00')
+                .attr('class', 'glow-red pulse');
+            }
+          });
+
+          if (activatedPathogens.length > 0) {
+            timerStarted = true;
+            startTimer();
+          }
+
+          // Update virus size based on active vulnerabilities
+          node.filter(n => n.id === 'DENV')
+            .select('circle')
+            .attr('r', 18 + activeVulnerabilities * 4);
+
+          // Update restricted links if any vulnerabilities are active
+          if (activeVulnerabilities > 0) {
+            link.filter(l => l.restricted && l.source.id === 'DENV')
+              .attr('opacity', 0.8)
+              .attr('stroke', '#f0f')
+              .attr('stroke-width', 4);
+          }
+
+          updateHUD();
+        }, 100);
+
+        updateHUD();
+      });
+
+      const activatedPathogens = randomizeInitialPathogens();
+
+      // Apply visual effects to activated pathogens
+      setTimeout(() => {
+        activatedPathogens.forEach(vuln => {
+          const circle = node.filter(n => n.id === vuln.id).select('circle');
+          circle.attr('fill', '#f00').attr('class', 'glow-red pulse');
+
+          // Apply specific visual effects based on pathogen type
+          const virus = nodes.find(n => n.id === 'DENV');
+
+          if (vuln.id === 'V1' || vuln.id === 'V2') {
+            link.filter(l => l.source.id === 'IFN' || l.target.id === 'IFN')
+              .attr('opacity', 0.1)
+              .attr('stroke', '#f00');
+
+            node.filter(n => ['IFN', 'STAT', 'NK'].includes(n.id))
+              .select('circle')
+              .attr('fill', '#f00')
+              .attr('stroke', '#f00')
+              .attr('r', 6);
+          }
+
+          if (vuln.id === 'V3') {
+            node.filter(n => n.id === 'NS1')
+              .select('circle')
+              .attr('r', 22)
+              .attr('fill', '#f0f')
+              .attr('class', 'glow-red pulse');
+          }
+
+          if (vuln.id === 'V4') {
+            node.filter(n => n.id === 'DIC')
+              .select('circle')
+              .attr('r', 20)
+              .attr('fill', '#f00')
+              .attr('class', 'glow-red pulse');
+          }
+        });
+
+        if (activatedPathogens.length > 0) {
+          timerStarted = true;
+          startTimer();
+        }
+
+        // Update virus size based on active vulnerabilities
+        node.filter(n => n.id === 'DENV')
+          .select('circle')
+          .attr('r', 18 + activeVulnerabilities * 4);
+
+        // Update restricted links if any vulnerabilities are active
+        if (activeVulnerabilities > 0) {
+          link.filter(l => l.restricted && l.source.id === 'DENV')
+            .attr('opacity', 0.8)
+            .attr('stroke', '#f0f')
+            .attr('stroke-width', 4);
+        }
+
+        // Update HUD to reflect new state
+        updateHUD();
+      }, 100); // Small delay to ensure nodes are rendered
+    }
+
+    document.getElementById('startButton').addEventListener('click', () => {
+      initAudio()
+      playClick();
+      setTimeout(() => init(), 150);
+    });
+
+    document.getElementById('restartButton').addEventListener('click', () => {
+      document.getElementById('gameOverlay').style.display = 'none';
+      playClick();
+      setTimeout(() => init(), 150);
+    });
+
+    document.getElementById('playAgainButton').addEventListener('click', () => {
+      document.getElementById('victoryOverlay').style.display = 'none';
+      playClick();
+      setTimeout(() => init(), 150);
+    });
+
+    document.getElementById('backToArticle').addEventListener('click', () => {
+      playClick();
+      setTimeout(() => {
+        window.location.href = 'burnout-clarity';
+      }, 150);
+    });
+  </script>
+</body>
+
+</html>

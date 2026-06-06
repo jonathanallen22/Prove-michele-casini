@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharpness Lab — Antitesi</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #fafaf7;
+            --fg: #111;
+            --muted: rgba(0, 0, 0, 0.55);
+            --line: rgba(0, 0, 0, 0.12);
+            --line-strong: rgba(0, 0, 0, 0.55);
+            --accent: #ff3366;
+            --gray: #f0eee9;
+            --serif: 'Crimson Pro', serif;
+            --grotesk: 'Inter', sans-serif;
+            --display: 'Fraunces', serif;
+            --mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+        }
+
+        body.dark-mode {
+            --bg: #0c0c0c;
+            --fg: #e8e6df;
+            --muted: rgba(255, 255, 255, 0.45);
+            --line: rgba(255, 255, 255, 0.1);
+            --line-strong: rgba(255, 255, 255, 0.55);
+            --gray: #161616;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            background: var(--bg);
+            color: var(--fg);
+            font-family: var(--serif);
+            line-height: 1.5;
+        }
+
+        body {
+            padding: 2rem 2rem 4rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        a { color: inherit; }
+
+        header {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            padding-bottom: 1rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--line-strong);
+        }
+
+        h1 {
+            font-family: var(--display);
+            font-weight: 700;
+            font-size: 2rem;
+            letter-spacing: -0.02em;
+            line-height: 1;
+        }
+
+        .subhead {
+            font-family: var(--grotesk);
+            font-size: 0.65rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            opacity: 0.45;
+        }
+
+        nav.tools {
+            display: flex;
+            gap: 1.2rem;
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        nav.tools button {
+            background: none;
+            border: none;
+            color: inherit;
+            font: inherit;
+            text-transform: inherit;
+            letter-spacing: inherit;
+            opacity: 0.5;
+            cursor: pointer;
+            padding: 0.2rem 0;
+            transition: opacity 0.15s;
+        }
+
+        nav.tools button:hover { opacity: 1; }
+
+        section {
+            margin-bottom: 2.5rem;
+        }
+
+        .section-label {
+            font-family: var(--grotesk);
+            font-size: 0.6rem;
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+            opacity: 0.4;
+            margin-bottom: 0.75rem;
+        }
+
+        canvas.draw {
+            display: block;
+            width: 100%;
+            aspect-ratio: 14 / 6;
+            background: var(--bg);
+            border: 1px solid var(--line-strong);
+            cursor: crosshair;
+        }
+
+        .canvas-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 0.5rem;
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            opacity: 0.6;
+        }
+
+        .canvas-actions {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .canvas-actions button, .btn {
+            font-family: var(--grotesk);
+            font-size: 0.62rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            background: none;
+            border: 1px solid var(--line-strong);
+            color: inherit;
+            padding: 0.45rem 0.8rem;
+            cursor: pointer;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .canvas-actions button:hover, .btn:hover {
+            background: var(--fg);
+            color: var(--bg);
+        }
+
+        .btn-primary {
+            background: var(--fg);
+            color: var(--bg);
+            border-color: var(--fg);
+        }
+
+        .scores {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.55rem;
+        }
+
+        .score-row {
+            display: grid;
+            grid-template-columns: 220px 1fr 80px 80px;
+            gap: 1rem;
+            align-items: center;
+            font-family: var(--mono);
+            font-size: 0.78rem;
+        }
+
+        .score-name {
+            font-family: var(--grotesk);
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+        }
+
+        .score-name small {
+            display: block;
+            font-size: 0.6rem;
+            opacity: 0.5;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+            margin-top: 0.1rem;
+        }
+
+        .score-bar {
+            position: relative;
+            height: 8px;
+            background: var(--gray);
+            overflow: hidden;
+        }
+
+        .score-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: var(--fg);
+            transition: width 0.25s ease;
+        }
+
+        .score-norm {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .score-raw {
+            text-align: right;
+            opacity: 0.55;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .saved-strip {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 0.6rem;
+        }
+
+        .saved-card {
+            border: 1px solid var(--line);
+            padding: 0.4rem;
+            cursor: pointer;
+            transition: border-color 0.15s;
+            position: relative;
+        }
+
+        .saved-card:hover { border-color: var(--line-strong); }
+        .saved-card.active { border-color: var(--accent); }
+        .saved-card.seed { border-style: dashed; }
+
+        .saved-card canvas {
+            display: block;
+            width: 100%;
+            aspect-ratio: 1.6;
+            background: transparent;
+        }
+
+        .saved-card .label {
+            font-family: var(--grotesk);
+            font-size: 0.6rem;
+            letter-spacing: 0.04em;
+            margin-top: 0.3rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .saved-card .delete {
+            opacity: 0;
+            font-size: 0.7rem;
+            color: var(--accent);
+            cursor: pointer;
+            padding: 0 0.2rem;
+            transition: opacity 0.15s;
+        }
+
+        .saved-card:hover .delete { opacity: 0.7; }
+        .saved-card .delete:hover { opacity: 1; }
+        .saved-card.seed .delete { display: none; }
+
+        .heatmap-wrap { overflow-x: auto; }
+
+        table.heatmap {
+            border-collapse: collapse;
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            width: 100%;
+        }
+
+        table.heatmap th, table.heatmap td {
+            border: 1px solid var(--line);
+            padding: 0.4rem 0.5rem;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            min-width: 60px;
+            white-space: nowrap;
+        }
+
+        table.heatmap th {
+            font-family: var(--grotesk);
+            font-size: 0.6rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 500;
+            opacity: 0.7;
+            background: var(--bg);
+        }
+
+        table.heatmap th.line-name {
+            text-align: left;
+            font-family: var(--grotesk);
+            text-transform: none;
+            letter-spacing: 0.02em;
+            font-size: 0.7rem;
+            font-weight: 500;
+            opacity: 1;
+            min-width: 140px;
+        }
+
+        table.heatmap td.line-name {
+            text-align: left;
+            font-family: var(--grotesk);
+            font-size: 0.72rem;
+            background: var(--bg);
+            cursor: pointer;
+        }
+
+        table.heatmap tr.active td.line-name {
+            color: var(--accent);
+        }
+
+        table.heatmap td.cell {
+            color: var(--fg);
+            background: color-mix(in srgb, var(--accent) calc(var(--heat) * 100%), transparent);
+        }
+
+        table.heatmap tbody tr { cursor: pointer; }
+
+        .notes {
+            font-family: var(--grotesk);
+            font-size: 0.7rem;
+            opacity: 0.5;
+            line-height: 1.6;
+            border-top: 1px solid var(--line);
+            padding-top: 1rem;
+            margin-top: 2.5rem;
+        }
+
+        .notes p { margin-bottom: 0.5rem; }
+        .notes code {
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            background: var(--gray);
+            padding: 0.05rem 0.25rem;
+        }
+
+        .save-dialog {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.4);
+            z-index: 100;
+        }
+        .save-dialog.open { display: flex; }
+        .save-dialog-inner {
+            background: var(--bg);
+            border: 1px solid var(--line-strong);
+            padding: 1.5rem;
+            min-width: 320px;
+        }
+        .save-dialog-inner h3 {
+            font-family: var(--display);
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+        .save-dialog-inner input {
+            width: 100%;
+            padding: 0.5rem;
+            font-family: var(--grotesk);
+            font-size: 0.85rem;
+            background: transparent;
+            color: var(--fg);
+            border: 1px solid var(--line-strong);
+            margin-bottom: 1rem;
+        }
+        .save-dialog-actions {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: flex-end;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div>
+            <h1>Sharpness Lab</h1>
+            <div class="subhead">Antitesi · explore3 · dev tool</div>
+        </div>
+        <nav class="tools">
+            <button id="darkModeToggle">dark</button>
+            <button id="resetSeedBtn">reset seeds</button>
+            <button id="clearSavedBtn">clear all saved</button>
+        </nav>
+    </header>
+
+    <section>
+        <div class="section-label">draw a line</div>
+        <canvas class="draw" id="drawCanvas" width="1600" height="700"></canvas>
+        <div class="canvas-meta">
+            <span id="canvasInfo">no line yet</span>
+            <div class="canvas-actions">
+                <button id="clearBtn">clear</button>
+                <button id="saveBtn">save line</button>
+            </div>
+        </div>
+    </section>
+
+    <section>
+        <div class="section-label">algorithm scores · current line</div>
+        <div class="scores" id="scoresBlock"></div>
+    </section>
+
+    <section>
+        <div class="section-label">saved lines · click to load</div>
+        <div class="saved-strip" id="savedStrip"></div>
+    </section>
+
+    <section>
+        <div class="section-label">heatmap · all algorithms × all lines</div>
+        <div class="heatmap-wrap">
+            <table class="heatmap" id="heatmap"></table>
+        </div>
+    </section>
+
+    <div class="notes">
+        <p><strong>About</strong>. Each algorithm produces a sharpness score in [0, 1]. The raw value is shown to its right. Cells in the heatmap are tinted by score: the more saturated, the sharper the line is according to that algorithm.</p>
+        <p><strong>Storage</strong>. Saved lines persist in <code>localStorage</code> under <code>sharpness-lab.lines</code>. Seeds are dashed and reset by clicking <code>reset seeds</code>. Drawn lines are stored in canvas-internal coordinates (1600×700).</p>
+        <p><strong>2-inch window</strong>. Computed from <code>96 px/in</code> (CSS spec) scaled into canvas-internal coordinates using the canvas's current rendered size. The number of windows is <code>ceil(L / 2in)</code>; in-between windows are added between each adjacent pair to smooth boundary effects.</p>
+    </div>
+
+    <div class="save-dialog" id="saveDialog">
+        <div class="save-dialog-inner">
+            <h3>name this line</h3>
+            <input type="text" id="saveDialogInput" placeholder="e.g. zigzag">
+            <div class="save-dialog-actions">
+                <button class="btn" onclick="closeSaveDialog()">cancel</button>
+                <button class="btn btn-primary" onclick="confirmSave()">save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    // ═══════════════════════════════════════════════════════════════════
+    // STATE
+    // ═══════════════════════════════════════════════════════════════════
+    const STORAGE_KEY = 'sharpness-lab.lines';
+    const drawCanvas = document.getElementById('drawCanvas');
+    const drawCtx = drawCanvas.getContext('2d');
+
+    let isDrawing = false;
+    let currentPoints = [];
+    let activeLineId = null;
+
+    // ═══════════════════════════════════════════════════════════════════
+    // GEOMETRY HELPERS
+    // ═══════════════════════════════════════════════════════════════════
+
+    function getCanvasPoint(clientX, clientY) {
+        const rect = drawCanvas.getBoundingClientRect();
+        return {
+            x: (clientX - rect.left) * (drawCanvas.width / rect.width),
+            y: (clientY - rect.top) * (drawCanvas.height / rect.height)
+        };
+    }
+
+    function pathLength(pts) {
+        let L = 0;
+        for (let i = 1; i < pts.length; i++) {
+            L += Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
+        }
+        return L;
+    }
+
+    function resampleEven(pts, N) {
+        if (pts.length < 2) return pts.slice();
+        const segs = [];
+        let totalLen = 0;
+        for (let i = 1; i < pts.length; i++) {
+            const d = Math.hypot(pts[i].x - pts[i-1].x, pts[i].y - pts[i-1].y);
+            segs.push(d);
+            totalLen += d;
+        }
+        if (totalLen === 0) return [pts[0]];
+        const step = totalLen / (N - 1);
+        const out = [pts[0]];
+        let acc = 0, j = 1;
+        for (let i = 1; i < N - 1; i++) {
+            const target = i * step;
+            while (j < pts.length && acc + segs[j-1] < target) {
+                acc += segs[j-1];
+                j++;
+            }
+            if (j >= pts.length) break;
+            const t = (target - acc) / segs[j-1];
+            out.push({
+                x: pts[j-1].x + t * (pts[j].x - pts[j-1].x),
+                y: pts[j-1].y + t * (pts[j].y - pts[j-1].y)
+            });
+        }
+        out.push(pts[pts.length - 1]);
+        return out;
+    }
+
+    function median3(rs) {
+        return rs.map((p, i) => {
+            if (i === 0 || i === rs.length - 1) return p;
+            const a = rs[i-1], b = rs[i], c = rs[i+1];
+            const xs = [a.x, b.x, c.x].sort((u, v) => u - v);
+            const ys = [a.y, b.y, c.y].sort((u, v) => u - v);
+            return { x: xs[1], y: ys[1] };
+        });
+    }
+
+    // turn angles at each interior point of a polyline.
+    // W is the half-window: vector from i-W to i, then i to i+W.
+    function turnAngles(pts, W) {
+        const out = [];
+        for (let i = W; i < pts.length - W; i++) {
+            const ax = pts[i].x - pts[i-W].x, ay = pts[i].y - pts[i-W].y;
+            const bx = pts[i+W].x - pts[i].x, by = pts[i+W].y - pts[i].y;
+            const mag = Math.hypot(ax, ay) * Math.hypot(bx, by);
+            if (mag < 1e-10) { out.push(0); continue; }
+            const cos = Math.max(-1, Math.min(1, (ax*bx + ay*by) / mag));
+            out.push(Math.acos(cos));
+        }
+        return out;
+    }
+
+    function twoInchInCanvasUnits() {
+        const rect = drawCanvas.getBoundingClientRect();
+        if (rect.width === 0) return drawCanvas.width / 4;
+        const cssPxPerInch = 96;
+        const internalPerCss = drawCanvas.width / rect.width;
+        return 2 * cssPxPerInch * internalPerCss;
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // PREPROCESSING — shared by all algorithms
+    // ═══════════════════════════════════════════════════════════════════
+    function preprocess(pts) {
+        if (pts.length < 5) return null;
+        const L = pathLength(pts);
+        if (L < 40) return null;
+        const N = Math.min(200, Math.max(30, Math.floor(L / 5)));
+        return median3(resampleEven(pts, N));
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // ALGORITHMS
+    // each takes raw points, returns { raw, norm } with norm in [0, 1]
+    // ═══════════════════════════════════════════════════════════════════
+
+    // 1. Max angle anywhere on the line.
+    function algoMaxAngle(pts) {
+        const sm = preprocess(pts);
+        if (!sm) return { raw: 0, norm: 0 };
+        const angles = turnAngles(sm, 4);
+        if (!angles.length) return { raw: 0, norm: 0 };
+        const max = Math.max(...angles);
+        return { raw: max, norm: Math.min(1, max / Math.PI) };
+    }
+
+    // 2. Mean of all turn angles.
+    function algoMeanAngle(pts) {
+        const sm = preprocess(pts);
+        if (!sm) return { raw: 0, norm: 0 };
+        const angles = turnAngles(sm, 4);
+        if (!angles.length) return { raw: 0, norm: 0 };
+        const mean = angles.reduce((s, a) => s + a, 0) / angles.length;
+        return { raw: mean, norm: Math.min(1, mean / (Math.PI / 2)) };
+    }
+
+    // 3. Top-K concentration (current explore2).
+    function algoTopKConcentration(pts) {
+        const sm = preprocess(pts);
+        if (!sm) return { raw: 0, norm: 0 };
+        const angles = turnAngles(sm, 4);
+        if (angles.length < 5) return { raw: 0, norm: 0 };
+        const weighted = angles.map(a => Math.pow(a, 1.3));
+        const total = weighted.reduce((s, v) => s + v, 0);
+        if (total < 1e-10) return { raw: 0, norm: 0 };
+        const sorted = [...weighted].sort((a, b) => b - a);
+        const K = Math.max(1, Math.round(weighted.length * 0.1));
+        const topSum = sorted.slice(0, K).reduce((s, v) => s + v, 0);
+        const Q = K / weighted.length;
+        const concentration = topSum / total;
+        const score = Math.max(0, Math.min(1, (concentration - Q) / (1 - Q)));
+        return { raw: concentration, norm: score };
+    }
+
+    // 4. ∫|κ|ds / L — total curvature density.
+    function algoCurvatureDensity(pts) {
+        const sm = preprocess(pts);
+        if (!sm) return { raw: 0, norm: 0 };
+        const angles = turnAngles(sm, 1);
+        const totalAngle = angles.reduce((s, a) => s + a, 0);
+        const L = pathLength(sm);
+        if (L < 1) return { raw: 0, norm: 0 };
+        const density = totalAngle / L;
+        // empirical scale: a tight spiral ≈ 0.05 rad/px on this canvas
+        return { raw: density, norm: Math.min(1, density / 0.05) };
+    }
+
+    // 5. Fraction of points with turn > 30°.
+    function algoFracAboveThreshold(pts) {
+        const sm = preprocess(pts);
+        if (!sm) return { raw: 0, norm: 0 };
+        const angles = turnAngles(sm, 4);
+        if (!angles.length) return { raw: 0, norm: 0 };
+        const threshold = Math.PI / 6;
+        const above = angles.filter(a => a > threshold).length;
+        const frac = above / angles.length;
+        return { raw: frac, norm: frac };
+    }
+
+    // 6. RDP simplification — vertex density.
+    function rdp(pts, epsilon) {
+        if (pts.length < 3) return pts.slice();
+        function perpDist(p, a, b) {
+            const dx = b.x - a.x, dy = b.y - a.y;
+            const mag = Math.hypot(dx, dy);
+            if (mag < 1e-10) return Math.hypot(p.x - a.x, p.y - a.y);
+            return Math.abs(dy * p.x - dx * p.y + b.x * a.y - b.y * a.x) / mag;
+        }
+        function recurse(start, end) {
+            let maxD = 0, idx = -1;
+            for (let i = start + 1; i < end; i++) {
+                const d = perpDist(pts[i], pts[start], pts[end]);
+                if (d > maxD) { maxD = d; idx = i; }
+            }
+            if (maxD > epsilon && idx !== -1) {
+                const left = recurse(start, idx);
+                const right = recurse(idx, end);
+                return left.slice(0, -1).concat(right);
+            }
+            return [pts[start], pts[end]];
+        }
+        return recurse(0, pts.length - 1);
+    }
+
+    function algoRDPDensity(pts) {
+        const sm = preprocess(pts);
+        if (!sm) return { raw: 0, norm: 0 };
+        const epsilon = 8;
+        const simplified = rdp(sm, epsilon);
+        const L = pathLength(sm);
+        if (L < 1) return { raw: 0, norm: 0 };
+        const density = simplified.length / (L / 100);
+        return { raw: density, norm: Math.min(1, density / 5) };
+    }
+
+    // 7. 2-inch window mean max, with overlapping in-between windows.
+    function algoTwoInchWindowMax(pts) {
+        const sm = preprocess(pts);
+        if (!sm) return { raw: 0, norm: 0 };
+        const angles = turnAngles(sm, 4);
+        if (!angles.length) return { raw: 0, norm: 0 };
+
+        const L = pathLength(sm);
+        const windowLen = twoInchInCanvasUnits();
+
+        // cumulative arc length at each smoothed point
+        const cum = [0];
+        for (let i = 1; i < sm.length; i++) {
+            cum.push(cum[i-1] + Math.hypot(sm[i].x - sm[i-1].x, sm[i].y - sm[i-1].y));
+        }
+        // angles[k] corresponds to point index k+4 (W=4 used above)
+        function maxAngleInArc(start, end) {
+            let maxA = 0;
+            for (let k = 0; k < angles.length; k++) {
+                const arc = cum[k + 4];
+                if (arc >= start && arc <= end) {
+                    if (angles[k] > maxA) maxA = angles[k];
+                }
+            }
+            return maxA;
+        }
+
+        const nMain = Math.max(1, Math.ceil(L / windowLen));
+        const mainLen = L / nMain;
+        const windows = [];
+        for (let i = 0; i < nMain; i++) {
+            windows.push([i * mainLen, (i + 1) * mainLen]);
+        }
+        // in-between windows: centered on each interior boundary, same length
+        for (let i = 1; i < nMain; i++) {
+            const c = i * mainLen;
+            const half = mainLen / 2;
+            windows.push([Math.max(0, c - half), Math.min(L, c + half)]);
+        }
+
+        const maxes = windows.map(([s, e]) => maxAngleInArc(s, e));
+        const mean = maxes.reduce((s, v) => s + v, 0) / maxes.length;
+        return { raw: mean, norm: Math.min(1, mean / Math.PI) };
+    }
+
+    const ALGORITHMS = [
+        { id: 'max',     name: 'Max angle',           desc: 'biggest single turn',                 fn: algoMaxAngle },
+        { id: 'mean',    name: 'Mean angle',          desc: 'average turn per point',              fn: algoMeanAngle },
+        { id: 'topk',    name: 'Top-K concentration', desc: 'top-10% angle weight (current)',      fn: algoTopKConcentration },
+        { id: 'curv',    name: 'Curvature density',   desc: '∫|κ|ds / L · radians per pixel',      fn: algoCurvatureDensity },
+        { id: 'frac',    name: 'Frac above 30°',      desc: 'share of points with sharp turn',     fn: algoFracAboveThreshold },
+        { id: 'rdp',     name: 'RDP vertex density',  desc: 'Douglas-Peucker survivors per 100px', fn: algoRDPDensity },
+        { id: 'window',  name: '2-inch window mean',  desc: 'mean of per-window max, with overlaps', fn: algoTwoInchWindowMax },
+    ];
+
+    // ═══════════════════════════════════════════════════════════════════
+    // SEED LINES
+    // ═══════════════════════════════════════════════════════════════════
+    function seedLines() {
+        const W = 1600, H = 700;
+        function sample(fn, n) {
+            const out = [];
+            for (let i = 0; i < n; i++) out.push(fn(i / (n - 1)));
+            return out;
+        }
+        return [
+            {
+                id: 'seed-straight', name: 'straight', seed: true,
+                points: sample(t => ({ x: 100 + t * (W - 200), y: H/2 + Math.sin(t * 0.5) * 4 }), 80),
+            },
+            {
+                id: 'seed-arc', name: 'gentle arc', seed: true,
+                points: sample(t => ({
+                    x: 100 + t * (W - 200),
+                    y: H/2 + Math.sin(t * Math.PI) * 180,
+                }), 100),
+            },
+            {
+                id: 'seed-corner', name: 'single corner', seed: true,
+                points: (() => {
+                    const out = [];
+                    for (let i = 0; i < 50; i++) out.push({ x: 200 + i * 14, y: 200 });
+                    for (let i = 0; i < 50; i++) out.push({ x: 900, y: 200 + i * 8 });
+                    return out;
+                })(),
+            },
+            {
+                id: 'seed-zigzag', name: 'zigzag', seed: true,
+                points: (() => {
+                    const out = [];
+                    const N = 240, segments = 12;
+                    for (let i = 0; i < N; i++) {
+                        const t = i / (N - 1);
+                        const x = 100 + t * (W - 200);
+                        // triangle wave
+                        const phase = t * segments;
+                        const local = phase - Math.floor(phase);
+                        const tri = local < 0.5 ? local * 2 : (1 - local) * 2; // 0..1..0
+                        const y = H/2 - 80 + tri * 160;
+                        out.push({ x, y });
+                    }
+                    return out;
+                })(),
+            },
+            {
+                id: 'seed-spiral', name: 'spiral', seed: true,
+                points: (() => {
+                    const out = [];
+                    const cx = W/2, cy = H/2;
+                    for (let i = 0; i < 320; i++) {
+                        const t = i / 320;
+                        const angle = t * Math.PI * 6;
+                        const r = 30 + t * 200;
+                        out.push({ x: cx + Math.cos(angle) * r, y: cy + Math.sin(angle) * r });
+                    }
+                    return out;
+                })(),
+            },
+        ];
+    }
+
+    function loadSaved() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return seedLines();
+            const parsed = JSON.parse(raw);
+            if (!Array.isArray(parsed) || !parsed.length) return seedLines();
+            return parsed;
+        } catch (e) {
+            console.warn('Failed to load saved lines:', e);
+            return seedLines();
+        }
+    }
+
+    function persistSaved(lines) {
+        try { localStorage.setItem(STORAGE_KEY, JSON.stringify(lines)); }
+        catch (e) { console.warn('Failed to persist:', e); }
+    }
+
+    let savedLines = loadSaved();
+
+    // ═══════════════════════════════════════════════════════════════════
+    // RENDERING
+    // ═══════════════════════════════════════════════════════════════════
+    function isDarkMode() { return document.body.classList.contains('dark-mode'); }
+
+    function drawGrid(ctx, w, h) {
+        const dark = isDarkMode();
+        ctx.fillStyle = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.045)';
+        for (let x = 80; x < w; x += 80) {
+            for (let y = 80; y < h; y += 80) {
+                ctx.beginPath();
+                ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+    }
+
+    function renderMainCanvas() {
+        drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+        drawGrid(drawCtx, drawCanvas.width, drawCanvas.height);
+        if (currentPoints.length < 2) return;
+        drawCtx.strokeStyle = isDarkMode() ? '#e8e6df' : '#111';
+        drawCtx.lineWidth = 3;
+        drawCtx.lineCap = 'round';
+        drawCtx.lineJoin = 'round';
+        drawCtx.beginPath();
+        drawCtx.moveTo(currentPoints[0].x, currentPoints[0].y);
+        for (let i = 1; i < currentPoints.length; i++) {
+            drawCtx.lineTo(currentPoints[i].x, currentPoints[i].y);
+        }
+        drawCtx.stroke();
+    }
+
+    function renderThumb(ctx, points, w, h) {
+        ctx.clearRect(0, 0, w, h);
+        if (points.length < 2) return;
+        let minX = points[0].x, maxX = minX, minY = points[0].y, maxY = minY;
+        for (const p of points) {
+            if (p.x < minX) minX = p.x; else if (p.x > maxX) maxX = p.x;
+            if (p.y < minY) minY = p.y; else if (p.y > maxY) maxY = p.y;
+        }
+        const bw = Math.max(1, maxX - minX), bh = Math.max(1, maxY - minY);
+        const margin = 6;
+        const scale = Math.min((w - margin * 2) / bw, (h - margin * 2) / bh);
+        const ox = (w - bw * scale) / 2 - minX * scale;
+        const oy = (h - bh * scale) / 2 - minY * scale;
+        ctx.strokeStyle = isDarkMode() ? '#e8e6df' : '#111';
+        ctx.lineWidth = 1.2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+        ctx.beginPath();
+        ctx.moveTo(points[0].x * scale + ox, points[0].y * scale + oy);
+        for (let i = 1; i < points.length; i++) {
+            ctx.lineTo(points[i].x * scale + ox, points[i].y * scale + oy);
+        }
+        ctx.stroke();
+    }
+
+    function renderScores() {
+        const block = document.getElementById('scoresBlock');
+        block.innerHTML = '';
+        const hasLine = currentPoints.length >= 2;
+        ALGORITHMS.forEach(algo => {
+            const { raw, norm } = hasLine ? algo.fn(currentPoints) : { raw: 0, norm: 0 };
+            const row = document.createElement('div');
+            row.className = 'score-row';
+            row.innerHTML = `
+                <div class="score-name">${algo.name}<small>${algo.desc}</small></div>
+                <div class="score-bar"><div class="score-bar-fill" style="width:${(norm * 100).toFixed(1)}%"></div></div>
+                <div class="score-norm">${norm.toFixed(3)}</div>
+                <div class="score-raw">${raw.toFixed(3)}</div>
+            `;
+            block.appendChild(row);
+        });
+
+        const info = document.getElementById('canvasInfo');
+        if (hasLine) {
+            const L = pathLength(currentPoints);
+            const w2 = twoInchInCanvasUnits();
+            const nWindows = Math.max(1, Math.ceil(L / w2));
+            const nameLine = activeLineId ? ` · loaded "${(savedLines.find(l => l.id === activeLineId) || {}).name || ''}"` : '';
+            info.textContent = `${currentPoints.length} pts · L = ${L.toFixed(0)} canvas-px · 2in ≈ ${w2.toFixed(0)} canvas-px · ${nWindows} main window${nWindows === 1 ? '' : 's'}${nameLine}`;
+        } else {
+            info.textContent = 'no line yet';
+        }
+    }
+
+    function renderSavedStrip() {
+        const strip = document.getElementById('savedStrip');
+        strip.innerHTML = '';
+        savedLines.forEach(line => {
+            const card = document.createElement('div');
+            card.className = 'saved-card' + (line.seed ? ' seed' : '') + (line.id === activeLineId ? ' active' : '');
+            card.dataset.id = line.id;
+
+            const tcanvas = document.createElement('canvas');
+            tcanvas.width = 200; tcanvas.height = 125;
+            const tctx = tcanvas.getContext('2d');
+            renderThumb(tctx, line.points, tcanvas.width, tcanvas.height);
+            card.appendChild(tcanvas);
+
+            const label = document.createElement('div');
+            label.className = 'label';
+            label.innerHTML = `<span>${line.name}${line.seed ? '' : ''}</span><span class="delete" title="delete">✕</span>`;
+            card.appendChild(label);
+
+            card.addEventListener('click', (e) => {
+                if (e.target.classList.contains('delete')) {
+                    e.stopPropagation();
+                    if (line.seed) return;
+                    if (confirm(`delete "${line.name}"?`)) {
+                        savedLines = savedLines.filter(l => l.id !== line.id);
+                        persistSaved(savedLines);
+                        if (activeLineId === line.id) activeLineId = null;
+                        renderAll();
+                    }
+                    return;
+                }
+                loadLine(line);
+            });
+
+            strip.appendChild(card);
+        });
+    }
+
+    function renderHeatmap() {
+        const tbl = document.getElementById('heatmap');
+        tbl.innerHTML = '';
+        const thead = document.createElement('thead');
+        const headRow = document.createElement('tr');
+        headRow.innerHTML = `<th class="line-name">line</th>` +
+            ALGORITHMS.map(a => `<th title="${a.desc}">${a.name}</th>`).join('');
+        thead.appendChild(headRow);
+        tbl.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        savedLines.forEach(line => {
+            const tr = document.createElement('tr');
+            if (line.id === activeLineId) tr.classList.add('active');
+            tr.dataset.id = line.id;
+            const nameCell = document.createElement('td');
+            nameCell.className = 'line-name';
+            nameCell.textContent = line.name;
+            tr.appendChild(nameCell);
+            ALGORITHMS.forEach(algo => {
+                const { norm } = algo.fn(line.points);
+                const td = document.createElement('td');
+                td.className = 'cell';
+                td.style.setProperty('--heat', norm.toFixed(3));
+                td.textContent = norm.toFixed(2);
+                tr.appendChild(td);
+            });
+            tr.addEventListener('click', () => loadLine(line));
+            tbody.appendChild(tr);
+        });
+        tbl.appendChild(tbody);
+    }
+
+    function renderAll() {
+        renderMainCanvas();
+        renderScores();
+        renderSavedStrip();
+        renderHeatmap();
+    }
+
+    // ═══════════════════════════════════════════════════════════════════
+    // INTERACTIONS
+    // ═══════════════════════════════════════════════════════════════════
+    function loadLine(line) {
+        currentPoints = line.points.map(p => ({ x: p.x, y: p.y }));
+        activeLineId = line.id;
+        renderAll();
+    }
+
+    function clearLine() {
+        currentPoints = [];
+        activeLineId = null;
+        renderAll();
+    }
+
+    function startDraw(x, y) {
+        currentPoints = [];
+        activeLineId = null;
+        isDrawing = true;
+        currentPoints.push(getCanvasPoint(x, y));
+        renderMainCanvas();
+    }
+
+    function moveDraw(x, y) {
+        if (!isDrawing) return;
+        currentPoints.push(getCanvasPoint(x, y));
+        renderMainCanvas();
+    }
+
+    function endDraw() {
+        if (!isDrawing) return;
+        isDrawing = false;
+        renderScores();
+        renderSavedStrip();
+    }
+
+    drawCanvas.addEventListener('mousedown', e => startDraw(e.clientX, e.clientY));
+    drawCanvas.addEventListener('mousemove', e => moveDraw(e.clientX, e.clientY));
+    drawCanvas.addEventListener('mouseup', endDraw);
+    drawCanvas.addEventListener('mouseleave', endDraw);
+    drawCanvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e.touches[0].clientX, e.touches[0].clientY); });
+    drawCanvas.addEventListener('touchmove', e => { e.preventDefault(); moveDraw(e.touches[0].clientX, e.touches[0].clientY); });
+    drawCanvas.addEventListener('touchend', endDraw);
+
+    // ═══════════════════════════════════════════════════════════════════
+    // SAVE FLOW
+    // ═══════════════════════════════════════════════════════════════════
+    const saveDialog = document.getElementById('saveDialog');
+    const saveDialogInput = document.getElementById('saveDialogInput');
+
+    function openSaveDialog() {
+        if (currentPoints.length < 5) {
+            alert('draw a line first');
+            return;
+        }
+        saveDialogInput.value = '';
+        saveDialog.classList.add('open');
+        setTimeout(() => saveDialogInput.focus(), 50);
+    }
+    function closeSaveDialog() { saveDialog.classList.remove('open'); }
+    function confirmSave() {
+        const name = saveDialogInput.value.trim() || `line ${new Date().toISOString().slice(0,16).replace('T', ' ')}`;
+        const line = {
+            id: 'user-' + Date.now() + '-' + Math.floor(Math.random() * 1000),
+            name,
+            seed: false,
+            points: currentPoints.map(p => ({ x: Math.round(p.x), y: Math.round(p.y) })),
+        };
+        savedLines.push(line);
+        persistSaved(savedLines);
+        activeLineId = line.id;
+        closeSaveDialog();
+        renderAll();
+    }
+    window.closeSaveDialog = closeSaveDialog;
+    window.confirmSave = confirmSave;
+
+    saveDialog.addEventListener('click', (e) => {
+        if (e.target === saveDialog) closeSaveDialog();
+    });
+    saveDialogInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') confirmSave();
+        if (e.key === 'Escape') closeSaveDialog();
+    });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // BUTTONS
+    // ═══════════════════════════════════════════════════════════════════
+    document.getElementById('clearBtn').addEventListener('click', clearLine);
+    document.getElementById('saveBtn').addEventListener('click', openSaveDialog);
+
+    document.getElementById('darkModeToggle').addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        try { localStorage.setItem('darkMode', document.body.classList.contains('dark-mode')); } catch(e) {}
+        renderAll();
+    });
+
+    document.getElementById('resetSeedBtn').addEventListener('click', () => {
+        if (!confirm('replace all saved lines with the original seed set?')) return;
+        savedLines = seedLines();
+        persistSaved(savedLines);
+        activeLineId = null;
+        renderAll();
+    });
+
+    document.getElementById('clearSavedBtn').addEventListener('click', () => {
+        if (!confirm('delete ALL saved lines including seeds? you can reset seeds afterwards.')) return;
+        savedLines = [];
+        persistSaved(savedLines);
+        activeLineId = null;
+        renderAll();
+    });
+
+    // ═══════════════════════════════════════════════════════════════════
+    // BOOT
+    // ═══════════════════════════════════════════════════════════════════
+    try {
+        if (localStorage.getItem('darkMode') === 'true') document.body.classList.add('dark-mode');
+    } catch (e) {}
+
+    window.addEventListener('resize', () => {
+        renderScores();
+        renderHeatmap();
+    });
+
+    renderAll();
+    </script>
+</body>
+
+</html>

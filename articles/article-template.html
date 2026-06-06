@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- EDIT: title format is "Article Title - Author Name | Antitesi Magazine" -->
+    <title>Article Title - Author Name | Antitesi Magazine</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+
+    <!-- Shared stylesheets (paths relative to articles/ subdirectory) -->
+    <link rel="stylesheet" href="../../css/index_style.css">
+    <link rel="stylesheet" href="../../css/article_style.css">
+    <link rel="stylesheet" href="../../css/mobile.css">
+
+    <!-- Flying magazine: desktop only -->
+    <script>
+        const isDesktop = window.innerWidth >= 768 && !/iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isDesktop) {
+            document.write('<link rel="stylesheet" href="../../css/spark_styles.css">');
+            document.write('<script>window.magazineSparkMode = true;<\/script>');
+            document.write('<script src="../../js/flying-magazine.js"><\/script>');
+        }
+    </script>
+
+    <script src="../../js/articles-and-utils.js"></script>
+
+    <!-- ═══════════════════════════════════════════════════════
+         OPTIONAL LIBRARIES — delete what you don't need
+         ═══════════════════════════════════════════════════════ -->
+
+    <!-- Leaflet (interactive maps) -->
+    <!-- <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" /> -->
+    <!-- <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script> -->
+
+    <!-- MathJax (mathematical expressions) -->
+    <!-- <script>window.MathJax = { tex: { inlineMath: [['$','$']] } };</script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script> -->
+
+    <style>
+        /* ─────────────────────────────────────────
+           EDIT: set the article accent color here.
+           This is the one thing that should differ
+           visually between articles.
+           ───────────────────────────────────────── */
+        :root {
+            --dynamic-color: #ff3366;
+            /* EDIT THIS */
+        }
+
+        /* ─────────────────────────────────────────
+           Article-specific styles go below.
+           Anything shared across all articles
+           belongs in article_style.css instead.
+           ───────────────────────────────────────── */
+
+        .part-number {
+            font-family: var(--grotesk);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            opacity: 0.4;
+            margin: 3rem 0 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- run dark mode first otherwise the page flashes -->
+    <script>
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
+
+    <div class="progress-bar"></div>
+
+    <!-- Navigation -->
+    <nav class="nav-cluster">
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+        <a href="../../archive.html" class="mobile-only">Archive</a>
+    </nav>
+
+    <!-- Article -->
+    <article class="article-view">
+
+        <header class="article-header">
+            <!-- EDIT: fallback values shown here, overridden at runtime by the IIFE below -->
+            <h1 class="article-title">Article Title</h1>
+            <div class="article-meta" id="article-meta">
+                <span>Article</span>
+                <span>~X min read</span>
+                <span>Month Year</span>
+            </div>
+            <div class="article-author" id="article-author">by Author Name</div>
+        </header>
+
+        <!-- Metadata IIFE: populates header from articles-and-utils.js at runtime.
+             Do not touch this — it just works as long as the filename in articles[] matches. -->
+        <script>
+            (function () {
+                const filename = window.location.pathname.split('/').pop();
+                const data = (typeof articles !== 'undefined') && articles.find(a => a.filename === filename);
+                if (!data) return;
+                const meta = document.getElementById('article-meta');
+                const author = document.getElementById('article-author');
+                if (meta) meta.innerHTML = `<span>Article</span><span>~${data.readTime} read</span><span>${data.publishDate}</span>`;
+                if (author) author.textContent = 'by ' + data.author;
+            })();
+        </script>
+
+        <!-- ═══════════════════════════════════════════════════════
+             EDIT: article body goes here.
+             Use <div class="article-content"> for prose.
+             Add section dividers, part numbers, interactive
+             elements, references — whatever the piece needs.
+             ═══════════════════════════════════════════════════════ -->
+
+        <div class="article-content">
+
+            <p>First paragraph of the article.</p>
+
+            <div class="section-divider"></div>
+
+            <p>Second section begins here.</p>
+
+        </div>
+
+        <!-- References section (delete if not needed) -->
+        <div class="article-references">
+            <h3>References</h3>
+            <a href="#" target="_blank">&rarr; Author &mdash; Title</a>
+        </div>
+
+    </article>
+
+    <!-- Keyboard shortcut hint -->
+    <div class="shortcuts-hint"></div>
+
+
+    <script>
+        // ── Accent color cycling ───────────────────────────────
+        const colors = ['#ff3366', '#3366ff', '#33ff66', '#ff9933', '#9933ff', '#33ffff'];
+        let colorIndex = 0;
+        function changeColor() {
+            colorIndex = (colorIndex + 1) % colors.length;
+            document.documentElement.style.setProperty('--dynamic-color', colors[colorIndex]);
+        }
+        document.addEventListener('click', changeColor);
+
+        // ── Keyboard shortcuts ─────────────────────────────────
+        // Uses the shared helper from articles-and-utils.js.
+        // Add any article-specific keys inside extraKeys.
+        initKeyboardShortcuts({
+            extraKeys: {
+                'a': openNextArticle,
+                'A': openNextArticle,
+                'Escape': returnToHome,
+                'h': returnToHome,
+                'H': returnToHome,
+            }
+        });
+    </script>
+
+</body>
+
+</html>

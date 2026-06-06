@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ritmo — Marquis | Antitesi Magazine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #000;
+            --white: #fff;
+            --gray: #f3f3f3;
+            --grotesk: 'Inter', sans-serif;
+            --display: 'Fraunces', serif;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+        }
+
+        body {
+            background: var(--white);
+            color: var(--black);
+            overflow: hidden;
+        }
+
+        body.dark-mode {
+            background: var(--black);
+            color: var(--gray);
+        }
+
+        #stage {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #word {
+            font-family: var(--display);
+            font-size: clamp(3rem, 12vw, 9rem);
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -0.03em;
+            text-align: center;
+        }
+
+        #note {
+            position: fixed;
+            bottom: 3rem;
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--grotesk);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            letter-spacing: 0.18em;
+            opacity: 0.3;
+            white-space: nowrap;
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        nav {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            font-family: var(--grotesk);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        nav a {
+            color: var(--black);
+            text-decoration: none;
+            opacity: 0.3;
+        }
+
+        body.dark-mode nav a {
+            color: var(--gray);
+        }
+
+        nav a:hover {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+    <script>
+        if (localStorage.getItem('darkMode') === 'true')
+            document.body.classList.add('dark-mode');
+    </script>
+
+    <nav>
+        <a href="../../index.html">Home</a>
+        <a href="../../explore.html">Explore</a>
+        <a href="../../about.html">About</a>
+    </nav>
+
+    <div id="stage">
+        <div id="word"></div>
+    </div>
+
+    <div id="note">
+        just because we can read this way &nbsp;·&nbsp; You got the idea. we could put some temporal patterns like
+        this<br>
+        click anywhere to continue after the final "." or <a href="template_soffritto.html"
+            style="color:inherit; text-decoration:underline; cursor:pointer;">click here</a>
+    </div>
+
+    <script>
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Escape' || e.key === 'h' || e.key === 'H') window.location.href = '../../index.html';
+            if (e.key === 'p' || e.key === 'P') window.location.href = 'template2.html';
+        });
+
+        // ── Timing constants (ms) ──────────────────────
+        const S = 400;   // slow
+        const M = 320;   // medium
+        const F = 260;   // fast
+
+        // mazurca 3/4: strong (long) – weak – weak
+        const MAZ = [600, 300, 300];
+        function maz(text, i) { return { text, dur: MAZ[i % 3] }; }
+        function mazRest(i) { return { text: '', dur: MAZ[i % 3] }; }
+
+        // afroamerican syncopation: long–short–long–short–short
+        const AFRO = [420, 210, 420, 210, 210];
+        function afro(text, i) { return { text, dur: AFRO[i % 5] }; }
+
+        // ── Sequence ───────────────────────────────────
+        const seq = [
+            // slow
+            { text: 'Capii', dur: S },
+            { text: 'presto', dur: S },
+            { text: 'che', dur: S },
+            { text: 'era', dur: S },
+            { text: 'la', dur: S },
+            { text: 'musica', dur: S },
+            { text: '.', dur: 520 },
+            // medium
+            { text: 'In', dur: M },
+            { text: 'particolare', dur: M },
+            { text: 'il', dur: M },
+            { text: 'ritmo', dur: M },
+            { text: '.', dur: 480 },
+            // fast
+            { text: 'Qualsiasi', dur: F },
+            { text: 'tipo', dur: F },
+            { text: 'di', dur: F },
+            { text: 'ritmo', dur: F },
+            { text: '.', dur: 480 },
+            // mazurca
+            maz('Dalle', 0),
+            maz('mazurche', 1),
+            maz('del', 2),
+            mazRest(0),
+            maz('nord', 1),
+            maz('Italia', 2),
+            // afroamericano
+            afro('ai', 0),
+            afro('pattern', 1),
+            afro('afroamericani', 2),
+            afro('.', 3),
+        ];
+
+        // ── Playback ───────────────────────────────────
+        const wordEl = document.getElementById('word');
+
+        function play(i) {
+            if (i >= seq.length) {
+                // "." stays on screen — click anywhere to proceed
+                document.addEventListener('click', () => {
+                    window.location.href = 'template_soffritto.html';
+                }, { once: true });
+                return;
+            }
+            wordEl.textContent = seq[i].text;
+            setTimeout(() => play(i + 1), seq[i].dur);
+        }
+
+        document.fonts.ready.then(() => setTimeout(() => play(0), 300));
+    </script>
+</body>
+
+</html>
