@@ -12,7 +12,7 @@
             document.write('<script type="importmap">\n{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/examples/jsm/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}\n<\/script>');
             document.write('<link rel="stylesheet" href="css/spark_styles.css">');
             document.write('<script>window.magazineSparkMode = true;<\/script>');
-            document.write('<script src="js/flying-magazine.js"><\/script>');
+            <!--document.write('<script src="js/flying-magazine.js"><\/script>');-->
         }
     </script>
     <script src="js/articles-and-utils.js"></script>
@@ -30,205 +30,254 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@400;600&family=Fraunces:opsz,wght@9..144,700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/index_style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=Fraunces:opsz,wght@9..144,300..700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/mobile.css?v=2">
 
     <style>
-        /* --- NUOVO STILE EDITORIALE / MINIMAL --- */
-        body { margin: 0; padding: 0; overflow-x: hidden; }
+
         
-        /* Hero Section a tutto schermo */
-        .hero-canvas-section {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            background: var(--bg-color, #ffffff);
-            color: var(--text-color, #000000);
-        }
+        /* --- STILI EDITORIALI / MINIMAL --- */
+        body { margin: 0; padding: 0; overflow-x: hidden; font-family: 'Inter', sans-serif; background: #fff; color: #000; }
+        body.dark-mode { background: #000; color: #fff; }
+        ::-webkit-scrollbar { display: none; }
+        html { scrollbar-width: none; }
 
-        body.dark-mode .hero-canvas-section {
-            --bg-color: #000000;
-            --text-color: #ffffff;
-        }
+        .progress-bar { position: fixed; left: 0; top: 0; width: 3px; height: 0%; background: currentColor; opacity: 0.4; z-index: 1000; transition: height 0.1s linear; pointer-events: none; }
+        
+        /* Hero Section */
+        .hero-canvas-section { position: relative; width: 100vw; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
 
-        /* Navbar minimale in alto a destra */
-        .nav-minimal {
-            position: absolute;
-            top: 2rem;
-            right: 2.5rem;
-            display: flex;
-            gap: 1.5rem;
-            z-index: 10;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
+       /* Navbar minimale a destra */
+        .nav-minimal { 
+            position: absolute; 
+            top: 2rem; 
+            right: 2.5rem; 
+            display: flex; 
+            gap: 1.5rem; 
+            z-index: 10; 
+            font-size: 0.9rem; 
         }
         .nav-minimal a { text-decoration: none; color: inherit; transition: opacity 0.3s; }
         .nav-minimal a:hover { opacity: 0.5; }
 
-        /* Titoli in alto al centro */
-        .header-titles {
+        /* NUOVA NAVBAR A SINISTRA */
+        .nav-left-controls {
             position: absolute;
             top: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            z-index: 10;
-            pointer-events: none; /* Lascia passare i click al canvas */
-        }
-        .header-titles h1 {
-            font-family: 'Fraunces', serif;
-            font-size: 2.5rem;
-            margin: 0 0 0.5rem 0;
-            letter-spacing: -0.02em;
-        }
-        .header-titles p {
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            margin: 0;
-            line-height: 1.2;
-            opacity: 0.8;
-        }
-
-        /* Canvas esteso a tutto lo schermo */
-        #drawingCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-            cursor: crosshair;
-        }
-
-        /* Elementi centrali (Draw a line, puntini, link) */
-        .center-prompt {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            z-index: 2;
-            pointer-events: none;
+            left: 2.5rem;
             display: flex;
-            flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            font-family: 'Inter', sans-serif;
-            color: rgba(0,0,0,0.4);
+            gap: 40px; /* Spazio esatto di 40px richiesto */
+            z-index: 10;
+            font-size: 0.9rem;
         }
-        body.dark-mode .center-prompt { color: rgba(255,255,255,0.4); }
-        
-        .prompt-text { font-size: 1.1rem; }
-        
-        .color-trigger {
-            pointer-events: auto; /* Rende i puntini cliccabili in futuro */
-            cursor: pointer;
-            letter-spacing: 2px;
-            font-weight: bold;
-            font-size: 1.2rem;
-            transition: color 0.3s;
-        }
-        .color-trigger:hover { color: var(--text-color); }
-        
-        .lines-info-link {
-            pointer-events: auto;
-            font-size: 0.75rem;
-            text-decoration: underline;
-            color: inherit;
-            opacity: 0.7;
-            margin-top: 1rem;
-            transition: opacity 0.3s;
+
+        .lines-info-link { 
+            cursor: pointer; 
+            text-decoration: none; 
+            color: inherit; 
+            opacity: 0.7; 
+            transition: opacity 0.3s; 
         }
         .lines-info-link:hover { opacity: 1; }
 
-        /* Scroll Arrow */
-        .scroll-hint {
-            position: absolute;
-            bottom: 2rem;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.85rem;
-            z-index: 10;
-            pointer-events: none;
-            animation: bounce 2s infinite ease-in-out;
+        /* Il vecchio selettore dei puntini diventa il bottone "+" */
+        .color-trigger { 
+            cursor: pointer; 
+            font-weight: 400;
+            font-size: 1.3rem; /* Leggermente più grande per bilanciare il testo */
+            line-height: 1;
+            transition: transform 0.3s, opacity 0.3s;
+            display: inline-block;
         }
-        @keyframes bounce {
-            0%, 100% { transform: translate(-50%, 0); }
-            50% { transform: translate(-50%, 5px); }
-        }
+        .color-trigger:hover { transform: scale(1.2); }
 
-        /* Popup Raccomandazione Articolo */
-        .article-recommendation {
-            position: absolute;
-            bottom: 6rem;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 10;
-            background: var(--bg-color);
-            padding: 1rem 2rem;
-            border: 1px solid rgba(0,0,0,0.2);
+        /* Centro prompt (Solo testo "draw a line") */
+        .center-prompt { 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            text-align: center; 
+            z-index: 2; 
+            pointer-events: none; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            gap: 0.5rem; 
+            color: rgba(0,0,0,0.4); 
+        }
+        body.dark-mode .center-prompt { color: rgba(255,255,255,0.4); }
+        .prompt-text { font-size: 1.1rem; transition: opacity 0.4s; }
+
+        /* GESTIONE SCOMPARSA ELEMENTI POST-DISEGNO */
+        /* Facciamo sparire la navbar di sinistra e il testo centrale quando la linea si rimpicciolisce */
+        .hero-canvas-section.shrunk .nav-left-controls,
+        .hero-canvas-section.shrunk .prompt-text,
+        .hero-canvas-section.shrunk .scroll-hint {
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.4s ease;
-            font-family: 'Inter', sans-serif;
-            font-size: 0.9rem;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: opacity 0.5s ease;
         }
-        body.dark-mode .article-recommendation { border-color: rgba(255,255,255,0.2); }
+
+        .header-titles { position: absolute; top: 2rem; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10; pointer-events: none; }
+        .header-titles h1 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 2.5rem; margin: 0 0 1.5rem 0; letter-spacing: -0.02em; pointer-events: auto; cursor: pointer; }
+        .header-titles p { font-size: 1rem; margin: 0; line-height: 1.2; opacity: 0.8; }
+
+
+        /* Algorithm Dropdown CSS */
+        .algorithm-dropdown {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 0.5s ease, opacity 0.4s ease, margin-top 0.4s ease;
+            width: 100vw;
+            max-width: 450px;
+            pointer-events: none;
+        }
+        .algorithm-dropdown.open {
+            max-height: 400px;
+            opacity: 1;
+            margin-top: 1.5rem;
+            pointer-events: auto;
+        }
+        .dropdown-instructions { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1.5rem; opacity: 0.8; }
+        .dropdown-formula { font-size: 0.85rem; opacity: 0.6; }
+        .formula-caption { font-size: 0.75rem; margin-top: 0.5rem; line-height: 1.4; }
+
+        .scroll-hint { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); text-align: center; font-size: 0.85rem; z-index: 10; pointer-events: none; animation: bounce 2s infinite ease-in-out; }
+        @keyframes bounce { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 5px); } }
+
+        .article-recommendation { position: absolute; bottom: 6rem; left: 50%; transform: translateX(-50%); z-index: 10; background: #fff; padding: 1rem 2rem; border: 1px solid rgba(0,0,0,0.2); opacity: 0; pointer-events: none; transition: opacity 0.4s ease; font-size: 0.9rem; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        body.dark-mode .article-recommendation { background: #bdbdbd; border-color: rgba(255,255,255,0.2); }
         .article-recommendation.visible { opacity: 1; pointer-events: auto; }
 
-        /* --- STILI ARCHIVIO (Incollati dal tuo file) --- */
+        /* --- STILI ARCHIVIO --- */
         .archive-grid.is-switching .article-entry { opacity: 0; transform: scale(0.95) translateY(10px); transition: opacity 0.18s ease, transform 0.18s ease; }
-        .archive-container { max-width: 1400px; margin: 0 auto; padding: 6rem 2rem 0rem; }
+        .archive-container { max-width: 100%; margin: 0 auto; padding: 2.5rem 0rem 0rem; }
         .research-mode-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(255, 255, 255, 0.98); z-index: 150; opacity: 0; pointer-events: none; transition: all 0.6s ease; }
         body.dark-mode .research-mode-overlay { background: rgba(0, 0, 0, 0.95); }
         .research-mode-overlay.active { opacity: 0.8; pointer-events: all; }
         .keyword-graph-canvas { width: 100%; height: 100%; cursor: pointer; position: absolute; top: 0; left: 0; }
         .archive-header { margin-bottom: 3rem; text-align: center; }
         .archive-title { font-family: 'Fraunces', serif; font-size: clamp(3rem, 8vw, 6rem); line-height: 0.9; margin-bottom: 1rem; letter-spacing: -0.03em; }
-        .archive-controls { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; margin-bottom: 3rem; font-family: 'Inter', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; }
+        .archive-controls { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; margin-bottom: 3rem; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; }
         .control-section { display: flex; align-items: center; gap: 0.75rem; }
         .control-label { opacity: 0.5; white-space: nowrap; }
         .filter-button { background: none; border: 1px solid currentColor; color: inherit; padding: 0.5rem 1rem; cursor: pointer; transition: all 0.3s ease; opacity: 0.3; font-family: inherit; font-size: inherit; letter-spacing: inherit; text-transform: inherit; }
         .filter-button:hover, .filter-button.active { opacity: 1; background: #000; color: #fff; border-color: #000; }
         body.dark-mode .filter-button:hover, body.dark-mode .filter-button.active { background: #fff; color: #000; border-color: #fff; }
-        .archive-grid { display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); grid-auto-rows: 120px; gap: 0.75rem; margin: 2rem 0; }
+        .archive-grid { display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); grid-auto-rows: 200px; gap: -1px; margin: 2rem 0;margin-left: -1px; /* Fondamentale per i bordi */
+            margin-right: -1px; }
         @keyframes cardIn { from { opacity: 0; transform: translateY(28px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .article-entry { grid-column: span var(--w, 1); grid-row: span var(--h, 1); position: relative; overflow: hidden; cursor: pointer; border-radius: 2px; background: #fff; color: #000; border: 1px solid rgba(0, 0, 0, 0.2); transition: box-shadow 0.4s ease; text-decoration: none; display: block; animation: cardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; animation-delay: calc(var(--i, 0) * 35ms); }
+       .article-entry { 
+            grid-column: span var(--w, 1); 
+            grid-row: span var(--h, 1); 
+            position: relative; 
+            overflow: hidden; 
+            cursor: pointer; 
+            background: #fff; 
+            color: #000; 
+            border: 1px solid #333; /* Bordo grigio scuro */
+            transition: background 0.3s ease; /* Niente più transition di shadow */
+            text-decoration: none; 
+            display: block; 
+            animation: cardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; 
+            animation-delay: calc(var(--i, 0) * 35ms); 
+        }
         body.dark-mode .article-entry { background: #000; color: #f1ebeb; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .block-description { position: absolute; bottom: 0; left: 0; right: 0; padding: 3rem 1.25rem 1.5rem; background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.97) 28%, rgba(255,255,255,1) 100%); font-family: 'Inter', sans-serif; font-size: 0.8rem; line-height: 1.65; letter-spacing: 0.01em; color: #111; transform: translateY(100%); transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1); z-index: 3; }
+        .block-description { position: absolute; bottom: 0; left: 0; right: 0; padding: 3rem 1.25rem 1.5rem; background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.97) 28%, rgba(255,255,255,1) 100%); font-size: 0.8rem; line-height: 1.65; letter-spacing: 0.01em; color: #111; transform: translateY(100%); transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1); z-index: 3; }
         body.dark-mode .block-description { background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.97) 28%, rgba(0,0,0,1) 100%); color: #f1ebeb; }
         .article-entry:hover .block-description { transform: translateY(0); }
         .color-stripe { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; display: flex; z-index: 4; transition: height 0.35s cubic-bezier(0.22, 1, 0.36, 1); }
         .color-stripe span { flex: 1; }
-        .article-entry:hover .color-stripe { height: 10px; }
-        .article-entry:hover { box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25); z-index: 2; }
+       .article-entry:hover { 
+            background: #f9f9f9; /* Un leggero cambio colore al passaggio mouse */
+            box-shadow: none; /* Rimosso shadow */
+            z-index: 2; 
+        }
         .article-entry.highlighted { outline: 3px solid #000; outline-offset: 3px; z-index: 3; }
         body.dark-mode .article-entry.highlighted { outline-color: #fff; }
         .block-content { position: absolute; inset: 0; padding: 1.25rem 1.25rem 1.75rem; display: flex; flex-direction: column; justify-content: space-between; transition: opacity 0.35s ease; z-index: 2; }
         .article-entry:hover .block-content { opacity: 0.15; }
         body.has-scrolled .block-hint { opacity: 0 !important; transition: opacity 0.6s ease; }
-        .block-hint { position: absolute; top: 1rem; right: 1rem; font-size: 0.65rem; font-family: 'Inter', sans-serif; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.25; transition: opacity 0.3s ease; z-index: 2; pointer-events: none; }
+        .block-hint { position: absolute; top: 1rem; right: 1rem; font-size: 0.65rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.25; transition: opacity 0.3s ease; z-index: 2; pointer-events: none; }
         .article-entry:hover .block-hint { opacity: 0; }
-        .block-title { font-family: 'Fraunces', serif; font-size: clamp(1.1rem, 1.6vw, 1.6rem); line-height: 1.05; letter-spacing: -0.01em; margin: 0; }
+        .block-title { font-family: 'Fraunces', serif; font-size: clamp(1.1rem, 1.6vw, 1.6rem); font-weight: 400; line-height: 1.05; letter-spacing: -0.01em; margin: 0; }
         .article-entry[style*="--w: 2"] .block-title { font-size: clamp(1.4rem, 2vw, 2rem); }
         .article-entry[style*="--w: 3"] .block-title { font-size: clamp(1.7rem, 2.6vw, 2.6rem); }
-        .block-meta { font-family: 'Inter', sans-serif; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.85; display: flex; justify-content: space-between; gap: 1rem; }
+        .block-meta { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; opacity: 0.85; display: flex; justify-content: space-between; gap: 1rem; }
         .block-author { font-weight: 500; }
         .block-readtime { opacity: 0.7; }
         .archive-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0rem; margin: 4rem 0; padding: 2rem 0; border-top: 1px solid rgba(0, 0, 0, 0.1); border-bottom: 1px solid rgba(0, 0, 0, 0.1); }
         body.dark-mode .archive-stats { border-color: rgba(255, 255, 255, 0.1); }
         .stat-item { text-align: center; }
         .stat-number { font-family: 'Fraunces', serif; font-size: 3rem; line-height: 1; transition: color 0.6s ease; }
-        .stat-label { font-family: 'Inter', sans-serif; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; margin-top: 0.5rem; }
+        .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; opacity: 0.5; margin-top: 0.5rem; }
+        /* --- ANIMAZIONI POST-DISEGNO --- */
+.hero-canvas-section {
+    transition: height 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Nasconde il testo centrale ISTANTANEAMENTE appena si inizia a disegnare */
+.hero-canvas-section.drawing .center-prompt {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease; /* Transizione rapidissima */
+}
+
+/* Quando la linea è stata disegnata, la sezione si accorcia */
+.hero-canvas-section.shrunk {
+    height: 45vh; 
+    min-height: 350px;
+}
+
+#drawingCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 1;
+    cursor: crosshair;
+    /* Ancora l'animazione al nuovo centro (a un quarto di schermo dall'alto) */
+    transform-origin: 50% 25vh; 
+    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+#drawingCanvas.shrunk {
+    transform: scale(0.4); 
+}
+
+/* Spostiamo le scritte e nascondiamo quello che non serve più */
+.center-prompt {
+    transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
+}
+.hero-canvas-section.shrunk .center-prompt {
+    transform: translate(-60%, -70%);
+}
+.hero-canvas-section.shrunk .color-trigger,
+.hero-canvas-section.shrunk .prompt-text,
+.hero-canvas-section.shrunk .lines-info-link,
+.hero-canvas-section.shrunk .scroll-hint {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Barra grigia della raccomandazione (stile del tuo mockup) */
+.article-recommendation {
+    bottom: 2rem;
+    background: #ffffff; /* Grigio del mockup */
+    color: #000;
+    border: none;
+    padding: 0.4rem 2rem;
+    font-size: 0.85rem;
+    border-radius: 0;
+    box-shadow: none;
+    white-space: nowrap;
+}
     </style>
+    
 </head>
 
 <body>
@@ -242,9 +291,16 @@
 
     <section class="hero-canvas-section" id="landing">
         
+        <nav class="nav-left-controls">
+            <span class="lines-info-link" id="linesInfoToggle">Find out more about lines</span>
+            <span class="color-trigger" id="colorTriggerBtn" title="Color picker disabled for now">+</span>
+        </nav>
+
         <nav class="nav-minimal">
             <a href="about.html">about</a>
-            <a href="archive.html" class="mobile-only">archive</a> </nav>
+            <a href="map/map.html">our desk</a>
+            <a href="archive.html" class="mobile-only">archive</a>
+        </nav>
 
         <div class="header-titles">
             <h1 class="thesis-statement">Antitesi</h1>
@@ -254,9 +310,19 @@
         <canvas id="drawingCanvas"></canvas>
 
         <div class="center-prompt">
-            <span class="prompt-text">draw a line</span>
-            <span class="color-trigger" title="Color picker disabled for now">...</span>
-            <a href="#algorithm-explanation" class="lines-info-link">find out more about Lines</a>
+            <span class="prompt-text">Draw a line</span>
+            
+            <div class="algorithm-dropdown" id="algorithmDropdown">
+                <div class="dropdown-instructions">
+                    smooth curves → narrative &nbsp;·&nbsp; sharp angles → analytical &nbsp;·&nbsp; color → tonal register
+                </div>
+                <div class="dropdown-formula">
+                    <p>\\[ \\underset{a \\in \\{\\text{articles}\\}}{\\operatorname{argmin}} \\sqrt{(S_d - S_a)^2 + d_{\\text{hue}}(H_d, H_a)^2} \\]</p>
+                    <p class="formula-caption">
+                        Where S is smoothness, and H is the circular mean of the hues — for the drawing (H<sub>d</sub>) and for the article (H<sub>a</sub>). Our recommendation logic in action.
+                    </p>
+                </div>
+            </div>
         </div>
 
         <div class="article-recommendation" id="articleRec">
@@ -264,15 +330,15 @@
         </div>
 
         <div class="scroll-hint">
-            ↓<br>scroll
+            ↓<br>Or scroll
         </div>
 
     </section>
 
     <div class="archive-container" id="archive-section">
-        <header class="archive-header">
+        <!--<header class="archive-header">
             <h1 class="archive-title">Archive</h1>
-        </header>
+        </header> -->
 
         <div class="archive-controls">
             <div class="control-section">
@@ -300,32 +366,35 @@
         <canvas class="keyword-graph-canvas" id="keywordGraphCanvas"></canvas>
     </div>
 
-    <div class="shortcuts-hint"></div>
-
     <script>
-        // --- 1. LOGICA CANVAS "DRAW A LINE" MODIFICATA ---
+        // --- LOGICA DROPDOWN ALGORITMO ---
+        document.getElementById('linesInfoToggle').addEventListener('click', function(e) {
+            e.stopPropagation(); // Previene che il click interferisca col canvas
+            const dropdown = document.getElementById('algorithmDropdown');
+            dropdown.classList.toggle('open');
+            if (dropdown.classList.contains('open')) {
+                this.textContent = "close info";
+            } else {
+                this.textContent = "find out more about Lines";
+            }
+        });
+
+       // --- LOGICA CANVAS "DRAW A LINE" ---
         (function initHeroCanvas() {
             const drawCanvas = document.getElementById('drawingCanvas');
             const drawCtx = drawCanvas.getContext('2d');
             let isDrawing = false, lastPoint = null, points = [];
 
-            // Adatta il canvas a tutto schermo
+            // Adesso la tela combacia perfettamente con lo schermo. Niente schiacciamenti.
             function resizeCanvas() {
+                if (drawCanvas.classList.contains('shrunk')) return;
                 drawCanvas.width = window.innerWidth;
                 drawCanvas.height = window.innerHeight;
             }
             window.addEventListener('resize', resizeCanvas);
             resizeCanvas();
 
-            function getCanvasPoint(clientX, clientY) {
-                const rect = drawCanvas.getBoundingClientRect();
-                return {
-                    x: (clientX - rect.left) * (drawCanvas.width / rect.width),
-                    y: (clientY - rect.top) * (drawCanvas.height / rect.height)
-                };
-            }
-
-            // Funzione sharpness originale mantenuta
+            // Funzione dell'algoritmo intatta
             function analyzeSharpness(pts) {
                 if (pts.length < 5) return 0;
                 let totalLen = 0; const segs = [];
@@ -389,76 +458,127 @@
             function analyzeDrawing() {
                 if (typeof articles === 'undefined' || !articles.length) return;
                 const sharpness = analyzeSharpness(points);
-                
-                // --- COLORE DISATTIVATO TEMPORANEAMENTE ---
-                // const userHasColor = selectedHues.length > 0;
-                const wSharp = 1.0; // Peso totalmente spostato sulla forma
-                // const wColor = 0.4;
+                const wSharp = 1.0; 
 
-                function dist(dS /*, dC*/) {
-                    return Math.sqrt(wSharp * dS * dS /* + wColor * dC * dC */);
-                }
+                function dist(dS) { return Math.sqrt(wSharp * dS * dS); }
 
                 const best = articles.reduce((prev, curr) => {
                     const dSharpPrev = (prev.sharpness ?? 0.5) - sharpness;
                     const dSharpCurr = (curr.sharpness ?? 0.5) - sharpness;
-                    
-                    // const dColorPrev = userHasColor ? colorDistance(selectedHues, prev.colors) : 0;
-                    // const dColorCurr = userHasColor ? colorDistance(selectedHues, curr.colors) : 0;
-
                     return dist(dSharpCurr) < dist(dSharpPrev) ? curr : prev;
                 });
 
-                const sharpType = sharpness > 0.5 ? 'sharp angles' : 'smooth curves';
+                document.querySelector('.prompt-text').textContent = "Nice line";
+                
                 const sharpStyle = sharpness > 0.5 ? 'analytical thinking' : 'narrative flow';
-
                 document.getElementById('recText').innerHTML =
-                    `Your ${sharpType} suggest a preference for ${sharpStyle}.<br><strong>Recommended:</strong> ` +
-                    `<a href="${articlePath(best)}" style="color:inherit;text-decoration:underline;">"${best.title}"</a>`;
+                    `Your line suggests a preference for ${sharpStyle}. <strong>Recommended article:</strong> ` +
+                    `<a href="${articlePath(best)}" style="color:inherit;text-decoration:none;border-bottom:1px solid #000;">"${best.title}"</a>`;
+                
+                // --- RIPOSIZIONAMENTO MATEMATICO ESATTO ---
+                let minX = points[0].x, maxX = points[0].x, minY = points[0].y, maxY = points[0].y;
+                for (let p of points) {
+                    if(p.x < minX) minX = p.x;
+                    if(p.x > maxX) maxX = p.x;
+                    if(p.y < minY) minY = p.y;
+                    if(p.y > maxY) maxY = p.y;
+                }
+                
+                let drawCX = (minX + maxX) / 2;
+                let drawCY = (minY + maxY) / 2;
+
+                // Il nuovo centro in cui vogliamo far volare la linea (a un quarto di altezza dallo schermo)
+                let targetCX = window.innerWidth / 2;
+                let targetCY = window.innerHeight * 0.25; 
+
+                let dx = targetCX - drawCX;
+                let dy = targetCY - drawCY;
+
+                drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
+                
+                const isDark = document.body.classList.contains('dark-mode');
+                drawCtx.strokeStyle = isDark ? '#ffffff' : '#000000';
+                drawCtx.lineWidth = 3;
+                drawCtx.lineCap = 'round';
+                drawCtx.beginPath();
+                drawCtx.moveTo(points[0].x + dx, points[0].y + dy);
+                for (let i = 1; i < points.length; i++) {
+                    drawCtx.lineTo(points[i].x + dx, points[i].y + dy);
+                }
+                drawCtx.stroke();
+                // ------------------------------------------
+
+                document.querySelector('.hero-canvas-section').classList.add('shrunk');
+                document.getElementById('drawingCanvas').classList.add('shrunk');
                 document.getElementById('articleRec').classList.add('visible');
             }
 
             function startDraw(x, y) {
+                if (y < 130) return; // Zona di sicurezza titoli
+
+                // Se era rimpicciolito e ridisegnano, resettiamo lo stato shrunk
+                if (drawCanvas.classList.contains('shrunk')) {
+                    document.querySelector('.hero-canvas-section').classList.remove('shrunk');
+                    drawCanvas.classList.remove('shrunk');
+                    document.querySelector('.prompt-text').textContent = "draw a line";
+                }
+
+                // --- AGGIUNGIAMO LA CLASSE "DRAWING" ---
+                document.querySelector('.hero-canvas-section').classList.add('drawing');
+
                 drawCtx.clearRect(0, 0, drawCanvas.width, drawCanvas.height);
                 document.getElementById('articleRec').classList.remove('visible');
                 isDrawing = true;
-                lastPoint = getCanvasPoint(x, y);
+                lastPoint = {x, y};
                 points = [lastPoint];
             }
 
             function moveDraw(x, y) {
                 if (!isDrawing) return;
-                const p = getCanvasPoint(x, y);
-                
-                // Tratto nero di default (o bianco se dark mode)
                 const isDark = document.body.classList.contains('dark-mode');
                 drawCtx.strokeStyle = isDark ? '#ffffff' : '#000000';
-                
                 drawCtx.lineWidth = 3;
                 drawCtx.lineCap = 'round';
                 drawCtx.beginPath();
                 drawCtx.moveTo(lastPoint.x, lastPoint.y);
-                drawCtx.lineTo(p.x, p.y);
+                drawCtx.lineTo(x, y);
                 drawCtx.stroke();
-                points.push(p);
-                lastPoint = p;
+                points.push({x, y});
+                lastPoint = {x, y};
             }
 
             function endDraw() {
-                if (isDrawing && points.length > 5) analyzeDrawing();
+                if (isDrawing && points.length > 5) {
+                    analyzeDrawing();
+                }
+                
                 isDrawing = false;
+                
+                // --- RIMUOVIAMO LA CLASSE "DRAWING" ---
+                // Se analyzeDrawing ha attivato lo "shrunk", il testo rimarrà comunque nascosto
+                document.querySelector('.hero-canvas-section').classList.remove('drawing');
             }
 
-            drawCanvas.addEventListener('mousedown', e => startDraw(e.clientX, e.clientY));
+            drawCanvas.addEventListener('mousedown', e => {
+                if (e.target.closest('.center-prompt') || e.target.closest('.header-titles') || e.target.closest('.nav-minimal')) return;
+                startDraw(e.clientX, e.clientY);
+            });
             drawCanvas.addEventListener('mousemove', e => moveDraw(e.clientX, e.clientY));
             drawCanvas.addEventListener('mouseup', endDraw);
-            drawCanvas.addEventListener('touchstart', e => { e.preventDefault(); startDraw(e.touches[0].clientX, e.touches[0].clientY); });
-            drawCanvas.addEventListener('touchmove', e => { e.preventDefault(); moveDraw(e.touches[0].clientX, e.touches[0].clientY); });
+            
+            drawCanvas.addEventListener('touchstart', e => { 
+                if (e.target.closest('.center-prompt') || e.target.closest('.header-titles') || e.target.closest('.nav-minimal')) return;
+                e.preventDefault(); 
+                startDraw(e.touches[0].clientX, e.touches[0].clientY); 
+            });
+            drawCanvas.addEventListener('touchmove', e => { 
+                if(isDrawing) { e.preventDefault(); moveDraw(e.touches[0].clientX, e.touches[0].clientY); }
+            });
             drawCanvas.addEventListener('touchend', endDraw);
         })();
 
 
-        // --- 2. LOGICA ARCHIVIO (Incollata e intatta) ---
+        // --- LOGICA ARCHIVIO ---
         let currentFilter = { view: 'timeline' };
 
         function initializeArchive() {
@@ -595,7 +715,6 @@
             resizeTimer = setTimeout(renderArticles, 200);
         });
 
-        // Research Mode init
         if(typeof ResearchMode !== 'undefined') {
             ResearchMode.init({ onArticleSelected: highlightAndScrollToArticle });
         }
@@ -610,7 +729,6 @@
             }
         }
         
-        // Toggles Dark Mode clickando sul titolo (come nel vecchio codice)
         let _thesisTaps = 0, _thesisTapTimer;
         document.querySelector('.thesis-statement').addEventListener('click', () => {
             _thesisTaps++;

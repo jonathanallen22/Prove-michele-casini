@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en" id="home" data-modal-active="false" style="--locked-height: 900px; --row-minHeight: 19px; --standard-cell-width: 80px;">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>Antitesi Magazine - Archive</title>
+  <!-- Using the Beckmans stylesheets to render the spreadsheet grid -->
+  <link href="style.css" rel="stylesheet">
+  <style>
+    /* --- RESET E VARIABILI --- */
+    :root {
+        --border: 0.5px solid #000;
+        --cell-height: 40px; /* Altezza di base delle righe */
+        --hover-height: 250px; /* Altezza quando si apre l'immagine */
+    }
+    
+    body {
+        margin: 0;
+        font-family: 'Inter', sans-serif;
+        background: #f4f4f4; /* Grigio chiarissimo tipico dei fogli di calcolo */
+        color: #000;
+    }
+    
+    a { text-decoration: none; color: inherit; }
+    h1, h2, h3 { font-family: 'Fraunces', serif; font-weight: 300; margin: 0; }
+
+    /* --- STRUTTURA DELLA GRIGLIA (SPREADSHEET) --- */
+    .table.grid {
+        display: grid;
+        /* Definisce le larghezze delle colonne: faux, index, name, e poi 14 cellette uguali */
+        grid-template-columns: 20px 40px 300px repeat(14, 1fr);
+        border-top: var(--border);
+        border-left: var(--border);
+        width: 100%;
+    }
+
+    /* Le singole celle della riga */
+    .table__cell__index, 
+    .table__cell__name, 
+    .table__cell__standard,
+    .table__cell__faux {
+        border-right: var(--border);
+        border-bottom: var(--border);
+        height: var(--cell-height);
+        display: flex;
+        align-items: center;
+        overflow: hidden;
+        transition: height 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        background: #fff;
+    }
+
+    /* Spaziature interne */
+    .cell--space--left { padding-left: 1rem; }
+    .cell--align--center { justify-content: center; width: 100%; }
+
+    /* --- RIGHE CATEGORIE (Narrative / Analytical) --- */
+    .empty--row .table__cell__index { padding: 0; }
+    .class__color { width: 100%; height: 100%; } /* Il quadratino colorato */
+
+    /* --- L'EFFETTO IMMAGINE (IL TRUCCO BECKMANS) --- */
+    /* La cella dell'immagine all'inizio è stretta e bassa */
+    .image--cell {
+        grid-column: span 1; /* Occupa 1 colonna */
+        position: relative;
+        padding: 0 !important;
+        transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* L'immagine schiacciata al centro (spreadsheet mode) */
+    .image--cell img {
+        width: 100%;
+        height: 100%;
+        object-fit: none; /* LA MAGIA: taglia e sgrana l'immagine per farla entrare */
+        object-position: center;
+        transition: object-fit 0.4s ease;
+    }
+
+    /* --- HOVER: L'INTERAZIONE --- */
+    /* Quando passi col mouse su un'intera riga articolo... */
+    .content__table:hover .table__cell__index,
+    .content__table:hover .table__cell__name,
+    .content__table:hover .table__cell__standard,
+    .content__table:hover .table__cell__faux {
+        height: var(--hover-height); /* Tutte le celle della riga diventano alte */
+        background: #f9f9f9; /* Leggero feedback visivo */
+    }
+
+    /* ...la cella dell'immagine si allarga a dismisura... */
+    .content__table:hover .image--cell {
+        grid-column: span 4; /* Si mangia 4 colonne invece di 1 */
+        z-index: 10;
+    }
+
+    /* ...e l'immagine si ricompone diventando bellissima */
+    .content__table:hover .image--cell img {
+        object-fit: cover; /* Torna proporzionata e copre l'area */
+    }
+
+    /* Colori al passaggio per simulare i link Beckmans */
+    .content__table:hover .table__cell__name h3,
+    .content__table:hover .table__cell__index .table__cell__inner {
+        color: blue;
+    }
+</style>
+</head>
+<body>
+<header>
+    <div class="table mobile--top--row hide--after--small" data-table=""></div>
+    <div class="table grid table--header" data-table="">
+        <div class="table__cell__faux header--medium--first--cell"></div>
+        <div class="table__cell__index header--small--first--cell"></div>
+        <a href="/" class="table__cell__school-name large--border--bottom hover--color--blue">
+          <h1 class="tabel__cell__inner cell--space--left hover--color--blue">Antitesi Magazine Archive</h1>
+        </a>
+        <div class="table__cell__standard hide--on--large"></div>
+        <div class="table__cell__info small--border--bottom">
+          <div class="tabel__cell__inner cell--space--left"><i>Database: 2026, Antitesi</i></div>
+        </div>
+        <div class="table__cell__standard hide--on--large"></div>
+        <div class="table__cell__info small--border--bottom">
+          <div class="tabel__cell__inner cell--space--left"><i>Complexity exists, curiosity connects.</i></div>
+        </div>
+        <div class="table__cell__standard header--small--last--cell"></div>
+        <div class="smallest--border--bottom table__cell__info-small cell--pos-0 medium--and--large--border--bottom ">
+            <div class="tabel__cell__inner cell--space--left">
+              <a href="/about" class="color--blue"><h2>About</h2></a>
+            </div>
+        </div>
+        <div class="table__cell__standard hide--on--medium header--large--end--cell"></div>
+    </div>
+</header>
+<main>
+
+<section class="students tab" data-active-tab="true" data-id="students">
+    
+    <!-- CATEGORY: NARRATIVE -->
+    <div class="table grid empty--row" data-table="">
+        <div class="table__cell__faux"></div>
+        <div class="table__cell__index"><div class="class__color" style="background-color:#80baff;"></div></div>
+        <div class="table__cell__name">
+            <h2 class="table__cell__inner cell--space--left"><i>Narrative</i></h2>
+        </div>
+        <div class="table__cell__standard"></div><div class="table__cell__standard"></div><div class="table__cell__standard smallest--end--cell"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div>
+    </div>
+
+    <!-- Article 1 -->
+    <a href="/articles/mazzocchi/burnout-clarity" class="table grid content__table hover--color--blue" data-id="burnout-clarity">
+        <div class="table__cell__faux"></div>
+        <div class="table__cell__index"><div class="table__cell__inner cell--align--center">1</div></div>
+        <div class="table__cell__name cell--space--left">
+            <h3 class="table__cell__inner">Burnout clarity — Michele Mazzocchi</h3>
+        </div>
+        <div class="table__cell__standard"></div><div class="table__cell__standard"></div><div class="table__cell__standard smallest--end--cell"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <!-- IMAGE CELL -->
+        <div class="table__cell__standard hide--on--small image--cell">
+            <figure class="table__cell__standard__content">
+                <img src="https://picsum.photos/seed/burnout-clarity/190/238" alt="Burnout clarity thumbnail">
+            </figure>
+        </div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium large--no--hover--border"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div>
+    </a>
+
+    <!-- Article 2 -->
+    <a href="/articles/filippi/weaving-rhapsody" class="table grid content__table hover--color--blue" data-id="weaving-my-rhapsody">
+        <div class="table__cell__faux"></div>
+        <div class="table__cell__index"><div class="table__cell__inner cell--align--center">2</div></div>
+        <div class="table__cell__name cell--space--left">
+            <h3 class="table__cell__inner">Weaving my rhapsody — Matilde Filippi</h3>
+        </div>
+        <div class="table__cell__standard"></div><div class="table__cell__standard"></div><div class="table__cell__standard smallest--end--cell"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--small"></div>
+        <!-- IMAGE CELL -->
+        <div class="table__cell__standard hide--on--small image--cell">
+            <figure class="table__cell__standard__content">
+                <img src="https://picsum.photos/seed/weaving-my-rhapsody/190/238" alt="Weaving my rhapsody thumbnail">
+            </figure>
+        </div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium large--no--hover--border"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div>
+    </a>
+
+    <!-- Article 3 -->
+    <a href="/articles/durrachiensis/not-without-uttering" class="table grid content__table hover--color--blue" data-id="not-without-uttering">
+        <div class="table__cell__faux"></div>
+        <div class="table__cell__index"><div class="table__cell__inner cell--align--center">3</div></div>
+        <div class="table__cell__name cell--space--left">
+            <h3 class="table__cell__inner">…not without uttering a host of obscene words… — Ianius Durrachiensis</h3>
+        </div>
+        <div class="table__cell__standard"></div><div class="table__cell__standard"></div><div class="table__cell__standard smallest--end--cell"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--smallest"></div>
+        <!-- IMAGE CELL -->
+        <div class="table__cell__standard hide--on--smallest image--cell">
+            <figure class="table__cell__standard__content">
+                <img src="https://picsum.photos/seed/not-without-uttering/190/238" alt="not without uttering thumbnail">
+            </figure>
+        </div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium large--no--hover--border"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div>
+    </a>
+
+    <!-- Article 4 -->
+    <a href="/articles/bassani/oltre-la-siepe" class="table grid content__table hover--color--blue" data-id="oltre-la-siepe">
+        <div class="table__cell__faux"></div>
+        <div class="table__cell__index"><div class="table__cell__inner cell--align--center">4</div></div>
+        <div class="table__cell__name cell--space--left">
+            <h3 class="table__cell__inner">Oltre la siepe — Elena Bassani</h3>
+        </div>
+        <div class="table__cell__standard"></div><div class="table__cell__standard"></div><div class="table__cell__standard smallest--end--cell"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <!-- IMAGE CELL -->
+        <div class="table__cell__standard hide--on--small image--cell">
+            <figure class="table__cell__standard__content">
+                <img src="https://picsum.photos/seed/oltre-la-siepe/190/238" alt="Oltre la siepe thumbnail">
+            </figure>
+        </div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium large--no--hover--border"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div>
+    </a>
+
+    <!-- Article 5 -->
+    <a href="/articles/marquis/template_mouse" class="table grid content__table hover--color--blue" data-id="lil-mouse">
+        <div class="table__cell__faux"></div>
+        <div class="table__cell__index"><div class="table__cell__inner cell--align--center">5</div></div>
+        <div class="table__cell__name cell--space--left">
+            <h3 class="table__cell__inner">A lil mouse moving around the page — Marquis</h3>
+        </div>
+        <div class="table__cell__standard"></div><div class="table__cell__standard"></div><div class="table__cell__standard smallest--end--cell"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div>
+        <!-- IMAGE CELL -->
+        <div class="table__cell__standard hide--on--small image--cell">
+            <figure class="table__cell__standard__content">
+                <img src="https://picsum.photos/seed/lil-mouse/190/238" alt="lil mouse thumbnail">
+            </figure>
+        </div>
+        <div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium large--no--hover--border"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div>
+    </a>
+
+    <!-- Article 6 -->
+    <a href="/articles/nasser/zhourat" class="table grid content__table hover--color--blue" data-id="zhourat">
+        <div class="table__cell__faux"></div>
+        <div class="table__cell__index"><div class="table__cell__inner cell--align--center">6</div></div>
+        <div class="table__cell__name cell--space--left">
+            <h3 class="table__cell__inner">Zhourat — Suna Houssein Nasser</h3>
+        </div>
+        <div class="table__cell__standard"></div><div class="table__cell__standard"></div><div class="table__cell__standard smallest--end--cell"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <!-- IMAGE CELL -->
+        <div class="table__cell__standard hide--on--small image--cell">
+            <figure class="table__cell__standard__content">
+                <img src="https://picsum.photos/seed/zhourat/190/238" alt="Zhourat thumbnail">
+            </figure>
+        </div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium large--no--hover--border"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div>
+    </a>
+
+
+    <!-- CATEGORY: ANALYTICAL -->
+    <div class="table grid empty--row" data-table="">
+        <div class="table__cell__faux"></div>
+        <div class="table__cell__index"><div class="class__color" style="background-color:#f19fff;"></div></div>
+        <div class="table__cell__name">
+            <h2 class="table__cell__inner cell--space--left"><i>Analytical</i></h2>
+        </div>
+        <div class="table__cell__standard"></div><div class="table__cell__standard"></div><div class="table__cell__standard smallest--end--cell"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div>
+    </div>
+
+    <!-- Article 7 -->
+    <a href="/articles/notarianni/road-to-nowhere" class="table grid content__table hover--color--blue" data-id="road-to-nowhere">
+        <div class="table__cell__faux"></div>
+        <div class="table__cell__index"><div class="table__cell__inner cell--align--center">7</div></div>
+        <div class="table__cell__name cell--space--left">
+            <h3 class="table__cell__inner">Road to nowhere — Olmo Notarianni</h3>
+        </div>
+        <div class="table__cell__standard"></div><div class="table__cell__standard"></div><div class="table__cell__standard smallest--end--cell"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <!-- IMAGE CELL -->
+        <div class="table__cell__standard hide--on--small image--cell">
+            <figure class="table__cell__standard__content">
+                <img src="https://picsum.photos/seed/road-to-nowhere/190/238" alt="Road to nowhere thumbnail">
+            </figure>
+        </div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium large--no--hover--border"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div>
+    </a>
+
+    <!-- Article 8 -->
+    <a href="/articles/stratas/dont-miss-your-stop" class="table grid content__table hover--color--blue" data-id="Dont-miss-your-stop">
+        <div class="table__cell__faux"></div>
+        <div class="table__cell__index"><div class="table__cell__inner cell--align--center">8</div></div>
+        <div class="table__cell__name cell--space--left">
+            <h3 class="table__cell__inner">Don't miss your stop — Lenny Stratas</h3>
+        </div>
+        <div class="table__cell__standard"></div><div class="table__cell__standard"></div><div class="table__cell__standard smallest--end--cell"></div>
+        <!-- IMAGE CELL -->
+        <div class="table__cell__standard hide--on--smallest image--cell">
+            <figure class="table__cell__standard__content">
+                <img src="https://picsum.photos/seed/Dont-miss-your-stop/190/238" alt="Dont miss your stop thumbnail">
+            </figure>
+        </div>
+        <div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium large--no--hover--border"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div>
+    </a>
+
+    <!-- Article 9 -->
+    <a href="/articles/starosta/moving-the-goalpost" class="table grid content__table hover--color--blue" data-id="moving-the-goalpost">
+        <div class="table__cell__faux"></div>
+        <div class="table__cell__index"><div class="table__cell__inner cell--align--center">9</div></div>
+        <div class="table__cell__name cell--space--left">
+            <h3 class="table__cell__inner">Moving the goalpost — Oliverio Starosta</h3>
+        </div>
+        <div class="table__cell__standard"></div><div class="table__cell__standard"></div><div class="table__cell__standard smallest--end--cell"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <!-- IMAGE CELL -->
+        <div class="table__cell__standard hide--on--small image--cell">
+            <figure class="table__cell__standard__content">
+                <img src="https://picsum.photos/seed/moving-the-goalpost/190/238" alt="Moving the goalpost thumbnail">
+            </figure>
+        </div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium large--no--hover--border"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div>
+    </a>
+
+    <!-- Article 10 -->
+    <a href="/articles/giovine/a-game-of-pretence" class="table grid content__table hover--color--blue" data-id="a-game-of-pretence">
+        <div class="table__cell__faux"></div>
+        <div class="table__cell__index"><div class="table__cell__inner cell--align--center">10</div></div>
+        <div class="table__cell__name cell--space--left">
+            <h3 class="table__cell__inner">A Game of Pretence — Lorenzo Giovine</h3>
+        </div>
+        <div class="table__cell__standard"></div><div class="table__cell__standard"></div><div class="table__cell__standard smallest--end--cell"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--smallest"></div><div class="table__cell__standard hide--on--smallest"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <div class="table__cell__standard hide--on--small"></div><div class="table__cell__standard hide--on--small"></div>
+        <!-- IMAGE CELL -->
+        <div class="table__cell__standard hide--on--small image--cell">
+            <figure class="table__cell__standard__content">
+                <img src="https://picsum.photos/seed/a-game-of-pretence/190/238" alt="a game of pretence thumbnail">
+            </figure>
+        </div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium large--no--hover--border"></div>
+        <div class="table__cell__standard hide--on--medium"></div><div class="table__cell__standard hide--on--medium"></div>
+        <div class="table__cell__standard hide--on--medium"></div>
+    </a>
+
+</section>
+</main>
+</body></html>
