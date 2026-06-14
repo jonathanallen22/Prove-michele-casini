@@ -104,44 +104,11 @@
         return PAGE_CONFIG._default;
     }
 
-    // ── Inject CSS ───────────────────────────────────────────────────────────
-    const style = document.createElement('style');
-    style.textContent = `
-        #speech-bubble {
-            display: none;
-            position: absolute;
-            left: 38%;
-            transform: translateX(-50%);
-            bottom: 100%;
-            margin-bottom: -88px;
-            width: 180px;
-            pointer-events: none;
-        }
-        #speech-bubble img { width: 100%; }
-        #speech-bubble span {
-            position: absolute;
-            top: 42%;
-            left: 54%;
-            transform: translate(-60%, -55%);
-            font-family: inherit;
-            font-size: 14px;
-            text-align: center;
-            width: 67%;
-            white-space: pre-line;
-        }
-        body.dark-mode #speech-bubble img {
-            filter: invert(1);
-        }
-        #viewer { display: inline-block; }
-        @media (max-width: 1200px) { #viewer { display: none; } }
-    `;
-    document.head.appendChild(style);
-
+   
     // ── Inject HTML into #viewer ─────────────────────────────────────────────
     const container = document.getElementById('viewer');
     if (!container) return; // nothing to do if the page has no #viewer
 
-    container.style.position = 'relative';
     container.innerHTML = `
         <div id="speech-bubble">
             <img src="multimedia/images/balloon.svg">
@@ -190,8 +157,7 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.enableZoom = false;
-        controls.minDistance = 20;
-        controls.maxDistance = 20;
+        
 
         // ── Model ──────────────────────────────────────────────────────────
         let model;
@@ -200,6 +166,7 @@
             (gltf) => {
                 model = gltf.scene;
                 model.position.y = 0;
+                model.scale.set(0.5, 0.5, 0.5);
                 const texture = new THREE.TextureLoader().load('multimedia/images/perry_color.png', () => {
                     renderer.domElement.style.opacity = '1';
                     if (config.introMessage) {
