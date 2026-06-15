@@ -1,0 +1,179 @@
+/* ========================================== */
+/* STILI ARCHIVIO "EXCEL SHEET" - style_archive.css */
+/* ========================================== */
+
+.archive-sheet {
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid #000;
+    font-family: 'Inter', sans-serif;
+    color: #000;
+}
+
+body.dark-mode .archive-sheet {
+    border-top: 1px solid #fff;
+    color: #fff;
+}
+
+/* La riga della griglia */
+.archive-row {
+    display: grid;
+    /* NUOVO ORDINE: Titolo (2fr), Autore (1.5fr), Anno (0.6fr), Immagine (12vw), Preview (3fr) */
+    grid-template-columns: 2fr 1.5fr 0.6fr 12vw 3fr; 
+    height: 40px; /* Altezza di base della riga Excel */
+    text-decoration: none;
+    color: inherit;
+    border-bottom: 1px solid #000;
+    transition: height 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    overflow: hidden;
+}
+
+body.dark-mode .archive-row {
+    border-bottom: 1px solid #fff;
+}
+
+/* HOVER: Espansione della riga */
+.archive-row:hover {
+    height: 350px; 
+    background-color: #f9f9f9;
+}
+
+body.dark-mode .archive-row:hover {
+    background-color: #111;
+}
+
+/* Regole generali per tutte le celle per garantire la visibilità */
+.cell {
+    display: flex;
+    align-items: center; /* Centra il testo verticalmente nei 60px */
+    padding: 0 1.5rem;
+    border-right: 1px solid rgba(0, 0, 0, 0.2);
+    font-size: 0.95rem;
+    overflow: hidden; /* Impedisce al testo di sbordare matematicamente */
+}
+
+body.dark-mode .cell {
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/*.cell:last-child {
+    border-right: none;
+}
+
+/* Assicura che i testi dentro le celle non vadano a capo e spariscero quando è chiuso */
+.cell span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Mette i tre puntini (...) se lo spazio non basta */
+    width: 100%;
+}
+
+/* Quando la riga si espande, permettiamo ai testi di respirare (opzionale) */
+.archive-row:hover .cell span {
+    white-space: normal; 
+}
+
+
+/* --- REGOLE SPECIFICHE DELLE CELLE --- */
+
+/* 1. Il Titolo col font Frank Ruhl Libre */
+.cell-title {
+    font-family: 'helvetica';
+    font-size: 1rem;
+}
+
+/* 2. L'immagine deformatissima */
+.cell-image {
+    padding: 0; 
+}
+
+.cell-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: fill; /* Mantiene lo stretch "schiacciatissimo" */
+    transition: filter 0.5s ease;
+}
+
+.archive-row:hover .cell-image img {
+    filter: grayscale(0%);
+}
+
+/* 3. La Preview del testo */
+.cell-preview {
+    opacity: 0.7;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+/* Quando la riga è chiusa, mostriamo solo una riga pulita di preview */
+.cell-preview span {
+    display: block;
+}
+
+/* Quando la riga è aperta, la preview può mostrare più testo */
+.archive-row:hover .cell-preview span {
+    display: -webkit-box;
+    -webkit-line-clamp: 12;
+    -webkit-box-orient: vertical;
+}
+/* ========================================== */
+/* HEADER E FILTRI NODALI                     */
+/* ========================================== */
+
+.archive-header {
+    text-align: center;
+    padding: 3rem 0 2rem 0;
+}
+
+.filter-section {
+    position: relative; /* Fondamentale per la tela SVG */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4rem; /* Lo spazio verticale tra le due righe */
+    padding-bottom: 3rem;
+    color: #000;
+}
+
+body.dark-mode .filter-section { color: #fff; }
+
+.filter-row {
+    display: flex;
+    gap: 1.5rem; /* Lo spazio orizzontale tra i bottoni */
+    z-index: 2; /* Tiene i bottoni sopra la linea */
+}
+
+/* Lo stile del singolo bottone */
+.filter-box {
+    background: transparent;
+    border: 1px solid currentColor;
+    color: currentColor;
+    font-family: 'Inter', sans-serif;
+    font-size: 1rem;
+    padding: 0.6rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+/* Quando il bottone viene cliccato (Stato Attivo) */
+.filter-box.active {
+    background: #000;
+    color: #fff;
+}
+
+body.dark-mode .filter-box.active {
+    background: #fff;
+    color: #000;
+}
+
+/* La tela SVG che contiene la linea */
+.connection-svg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none; /* Lascia passare i clic ai bottoni sottostanti */
+    z-index: 1;
+}

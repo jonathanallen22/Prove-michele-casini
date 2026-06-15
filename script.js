@@ -96,7 +96,7 @@ document.getElementById('linesInfoToggle').addEventListener('click', function(e)
         
         const sharpStyle = sharpness > 0.5 ? 'analytical thinking' : 'narrative flow';
         document.getElementById('recText').innerHTML =
-            `Your line suggests a preference for ${sharpStyle}. <strong>Recommended article:</strong> ` +
+            `Your line suggests a preference for ${sharpStyle}. Recommended article: ` +
             `<a href="${articlePath(best)}" style="color:inherit;text-decoration:none;border-bottom:1px solid #000;">"${best.title}"</a>`;
         
         let minX = points[0].x, maxX = points[0].x, minY = points[0].y, maxY = points[0].y;
@@ -138,7 +138,7 @@ document.getElementById('linesInfoToggle').addEventListener('click', function(e)
         if (y < 130) return; // Zona di sicurezza titoli
 
         if (drawCanvas.classList.contains('shrunk')) {
-            document.querySelector('.hero-canvas-section').classList.remove('shrunk');
+            document.querySelector('.hero-canvas-section').classList.remove('shrunk', 'scrolled'); // Puliamo entrambe le classi
             drawCanvas.classList.remove('shrunk');
             document.querySelector('.prompt-text').textContent = "draw a line";
         }
@@ -250,61 +250,43 @@ function getFilteredAndSortedArticles() {
     });
 }
 
-function getColumnCount() {
-    const w = window.innerWidth;
-    if (w >= 1100) return 4;
-    if (w >= 800) return 3;
-    return 2;
-}
-
-function assignBlockDimensions(articleList, cols) {
-    const templates = [[1,1], [2,1], [1,2], [1,1], [1,1], [1,2], [2,1], [1,1], [2,2], [1,1], [1,1], [2,1], [1,2], [1,1], [2,1], [1,1]];
-    const dims = [];
-    let colTracker = Array(cols).fill(0);
-    let templateIdx = 0;
-    for (let i = 0; i < articleList.length; i++) {
-        const articlesLeft = articleList.length - i;
-        const minFilled = Math.min(...colTracker);
-        let startCol = colTracker.indexOf(minFilled);
-        let freeRun = 0;
-        for (let c = startCol; c < cols; c++) { if (colTracker[c] === minFilled) freeRun++; else break; }
-        let [tw, th] = templates[templateIdx % templates.length];
-        templateIdx++;
-        let w = Math.min(tw, freeRun, 2);
-        if (articlesLeft === 1) w = Math.min(freeRun, 2);
-        w = Math.max(1, w);
-        let h = th; 
-        dims.push({ w, h });
-        for (let c = 0; c < w; c++) { colTracker[startCol + c] = minFilled + h; }
-    }
-    return dims;
-}
-
 function renderArticles() {
     const archiveGrid = document.getElementById('archiveGrid');
-    const cols = getColumnCount();
-    archiveGrid.style.setProperty('--cols', cols);
     const sorted = getFilteredAndSortedArticles();
-    const dims = assignBlockDimensions(sorted, cols);
+    
     archiveGrid.innerHTML = sorted.map((article, i) => {
-        const { w, h } = dims[i];
-        const colors = (article.colors && article.colors.length) ? article.colors : ['#888'];
-        const stripe = `<div class="color-stripe">${colors.map(c => `<span style="background:${c}"></span>`).join('')}</div>`;
+        const placeholders = [
+            'https://img.magnific.com/premium-vector/png-files-transparent-vector-background-png-background_302321-1276.jpg'
+        ];
+        const imgSrc = placeholders[i % placeholders.length];
+        const pickLabel = i === 0 ? `<div class="editor-pick-outside">Our pick for you &darr;</div>` : '';
+
         return `
-            <a class="article-entry" href="/articles/${article.folder}/${article.filename}" data-article-id="${article.id}" style="--w: ${w}; --h: ${h}; --i: ${i}">
-                <div class="block-hint">↗</div>
-                <div class="block-content">
-                    <h2 class="block-title">${article.title}</h2>
-                    <div class="block-meta">
-                        <span class="block-author">${article.author}</span>
-                        <span class="block-readtime">${article.publishDate ? article.publishDate : ''}${article.readTime ? ' · ' + article.readTime : ''}</span>
+            <a class="article-entry" href="/articles/${article.folder}/${article.filename}" data-article-id="${article.id}" style="--i: ${i}">
+                ${pickLabel}
+                <div class="card-inner">
+                    <div class="card-text-col">
+                        <div class="title-wrapper">
+                            <h2 class="block-title">${article.title}</h2>
+                        </div>
+                        
+                        <div class="card-lower-text">
+                            <div class="block-meta">
+                                <span class="block-author">${article.author || ''}</span>
+                                <span class="block-readtime"># ${String(i).padStart(3, '0')}</span>
+                            </div>
+                            <div class="description-wrapper">
+                                <div class="block-description">${article.description || 'Lorem ipsum dolor sit amet consectetur...'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-img-col">
+                        <img src="${imgSrc}" alt="${article.title}">
                     </div>
                 </div>
-                <div class="block-description">${article.description || article.recommendationDesc || ''}</div>
-                ${stripe}
             </a>`;
     }).join('');
-    archiveGrid.querySelectorAll('.article-entry').forEach(attachTilt);
 }
 
 function attachTilt(el) {
@@ -409,4 +391,36 @@ document.getElementById('hamburgerBtn').addEventListener('click', function() {
     // Aggiunge o toglie la classe "open" all'overlay (per mostrarlo/nasconderlo)
     document.getElementById('hamburgerOverlay').classList.toggle('open');
 });
+// --- ANIMAZIONE AL PRIMO SCROLL ---
+let isAnimatingLayout = false; // Una "guardia" per sapere se l'animazione è in corso
 
+window.addEventListener('scroll', function() {
+    const hero = document.querySelector('.hero-canvas-section');
+    const canvas = document.getElementById('drawingCanvas');
+    
+    // Se scorri, la sezione non è rimpicciolita, e non stiamo già animando...
+    if (window.scrollY > 10 && !hero.classList.contains('shrunk') && !isAnimatingLayout) {
+        
+        isAnimatingLayout = true; // Alziamo la paletta di stop
+        
+        // 1. Blocca fisicamente la rotellina nascondendo l'overflow
+        document.body.style.overflow = 'hidden';
+        
+        // 2. Riporta la visuale al pixel zero
+        window.scrollTo(0, 0);
+        
+        // 3. Fai partire la magia
+        hero.classList.add('shrunk', 'scrolled'); // Aggiungiamo anche scrolled!
+        if (canvas) canvas.classList.add('shrunk');
+        
+        const wheelWrap = document.getElementById('colorWheelWrap');
+        if (wheelWrap) wheelWrap.classList.remove('open');
+        
+        // 4. Aspetta esattamente 1 secondo (la durata del tuo CSS) 
+        // e poi ridai all'utente il controllo della pagina!
+        setTimeout(() => {
+            document.body.style.overflow = ''; // Sblocca lo scroll
+            isAnimatingLayout = false; // Abbassa la paletta
+        }, 1000); 
+    }
+});

@@ -72,6 +72,14 @@ body.dark-mode .center-prompt { color: rgba(255,255,255,0.4); }
     transition: opacity 0.5s ease;
 }
 
+/* Se abbiamo rimpicciolito tramite scroll, "salviamo" il prompt dalla scomparsa! */
+.hero-canvas-section.shrunk.scrolled .prompt-text,
+.hero-canvas-section.shrunk.scrolled .color-trigger,
+.hero-canvas-section.shrunk.scrolled .lines-info-link {
+    opacity: 1;
+    pointer-events: auto;
+}
+
 .header-titles { position: absolute; top: 2rem; left: 50%; transform: translateX(-50%); text-align: center; z-index: 10; pointer-events: none; }
 .header-titles h1 { font-family: 'Fraunces', serif; font-weight: 400; font-size: 2.5rem; margin: 0 0 1.5rem 0; letter-spacing: -0.02em; pointer-events: auto; cursor: pointer; }
 .header-titles p { font-size: 1rem; margin: 0; line-height: 1.2; opacity: 0.8; }
@@ -118,23 +126,228 @@ body.dark-mode .research-mode-overlay { background: rgba(0, 0, 0, 0.95); }
 .filter-button { background: none; border: 1px solid currentColor; color: inherit; padding: 0.5rem 1rem; cursor: pointer; transition: all 0.3s ease; opacity: 0.3; font-family: inherit; font-size: inherit; letter-spacing: inherit; text-transform: inherit; }
 .filter-button:hover, .filter-button.active { opacity: 1; background: #000; color: #fff; border-color: #000; }
 body.dark-mode .filter-button:hover, body.dark-mode .filter-button.active { background: #fff; color: #000; border-color: #fff; }
-.archive-grid { display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); grid-auto-rows: 200px; gap: -1px; margin: 2rem 0; margin-left: -1px; margin-right: -1px; }
+/* --- LA GRIGLIA EDITORIALE --- */
+.archive-grid { 
+    display: grid; 
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 15px; 
+    margin: 3.5rem 1rem 2rem 1rem; /* Spazio in alto per la scritta */
+}
+
+.article-entry { 
+    grid-column: span 1;
+    height: 400px; /* <-- ALTEZZA FISSA E RIGOROSA PER TUTTI */
+    position: relative; 
+    cursor: pointer; 
+    background: #fff; 
+    color: #000; 
+    border: 1px solid #000;
+    transition: background 0.3s ease; 
+    text-decoration: none; 
+    display: block; 
+    overflow: hidden; /* <-- Di base nascondiamo tutto ciò che esce */
+}
+
+/* OVERRIDE PER IL PRIMO ARTICOLO */
+.article-entry:nth-child(1) {
+    grid-column: span 2;
+    overflow: visible; /* <-- LUI deve lasciar uscire la scritta in ALTO */
+}
+
+/* --- LAYOUT INTERNO DELLE CARD --- */
+.card-inner {
+    display: flex;
+    height: 100%;
+    padding: 2.2rem;
+    box-sizing: border-box;
+}
+
+
+/* Scatola Titolo (limita l'altezza se troppo lungo) */
+.title-wrapper {
+    max-height: 4.2rem; /* Circa 3 righe di titolo */
+    overflow: hidden;
+}
+
+.block-title { 
+    font-family: 'Frank Ruhl Libre', serif;
+    font-size: 1.8rem; 
+    font-weight: 400; 
+    line-height: 1.05; 
+    margin: 0; 
+    display: inline-block; 
+    transform: scaleX(0.85); 
+    transform-origin: left center;
+}
+
+/* Scatola Testi in Basso */
+.card-lower-text {
+    margin-bottom: 0.5rem; /* Rimosso il grande margin che pressava */
+}
+
+.description-wrapper {
+    max-height: 4rem; /* Circa 3-4 righe di descrizione */
+    overflow: hidden; /* Taglia il testo Lorem Ipsum se troppo lungo */
+    position: relative;
+}
+
+/* Tocco di classe: Sfuma il testo Lorem Ipsum se viene tagliato */
+.description-wrapper::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 1.5rem;
+    background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,1));
+}
+
+.block-meta { 
+    font-size: 0.85rem; 
+    display: flex; 
+    justify-content: space-between; 
+    margin-bottom: 1rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1); 
+}
+
+/* TIENI SOLO QUESTO */
+.block-description { 
+    font-size: 0.85rem; 
+    line-height: 1.4; 
+    opacity: 0.8; 
+    margin: 0;
+}
+/* --- ETICHETTA FUORI DALLA CARD --- */
+.editor-pick-outside {
+    position: absolute;
+    top: -2.5rem; /* La alza portandola fisicamente fuori e sopra la riga nera */
+    left: 0rem;
+    font-size: 0.85rem;
+    pointer-events: none; /* Evita che dia fastidio se ci clicchi sopra */
+}
+
+/* --- LAYOUT INTERNO DELLE CARD --- */
+.card-inner {
+    display: flex;
+    height: 100%;
+    padding: 2rem; /* Spazio dai bordi come nel disegno */
+    box-sizing: border-box;
+}
+
+/* Colonna di sinistra: Testi */
+.card-text-col {
+    flex: 1; /* Prende lo spazio necessario */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Spinge il titolo in alto e la preview in basso */
+    padding-right: 2rem;
+    z-index: 2;
+}
+
+.editor-pick {
+    font-size: 0.85rem;
+    margin-bottom: 0.5rem;
+}
+
+/* Titolo dell'articolo */
+.block-title { 
+    font-family: 'Frank Ruhl Libre', serif; /* <-- FONT AGGIORNATO QUI */
+    font-size: 1.8rem; 
+    font-weight: 300; 
+    line-height: 1.05; 
+    letter-spacing: -0.01em; 
+    margin: 0; 
+
+    display: inline-block; 
+    transform: scaleX(0.75); /* 0.85 significa che è largo l'85% del normale. Prova anche 0.9 o 0.8! */
+    transform-origin: left center;
+}
+
+/* Testi in basso a sinistra */
+.card-lower-text {
+    margin-bottom: 2rem; /* Spazio per evitare la riga dei colori */
+}
+
+.block-meta { 
+    font-size: 0.85rem; 
+    display: flex; 
+    justify-content: space-between; 
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(0,0,0,0.1); /* Righettina sottile opzionale */
+}
+
+.block-description { 
+    font-size: 0.85rem; 
+    line-height: 1.4; 
+    opacity: 0.8; 
+}
+
+/* Colonna di destra: Immagine */
+.card-img-col {
+    flex: 1; /* Prende la metà destra */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.card-img-col img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+/* --- OVERRIDES PER IL PRIMO ARTICOLO GIGANTE --- */
+.article-entry:nth-child(1) .card-inner {
+    padding: 3rem; /* Ancora più respiro */
+}
+
+.article-entry:nth-child(1) .card-text-col {
+    flex: 0 0 40%; /* Nel gigante il testo è più stretto (40%) */
+}
+
+.article-entry:nth-child(1) .card-img-col img {
+    transform: scale(1.1); /* Immagine leggermente più grande */
+}
+
+/* Sistema l'hover che faceva scomparire le cose prima */
+.article-entry:hover { background: #f9f9f9; }
+.article-entry:hover .block-content { opacity: 1; }
 @keyframes cardIn { from { opacity: 0; transform: translateY(28px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
 .article-entry { 
-    grid-column: span var(--w, 1); 
-    grid-row: span var(--h, 1); 
+    grid-column: span 1; /* Di base occupano 1 colonna (1/3) */
+    min-height: 400px; /* Altezza di base */
     position: relative; 
     overflow: hidden; 
     cursor: pointer; 
     background: #fff; 
     color: #000; 
-    border: 1px solid #333; 
+    border: 1px solid #000; /* Bordo nero netto come nel tuo disegno */
     transition: background 0.3s ease; 
     text-decoration: none; 
     display: block; 
-    animation: cardIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both; 
-    animation-delay: calc(var(--i, 0) * 35ms); 
 }
+/* IL PRIMO ARTICOLO: IL GIGANTE (Our Pick) */
+.article-entry:nth-child(1) {
+    grid-column: span 2; /* Occupa 2 colonne su 3 */
+}
+
+/* Aumentiamo il titolo solo per il primo gigante */
+.article-entry:nth-child(1) .block-title {
+    font-size: clamp(2rem, 3vw, 3.5rem);
+}
+
+/* Modalità Mobile (Tutti a 1 colonna) */
+@media (max-width: 768px) {
+    .archive-grid {
+        grid-template-columns: 1fr;
+    }
+    .article-entry:nth-child(1) {
+        grid-column: span 1;
+    }
+}
+
 body.dark-mode .article-entry { background: #000; color: #f1ebeb; border: 1px solid rgba(255, 255, 255, 0.2); }
 .block-description { position: absolute; bottom: 0; left: 0; right: 0; padding: 3rem 1.25rem 1.5rem; background: linear-gradient(to bottom, transparent 0%, rgba(255,255,255,0.97) 28%, rgba(255,255,255,1) 100%); font-size: 0.8rem; line-height: 1.65; letter-spacing: 0.01em; color: #111; transform: translateY(100%); transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1); z-index: 3; }
 body.dark-mode .block-description { background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.97) 28%, rgba(0,0,0,1) 100%); color: #f1ebeb; }
@@ -201,7 +414,7 @@ body.dark-mode .archive-stats { border-color: rgba(255, 255, 255, 0.1); }
     transition: transform 1s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.5s ease;
 }
 .hero-canvas-section.shrunk .center-prompt {
-    transform: translate(-60%, -70%);
+    transform: translate(-50%, -60%);
 }
 .hero-canvas-section.shrunk .color-trigger,
 .hero-canvas-section.shrunk .prompt-text,
@@ -317,13 +530,13 @@ body.dark-mode #speech-bubble img {
 
 /* Animazione a 3 linee: da Hamburger a "X" */
 .hamburger-btn.open span:nth-child(1) {
-    transform: translateY(9px) rotate(45deg); /* Scende e ruota */
+    transform: translateY(7px) rotate(45deg); /* Scende e ruota */
 }
 .hamburger-btn.open span:nth-child(2) {
     opacity: 0; /* La linea centrale sparisce! */
 }
 .hamburger-btn.open span:nth-child(3) {
-    transform: translateY(-9px) rotate(-45deg); /* Sale e ruota */
+    transform: translateY(-7px) rotate(-45deg); /* Sale e ruota */
 }
 
 /* Pannello del menu (Overlay a tutto schermo) */
@@ -395,4 +608,16 @@ body.dark-mode .hamburger-overlay {
 
 body.dark-mode .color-marker {
     border-color: #000;
+}
+
+
+
+/* 1. Permettiamo alla scritta di uscire dal bordo senza essere tagliata */
+.article-entry:nth-child(1) {
+    overflow: visible;
+}
+/* --- NASCONDI FILTRI E STATISTICHE --- */
+.archive-controls,
+.archive-stats {
+    display: none !important;
 }
